@@ -16,6 +16,10 @@ Item {
     property bool boldFont: false
     property bool filled: false
 
+    property bool isWuWa: false
+
+    ResonanceClockGeometry { id: clockGeom }
+
     property color textColor: WidgetColorScheme.textColorOnBg
     property color outlineColor: WidgetColorScheme.subtextColorOnBg
     property color pillBg: WidgetColorScheme.pillBgColor
@@ -34,24 +38,59 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
 
         implicitWidth: {
+            if (root.isWuWa) return clockGeom.get(root.baseWidth).capsuleWidth;
             if (root.minuteStyle === "pill_horizontal") return root.baseWidth * 0.52;
             if (root.minuteStyle === "pill_round") return root.baseWidth * 0.20;
             return minuteText.implicitWidth + 16;
         }
 
         implicitHeight: {
+            if (root.isWuWa) return clockGeom.get(root.baseWidth).capsuleHeight;
             if (root.minuteStyle === "pill_horizontal") return root.baseWidth * 0.18;
             if (root.minuteStyle === "pill_round") return root.baseWidth * 0.20;
             return minuteText.implicitHeight + 8;
         }
 
         radius: height / 2
-        color: root.minuteStyle === "pill_round" || (root.filled && root.minuteStyle === "pill_horizontal") ? root.pillBg : "transparent"
-        border.color: root.minuteStyle === "pill_horizontal" ? root.outlineColor : "transparent"
-        border.width: root.minuteStyle === "pill_horizontal" ? 1.5 : 0
+        color: root.isWuWa ? root.pillBg : (root.minuteStyle === "pill_round" || (root.filled && root.minuteStyle === "pill_horizontal") ? root.pillBg : "transparent")
+        border.color: root.isWuWa ? root.outlineColor : (root.minuteStyle === "pill_horizontal" ? root.outlineColor : "transparent")
+        border.width: (root.isWuWa || root.minuteStyle === "pill_horizontal") ? 1.5 : 0
 
+        // WuWa Compact Capsule: both minute and smaller seconds inside
+        Row {
+            visible: root.isWuWa
+            anchors.centerIn: parent
+            spacing: Math.max(3, Math.round(root.baseWidth * 0.015))
+
+            StyledText {
+                text: root.minuteString
+                color: root.textColor
+                font {
+                    family: root.boldFont ? Appearance.font.family.display : Appearance.font.family.numbers
+                    pixelSize: Math.round(mainShape.height * 0.48)
+                    weight: root.boldFont ? Font.Bold : Font.DemiBold
+                }
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            StyledText {
+                visible: root.showSeconds
+                text: root.secondString
+                color: root.accentColor
+                opacity: 0.85
+                font {
+                    family: root.boldFont ? Appearance.font.family.display : Appearance.font.family.numbers
+                    pixelSize: Math.round(mainShape.height * 0.32)
+                    weight: root.boldFont ? Font.Bold : Font.Normal
+                }
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+
+        // Classic Layout
         StyledText {
             id: minuteText
+            visible: !root.isWuWa
             anchors.left: parent.left
             anchors.leftMargin: root.minuteStyle === "pill_horizontal" ? parent.height * 0.35 : 0
             anchors.centerIn: (root.minuteStyle === "pill_round" || root.minuteStyle === "text_only") ? parent : undefined
@@ -67,7 +106,7 @@ Item {
 
         StyledText {
             id: secondText
-            visible: root.showSeconds && root.minuteStyle === "pill_horizontal"
+            visible: !root.isWuWa && root.showSeconds && root.minuteStyle === "pill_horizontal"
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.left
             anchors.horizontalCenterOffset: root.secondsCenterX

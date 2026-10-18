@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.common.widgets
 import qs.services
 
 Canvas {
@@ -16,6 +17,7 @@ Canvas {
     property bool rotateSeconds: false
     property bool animationActive: true
     property bool smoothRotation: true
+    property bool isWuWa: false
 
     property color textColor: WidgetColorScheme.textColorOnBg
     property color subtextColor: WidgetColorScheme.subtextColorOnBg
@@ -23,6 +25,8 @@ Canvas {
 
     property int currentMinute: DateTime.clock.minutes
     property int currentSecond: DateTime.clock.seconds
+
+    ResonanceClockGeometry { id: clockGeom }
 
     anchors.fill: parent
     contextType: "2d"
@@ -122,6 +126,88 @@ Canvas {
     onTextColorChanged:        requestPaint()
     onSubtextColorChanged:     requestPaint()
     onAccentColorChanged:      requestPaint()
+    onIsWuWaChanged:            requestPaint()
+
+    Item {
+        id: wuwaNumeralsLayer
+        anchors.fill: parent
+        visible: root.isWuWa && root.dialStyle === "concentric"
+
+        readonly property var numerals: [
+            { val: "00", angle: -Math.PI / 2 },
+            { val: "05", angle: -Math.PI / 2 + (Math.PI / 6) },
+            { val: "10", angle: -Math.PI / 2 + (Math.PI / 3) },
+            { val: "15", angle: -Math.PI / 2 + (Math.PI / 2) },
+            { val: "20", angle: -Math.PI / 2 + (2 * Math.PI / 3) },
+            { val: "25", angle: -Math.PI / 2 + (5 * Math.PI / 6) },
+            { val: "30", angle: -Math.PI / 2 + Math.PI },
+            { val: "35", angle: -Math.PI / 2 + (7 * Math.PI / 6) },
+            { val: "40", angle: -Math.PI / 2 + (4 * Math.PI / 3) },
+            { val: "45", angle: -Math.PI / 2 + (3 * Math.PI / 2) },
+            { val: "50", angle: -Math.PI / 2 + (5 * Math.PI / 3) },
+            { val: "55", angle: -Math.PI / 2 + (11 * Math.PI / 6) }
+        ]
+
+        readonly property real rOrbit: clockGeom.get(root.width).rOrbit
+        readonly property real numFontPx: Math.max(8, Math.round(root.width * 0.040))
+
+        Repeater {
+            model: (root.isWuWa && root.dialStyle === "concentric") ? wuwaNumeralsLayer.numerals : []
+            Item {
+                id: glyphItem
+                required property var modelData
+                required property int index
+
+                readonly property real itemAngle: modelData.angle
+                readonly property real cx: root.width / 2
+                readonly property real cy: root.height / 2
+                readonly property real tx: cx + Math.cos(itemAngle) * wuwaNumeralsLayer.rOrbit
+                readonly property real ty: cy + Math.sin(itemAngle) * wuwaNumeralsLayer.rOrbit
+
+                x: tx - width / 2
+                y: ty - height / 2
+                width: glyphText.implicitWidth
+                height: glyphText.implicitHeight
+
+                rotation: -root.rotation
+                transformOrigin: Item.Center
+
+                // Whole-glyph soft fade before capsule exclusion intersection
+                opacity: {
+                    if (!root.hideMinutePillArea) return 1.0;
+                    var geom = clockGeom.get(root.width);
+                    var clr = geom.maskClearance;
+                    var capLeft = geom.capsuleX - clr;
+                    var capRight = geom.capsuleX + geom.capsuleWidth + clr;
+                    var capTop = (geom.capsuleYCenter - (geom.capsuleHeight / 2.0)) - clr;
+                    var capBottom = (geom.capsuleYCenter + (geom.capsuleHeight / 2.0)) + clr;
+
+                    var worldAngle = itemAngle + (root.rotation * Math.PI / 180.0);
+                    var worldCenterX = cx + Math.cos(worldAngle) * wuwaNumeralsLayer.rOrbit;
+                    var worldCenterY = cy + Math.sin(worldAngle) * wuwaNumeralsLayer.rOrbit;
+                    var glyphLeft = worldCenterX - width / 2.0;
+                    var glyphRight = worldCenterX + width / 2.0;
+                    var glyphTop = worldCenterY - height / 2.0;
+                    var glyphBottom = worldCenterY + height / 2.0;
+
+                    var sep = Math.max(capLeft - glyphRight, glyphLeft - capRight, capTop - glyphBottom, glyphTop - capBottom);
+                    return Math.max(0.0, Math.min(1.0, sep / 4.0));
+                }
+
+                StyledText {
+                    id: glyphText
+                    anchors.centerIn: parent
+                    text: glyphItem.modelData.val
+                    color: root.isWuWa ? root.textColor : root.accentColor
+                    font {
+                        family: root.boldFont ? Appearance.font.family.display : Appearance.font.family.numbers
+                        pixelSize: wuwaNumeralsLayer.numFontPx
+                        weight: Font.Bold
+                    }
+                }
+            }
+        }
+    }
 
     onPaint: {
         var ctx = getContext("2d");
@@ -132,6 +218,11 @@ Canvas {
         var cx = width / 2;
         var cy = height / 2;
         var fontWeight = boldFont ? "bold " : "bold ";
+
+        // ── WUWA CHRONO RESONATOR: Upright numerals are rendered above via wuwaNumeralsLayer ──
+        if (root.isWuWa && dialStyle === "concentric") {
+            return;
+        }
 
         // ── STYLE 1: CONCENTRIC ──
         if (dialStyle === "concentric") {

@@ -2519,6 +2519,7 @@ Singleton {
                         property string frameStyle: "none"
                         property bool boldFont: false
                         property bool use24h: true
+                        property bool wuwaUse24h: false
                         property bool showHourText: true
                         property string hourHandStyle: "hide"
                         property string minuteHandStyle: "hide"

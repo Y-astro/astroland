@@ -54,7 +54,14 @@ Item {
             }
             StyledText {
                 visible: root.type === "weather_temp"
-                text: (Weather.data.temp || "--") + "°"
+                text: {
+                    var t = Weather.data?.temp;
+                    if (t !== undefined && t !== null && String(t).trim() !== "") {
+                        var str = String(t).trim();
+                        return str.indexOf("°") !== -1 ? str : str + "°";
+                    }
+                    return "--°";
+                }
                 color: root.textColor
                 font.pixelSize: parent.parent.height * 0.50
                 font.weight: Font.Bold

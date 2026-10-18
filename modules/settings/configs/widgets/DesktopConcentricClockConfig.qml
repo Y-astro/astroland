@@ -8,6 +8,11 @@ ContentPage {
     id: root
     forceWidth: false
 
+    readonly property bool isWuWa: {
+        var s = Config.options.background?.widgets?.concentric_clock?.skin ?? "classic";
+        return s === "wuwa" || s === "chrono_resonator";
+    }
+
     signal goBack
 
     RowLayout {
@@ -267,9 +272,15 @@ ContentPage {
             ConfigSwitch {
                 buttonIcon: "more_time"
                 text: Translation.tr("24-Hour Format")
-                checked: Config.options.background.widgets.concentric_clock.use24h ?? false
+                checked: root.isWuWa
+                    ? (Config.options.background.widgets.concentric_clock.wuwaUse24h ?? false)
+                    : (Config.options.background.widgets.concentric_clock.use24h ?? true)
                 onCheckedChanged: {
-                    Config.options.background.widgets.concentric_clock.use24h = checked;
+                    if (root.isWuWa) {
+                        Config.options.background.widgets.concentric_clock.wuwaUse24h = checked;
+                    } else {
+                        Config.options.background.widgets.concentric_clock.use24h = checked;
+                    }
                 }
             }
 

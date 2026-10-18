@@ -20,6 +20,7 @@ Item {
     property int customWeight: 700
     property int customWidth: 100
     property int customRound: 0
+    property bool opticalCenter: false
 
     readonly property string hourString: {
         var h = hour;
@@ -33,9 +34,18 @@ Item {
     width: hourText.implicitWidth
     height: hourText.implicitHeight
 
+    TextMetrics {
+        id: hourMetrics
+        font: hourText.font
+        text: hourText.text
+    }
+
     StyledText {
         id: hourText
         anchors.centerIn: parent
+        anchors.horizontalCenterOffset: root.opticalCenter
+            ? ((hourText.implicitWidth / 2.0) - (hourMetrics.tightBoundingRect.x + hourMetrics.tightBoundingRect.width / 2.0))
+            : 0
         text: root.hourString
         color: root.color
         font {

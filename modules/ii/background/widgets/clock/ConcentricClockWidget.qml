@@ -41,7 +41,11 @@ AbstractBackgroundWidget {
     readonly property string cfgDialStyle: Config.ready ? (Config.options.background.widgets.concentric_clock.dialStyle ?? "concentric") : "concentric"
     readonly property string cfgFrameStyle: Config.ready ? (Config.options.background.widgets.concentric_clock.frameStyle ?? "none") : "none"
     readonly property bool cfgBoldFont: Config.ready ? (Config.options.background.widgets.concentric_clock.boldFont ?? false) : false
-    readonly property bool cfgUse24h: Config.ready ? (Config.options.background.widgets.concentric_clock.use24h ?? true) : true
+    readonly property bool cfgUse24h: Config.ready
+        ? (root.isWuWa
+            ? (Config.options.background.widgets.concentric_clock.wuwaUse24h ?? false)
+            : (Config.options.background.widgets.concentric_clock.use24h ?? true))
+        : (root.isWuWa ? false : true)
     readonly property bool cfgShowHourText: Config.ready ? (Config.options.background.widgets.concentric_clock.showHourText ?? true) : true
 
     readonly property string cfgHourHandStyle: Config.ready ? (Config.options.background.widgets.concentric_clock.hourHandStyle ?? "hide") : "hide"
@@ -85,6 +89,50 @@ AbstractBackgroundWidget {
         ? ResonanceTheme.accentGold
         : (root.cfgUseBlackBg ? WidgetColorScheme.accentColor : Appearance.colors.colOnPrimaryContainer)
 
+    // Stage 3: WuWa Perceptual Contrast Mapping
+    // Non-linear sqrt(rawAlpha) curve provides solid deep teal contrast support behind
+    // foreground numerals/text against bright sunset skies while preserving transparency=1 -> 0, transparency=0 -> 1 (before theme intensity scaling).
+    readonly property real wuwaBgAlpha: {
+        var rawAlpha = 1.0 - root.cfgTransparency;
+        return Math.max(0.0, Math.min(1.0, Math.sqrt(rawAlpha) * ResonanceTheme.intensity));
+    }
+
+    ResonanceClockGeometry {
+        id: clockGeom
+    }
+
+    readonly property bool wuwaDialRotating: root.live
+        && !GlobalStates.screenLocked
+        && (root.Window.window?.visible ?? true)
+        && (root.Window.window?.activeWorkspaceWithFullscreen == undefined)
+
+    readonly property string wuwaWeatherTemp: {
+        var t = Weather.data?.temp;
+        if (t !== undefined && t !== null && String(t).trim() !== "") {
+            var str = String(t).trim();
+            return str.indexOf("°") !== -1 ? str : str + "°";
+        }
+        return "--";
+    }
+
+    readonly property string wuwaWeatherDesc: {
+        var d = Weather.data?.description;
+        if (d !== undefined && d !== null && String(d).trim() !== "") {
+            return String(d).trim().toUpperCase();
+        }
+        return "";
+    }
+
+    readonly property string wuwaWeatherText: {
+        if (root.cfgBottomSubDialContent === "battery") {
+            return Math.round(Battery.percentage * 100) + "%" + (Battery.isCharging ? " ⚡" : "");
+        }
+        if (wuwaWeatherDesc === "") {
+            return wuwaWeatherTemp;
+        }
+        return wuwaWeatherTemp + " · " + wuwaWeatherDesc;
+    }
+
     // Dynamic offset for sub-dials based on dialStyle to prevent overlapping numbers
     readonly property real dialInnerMargin: ((cfgDialStyle === "concentric" || cfgDialStyle === "inner_only" || cfgDialStyle === "full_dense") ? 0.08 : 0.02) + cfgSubdialMarginOffset
 
@@ -115,7 +163,7 @@ AbstractBackgroundWidget {
                 id: clockBgCircle
                 anchors.fill: parent
                 radius: width / 2
-                color: (root.cfgBlurRadius > 0 && root.wallpaperItem !== null) ? "transparent" : ColorUtils.applyAlpha(root.clockBgColor, (1.0 - root.cfgTransparency) * (root.isWuWa ? ResonanceTheme.intensity : 1.0))
+                color: root.isWuWa ? "transparent" : ((root.cfgBlurRadius > 0 && root.wallpaperItem !== null) ? "transparent" : ColorUtils.applyAlpha(root.clockBgColor, 1.0 - root.cfgTransparency))
                 clip: true
 
                 layer.enabled: true
@@ -129,6 +177,75 @@ AbstractBackgroundWidget {
                     }
                 }
 
+                // Stage 3: WuWa Localized Soft Glass Mask
+                // Core covers hour/AMPM/resonance/weather, delicate wing extends right behind/beyond capsule
+                Canvas {
+                    id: wuwaGlassMask
+                    anchors.fill: parent
+                    visible: false
+                    contextType: "2d"
+
+                    onWidthChanged: requestPaint()
+                    onHeightChanged: requestPaint()
+
+                    onPaint: {
+                        var ctx = getContext("2d");
+                        ctx.reset();
+                        var w = width;
+                        var h = height;
+                        if (w <= 0 || h <= 0) return;
+
+                        var d = Math.min(w, h);
+                        var r = d / 2.0;
+                        var cx = w / 2.0;
+                        var cy = h / 2.0;
+
+                        // 1. Central Core: Solid deep contrast backing under hour, AM/PM, RESONANCE, ECG, weather
+                        // Feather begins at 0.45R (~0.22D) and smoothly fades out to 0.72R (~0.36D)
+                        var coreGrad = ctx.createRadialGradient(cx, cy, r * 0.45, cx, cy, r * 0.72);
+                        coreGrad.addColorStop(0.0, "rgba(255, 255, 255, 1.0)");
+                        coreGrad.addColorStop(0.60, "rgba(255, 255, 255, 0.95)");
+                        coreGrad.addColorStop(0.85, "rgba(255, 255, 255, 0.40)");
+                        coreGrad.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
+
+                        ctx.fillStyle = coreGrad;
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, r * 0.72, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // 2. Localized Glass Wing behind and beyond capsule:
+                        // Centered slightly left of capsule (cx ~ 0.77D, cy ~ 0.46D)
+                        // Extends beyond the right edge of capsule (x=0.93D) to ~0.99D,
+                        // then gradually dissolves out toward the right and outside
+                        var capCenterX = d * 0.77;
+                        var capCenterY = d * 0.46;
+                        var capRadiusX = d * 0.22;
+                        var capRadiusY = d * 0.16;
+
+                        ctx.save();
+                        ctx.translate(capCenterX, capCenterY);
+                        ctx.scale(1.0, capRadiusY / capRadiusX);
+                        var capGrad = ctx.createRadialGradient(-d * 0.04, 0, d * 0.04, 0, 0, capRadiusX);
+                        capGrad.addColorStop(0.0, "rgba(255, 255, 255, 1.0)");
+                        capGrad.addColorStop(0.50, "rgba(255, 255, 255, 0.80)");
+                        capGrad.addColorStop(0.75, "rgba(255, 255, 255, 0.35)");
+                        capGrad.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
+                        ctx.fillStyle = capGrad;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, capRadiusX, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                }
+
+                Rectangle {
+                    id: bgBlurClassicMask
+                    anchors.fill: parent
+                    radius: width / 2
+                    color: "white"
+                    visible: false
+                }
+
                 // Wallpaper blur sampler within circle behind existing children
                 FastBlurred {
                     id: bgBlur
@@ -139,8 +256,30 @@ AbstractBackgroundWidget {
                     trackX: root.x
                     trackY: root.y
                     tint: root.isWuWa ? ResonanceTheme.colTealInk : root.clockBgColor
-                    tintOpacity: (1.0 - root.cfgTransparency) * (root.isWuWa ? ResonanceTheme.intensity : 1.0)
+                    tintOpacity: root.isWuWa ? root.wuwaBgAlpha : (1.0 - root.cfgTransparency)
                     visible: root.cfgBlurRadius > 0 && root.wallpaperItem !== null
+
+                    layer.effect: OpacityMask {
+                        maskSource: root.isWuWa ? wuwaGlassMask : bgBlurClassicMask
+                    }
+                }
+
+                // Static colored glass fallback when wallpaper blur is unavailable
+                Item {
+                    id: wuwaGlassFallback
+                    anchors.fill: parent
+                    visible: root.isWuWa && (root.cfgBlurRadius <= 0 || root.wallpaperItem === null)
+
+                    Rectangle {
+                        anchors.fill: parent
+                        color: ResonanceTheme.colTealInk
+                    }
+
+                    layer.enabled: true
+                    layer.effect: OpacityMask {
+                        maskSource: wuwaGlassMask
+                    }
+                    opacity: root.wuwaBgAlpha
                 }
 
                 // 1. Dial Canvas wrapped in stationary Item with cutout mask for seconds readout
@@ -148,7 +287,8 @@ AbstractBackgroundWidget {
                     id: dialCanvasWrapper
                     anchors.fill: parent
 
-                    readonly property bool maskActive: root.cfgDialStyle === "concentric" && root.cfgMinuteStyle === "pill_horizontal"
+                    readonly property bool maskActive: root.cfgMinuteStyle !== "hide"
+                        && ((root.cfgDialStyle === "concentric" && root.cfgMinuteStyle === "pill_horizontal") || root.isWuWa)
 
                     layer.enabled: maskActive
                     layer.effect: OpacityMask {
@@ -168,18 +308,42 @@ AbstractBackgroundWidget {
                                 ctx.fillRect(0, 0, w, h);
 
                                 ctx.globalCompositeOperation = "destination-out";
-                                var cx = w * 0.93;
-                                var cy = h * 0.5;
-                                var rOuter = w * 0.075;
-                                var rInner = w * 0.04;
-                                var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, rOuter);
-                                grad.addColorStop(0.0, "rgba(0, 0, 0, 1.0)");
-                                grad.addColorStop(rInner / rOuter, "rgba(0, 0, 0, 1.0)");
-                                grad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
-                                ctx.fillStyle = grad;
-                                ctx.beginPath();
-                                ctx.arc(cx, cy, rOuter, 0, 2 * Math.PI);
-                                ctx.fill();
+                                if (root.isWuWa) {
+                                    var geom = clockGeom.get(w);
+                                    var clr = geom.maskClearance;
+                                    var capX = geom.capsuleX - clr;
+                                    var capY = (geom.capsuleYCenter - (geom.capsuleHeight / 2.0)) - clr;
+                                    var capW = geom.capsuleWidth + (clr * 2.0);
+                                    var capH = geom.capsuleHeight + (clr * 2.0);
+                                    var capR = capH / 2.0;
+
+                                    ctx.fillStyle = "rgba(0, 0, 0, 1.0)";
+                                    ctx.beginPath();
+                                    ctx.moveTo(capX + capR, capY);
+                                    ctx.lineTo(capX + capW - capR, capY);
+                                    ctx.arc(capX + capW - capR, capY + capR, capR, -Math.PI / 2, 0, false);
+                                    ctx.lineTo(capX + capW, capY + capH - capR);
+                                    ctx.arc(capX + capW - capR, capY + capH - capR, capR, 0, Math.PI / 2, false);
+                                    ctx.lineTo(capX + capR, capY + capH);
+                                    ctx.arc(capX + capR, capY + capH - capR, capR, Math.PI / 2, Math.PI, false);
+                                    ctx.lineTo(capX, capY + capR);
+                                    ctx.arc(capX + capR, capY + capR, capR, Math.PI, 3 * Math.PI / 2, false);
+                                    ctx.closePath();
+                                    ctx.fill();
+                                } else {
+                                    var cx = w * 0.93;
+                                    var cy = h * 0.5;
+                                    var rOuter = w * 0.075;
+                                    var rInner = w * 0.04;
+                                    var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, rOuter);
+                                    grad.addColorStop(0.0, "rgba(0, 0, 0, 1.0)");
+                                    grad.addColorStop(rInner / rOuter, "rgba(0, 0, 0, 1.0)");
+                                    grad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+                                    ctx.fillStyle = grad;
+                                    ctx.beginPath();
+                                    ctx.arc(cx, cy, rOuter, 0, 2 * Math.PI);
+                                    ctx.fill();
+                                }
                             }
 
                             Connections {
@@ -191,6 +355,13 @@ AbstractBackgroundWidget {
                                 }
                             }
 
+                            Connections {
+                                target: root
+                                function onIsWuWaChanged() {
+                                    dialFadeMask.requestPaint();
+                                }
+                            }
+
                             onWidthChanged: requestPaint()
                             onHeightChanged: requestPaint()
                         }
@@ -199,8 +370,9 @@ AbstractBackgroundWidget {
                     ConcentricDialCanvas {
                         anchors.fill: parent
                         rotateSeconds: root.cfgDialStyle === "concentric"
-                        animationActive: root.live
+                        animationActive: root.isWuWa ? root.wuwaDialRotating : root.live
                         smoothRotation: root.smoothMotion
+                        isWuWa: root.isWuWa
                         currentSecond: localSystemClock.seconds
                         currentMinute: localSystemClock.minutes
                         dialStyle: root.cfgDialStyle
@@ -210,7 +382,7 @@ AbstractBackgroundWidget {
                         hideMinutePillArea: root.cfgMinuteStyle !== "hide"
                         textColor: root.clockTextColor
                         subtextColor: root.clockSubtextColor
-                        accentColor: root.clockAccentColor
+                        accentColor: root.isWuWa ? ResonanceTheme.textPrimary : root.clockAccentColor
                     }
                 }
 
@@ -218,7 +390,7 @@ AbstractBackgroundWidget {
                 ResonanceRing {
                     anchors.fill: parent
                     visible: root.isWuWa
-                    live: root.live
+                    live: root.wuwaDialRotating
                     minutePillVisible: root.cfgMinuteStyle !== "hide"
                 }
 
@@ -310,7 +482,7 @@ AbstractBackgroundWidget {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: parent.height * (0.06 + root.dialInnerMargin)
-                    shown: root.cfgBottomSubDialContent !== "none"
+                    shown: !root.isWuWa && root.cfgBottomSubDialContent !== "none"
                     sourceComponent: ConcentricComplication {
                         type: root.cfgBottomSubDialContent
                         textColor: root.clockTextColor
@@ -319,30 +491,55 @@ AbstractBackgroundWidget {
                     }
                 }
 
-                // 7. Large Hour Display (Centered in widget)
+                // 7. Large Hour Display
                 FadeLoader {
-                    anchors.centerIn: parent
+                    anchors.horizontalCenter: root.isWuWa ? parent.left : parent.horizontalCenter
+                    anchors.horizontalCenterOffset: root.isWuWa ? clockGeom.get(parent.width).hourX : 0
+                    anchors.verticalCenter: root.isWuWa ? parent.top : parent.verticalCenter
+                    anchors.verticalCenterOffset: root.isWuWa ? clockGeom.get(parent.width).hourY : 0
                     shown: root.cfgShowHourText
                     sourceComponent: ConcentricHourDisplay {
                         hour: localSystemClock.hours
                         baseWidth: clockContainer.width
                         use24h: root.cfgUse24h
                         boldFont: root.cfgBoldFont
-                        customPixelSize: root.cfgHourPixelSize
+                        customPixelSize: root.isWuWa ? Math.min(26, root.cfgHourPixelSize) : root.cfgHourPixelSize
                         customWeight: root.cfgHourFontWeight
                         customWidth: root.cfgHourFontWidth
                         customRound: root.cfgHourFontRound
+                        opticalCenter: root.isWuWa
                         color: root.clockTextColor
+                    }
+                }
+
+                // 7b. WuWa Upper Stationary AM/PM Indicator (12h format only)
+                StyledText {
+                    id: wuwaAmPmText
+                    visible: root.isWuWa && !root.cfgUse24h
+                    anchors.horizontalCenter: parent.left
+                    anchors.horizontalCenterOffset: clockGeom.get(parent.width).xAmPm
+                    anchors.verticalCenter: parent.top
+                    anchors.verticalCenterOffset: clockGeom.get(parent.width).yAmPm
+                    text: (localSystemClock.hours ?? 0) >= 12 ? "PM" : "AM"
+                    color: ResonanceTheme.textPrimary
+                    opacity: 0.85 * ResonanceTheme.intensity
+                    font {
+                        family: Appearance.font.family.main
+                        pixelSize: Math.max(8, Math.round(clockContainer.width * 0.038))
+                        weight: Font.DemiBold
+                        letterSpacing: Math.max(1.0, clockContainer.width * 0.008)
                     }
                 }
 
                 // 8. Minute Pill (Positioned right at 3:00 / 15 minute tick, clipped by clockBgCircle)
                 FadeLoader {
-                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenter: root.isWuWa ? parent.top : parent.verticalCenter
+                    anchors.verticalCenterOffset: root.isWuWa ? clockGeom.get(parent.width).capsuleYCenter : 0
                     anchors.left: parent.left
-                    anchors.leftMargin: parent.width * root.cfgMinutePillLeftMargin
+                    anchors.leftMargin: root.isWuWa ? clockGeom.get(parent.width).capsuleX : (parent.width * root.cfgMinutePillLeftMargin)
                     shown: root.cfgMinuteStyle !== "hide"
                     sourceComponent: ConcentricMinutePill {
+                        isWuWa: root.isWuWa
                         baseWidth: clockContainer.width
                         minuteStyle: root.cfgMinuteStyle
                         boldFont: root.cfgBoldFont
@@ -351,10 +548,49 @@ AbstractBackgroundWidget {
                         outlineColor: root.isWuWa ? ResonanceTheme.borderAccent : ColorUtils.applyAlpha(root.clockTextColor, 0.5)
                         pillBg: root.isWuWa ? ResonanceTheme.bgGlassElevated : (root.cfgUseBlackBg ? WidgetColorScheme.pillBgColor : ColorUtils.applyAlpha(root.clockBgColor, 0.45))
                         filled: root.isWuWa ? true : !root.cfgUseBlackBg
-                        showSeconds: root.cfgDialStyle === "concentric" && root.cfgMinuteStyle === "pill_horizontal"
+                        showSeconds: (root.cfgDialStyle === "concentric" && root.cfgMinuteStyle === "pill_horizontal") || root.isWuWa
                         second: localSystemClock.seconds
                         minute: localSystemClock.minutes
                         secondsCenterX: clockContainer.width * (0.93 - root.cfgMinutePillLeftMargin)
+                    }
+                }
+
+                // 8b. WuWa Under-Center Elements: "RESONANCE" and Constrained Weather readout
+                Item {
+                    id: wuwaUnderCenter
+                    anchors.fill: parent
+                    visible: root.isWuWa
+
+                    StyledText {
+                        id: resonanceLabel
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.top
+                        anchors.verticalCenterOffset: clockGeom.get(parent.width).yResonance
+                        text: "RESONANCE"
+                        color: ResonanceTheme.accentGold
+                        opacity: 0.70 * ResonanceTheme.intensity
+                        font {
+                            family: Appearance.font.family.main
+                            pixelSize: Math.max(8, Math.round(parent.width * 0.038))
+                            weight: Font.DemiBold
+                            letterSpacing: Math.max(1.0, parent.width * 0.010)
+                        }
+                    }
+
+                    // 8c. Curved Weather Annotation (WuWa Chrono Resonator Stage 2)
+                    ResonanceWeatherArc {
+                        id: wuwaWeatherArc
+                        anchors.fill: parent
+                        visible: root.cfgBottomSubDialContent !== "none"
+                        text: root.wuwaWeatherText
+                        baseDiameter: clockContainer.width
+                        radius: clockGeom.get(parent.width).rWeatherArc
+                        maxArcSpan: clockGeom.get(parent.width).maxWeatherArcSpan
+                        fontPixelSize: clockGeom.get(parent.width).weatherFontSize
+                        fontFamily: Appearance.font.family.main
+                        color: ResonanceTheme.textPrimary
+                        accentColor: ResonanceTheme.textPrimary
+                        accentOpacity: 0.90 * ResonanceTheme.intensity
                     }
                 }
             }

@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.modules.common
 import qs.modules.common.functions
+import qs.services
 
 Item {
     id: root
@@ -19,6 +20,8 @@ Item {
     property color textSecondary: ResonanceTheme.textSecondary
     property real intensity: ResonanceTheme.intensity
 
+    ResonanceClockGeometry { id: clockGeom }
+
     anchors.fill: parent
     enabled: false
 
@@ -27,14 +30,14 @@ Item {
         anchors.fill: parent
         contextType: "2d"
 
-        function drawDiamond(ctx, x, y, size, fill) {
+        function drawPointedDiamond(ctx, x, y, size, fill) {
             ctx.save();
             ctx.fillStyle = fill;
             ctx.beginPath();
-            ctx.moveTo(x, y - size);
-            ctx.lineTo(x + size, y);
-            ctx.lineTo(x, y + size);
-            ctx.lineTo(x - size, y);
+            ctx.moveTo(x, y - size * 1.25);
+            ctx.lineTo(x + size * 0.85, y);
+            ctx.lineTo(x, y + size * 1.25);
+            ctx.lineTo(x - size * 0.85, y);
             ctx.closePath();
             ctx.fill();
             ctx.restore();
@@ -51,108 +54,184 @@ Item {
             var cx = w / 2;
             var cy = h / 2;
             var diameter = Math.min(w, h);
+            var geom = clockGeom.get(diameter);
 
-            // ── 1. OUTER ETCHED RING & BROKEN ORBIT ──
-            var rOuter = diameter * 0.475;
-            var majorTickLen = diameter * 0.038;
-            var minorTickLen = diameter * 0.018;
-            var arcGapRad = 4.0 * Math.PI / 180.0; // 4 degree gap around major ticks
+            var rCardinal = geom.rCardinal;
+            var rOrnament = geom.rOrnament;
+            var rTickInner = geom.rTickInner;
+            var rQuiet = geom.rQuiet;
+            var diamondSize = geom.cardinalSize;
 
-            // 12 Major Divisions + Broken Arcs + Fine Ticklets
+            // Angular bounds of minute capsule region near 3:00 (angle 0)
+            var capAngleTop = -0.32;
+            var capAngleBottom = 0.16;
+
+            // ── 1. FOUR POINTED CARDINAL DIAMONDS (all visible, clear of capsule) ──
+            // North (12:00)
+            drawPointedDiamond(ctx, cx, cy - rCardinal, diamondSize, root.accentGold);
+            // South (6:00)
+            drawPointedDiamond(ctx, cx, cy + rCardinal, diamondSize, root.accentGold);
+            // West (9:00)
+            drawPointedDiamond(ctx, cx - rCardinal, cy, diamondSize, root.accentGold);
+            // East (3:00) - sits at 0.95R, safely outside capsule right edge (0.86R)
+            drawPointedDiamond(ctx, cx + rCardinal, cy, diamondSize, root.accentGold);
+
+            // ── 2. BROKEN CIRCUMFERENCE AT rOrnament & TICKS AT >= rTickInner ──
+            var majorTickLen = rOrnament - rTickInner;
+            var minorTickLen = majorTickLen * 0.50;
+            var arcGapRad = 3.5 * Math.PI / 180.0; // 3.5 degree gap around major hour marks
+
             for (var k = 0; k < 12; k++) {
                 var angle = -Math.PI / 2 + (k * Math.PI / 6);
+                var isNearCapsule = (k === 3) || (angle >= capAngleTop && angle <= capAngleBottom);
 
-                // Major Tick at hour mark
-                var cosA = Math.cos(angle);
-                var sinA = Math.sin(angle);
-                ctx.save();
-                ctx.strokeStyle = root.accentGold;
-                ctx.lineWidth = Math.max(1.0, diameter * 0.006);
-                ctx.beginPath();
-                ctx.moveTo(cx + cosA * (rOuter - majorTickLen), cy + sinA * (rOuter - majorTickLen));
-                ctx.lineTo(cx + cosA * (rOuter + diameter * 0.004), cy + sinA * (rOuter + diameter * 0.004));
-                ctx.stroke();
-                ctx.restore();
+                // Major tick at hour mark (omit at 3:00 to keep capsule clean)
+                if (!isNearCapsule) {
+                    var cosA = Math.cos(angle);
+                    var sinA = Math.sin(angle);
+                    ctx.save();
+                    ctx.strokeStyle = root.accentGold;
+                    ctx.lineWidth = Math.max(1.0, diameter * 0.005);
+                    ctx.beginPath();
+                    ctx.moveTo(cx + cosA * rTickInner, cy + sinA * rTickInner);
+                    ctx.lineTo(cx + cosA * rOrnament, cy + sinA * rOrnament);
+                    ctx.stroke();
+                    ctx.restore();
+                }
 
                 // Broken outer arc between hour marks
                 var arcStart = angle + arcGapRad;
                 var arcEnd = angle + (Math.PI / 6) - arcGapRad;
-                ctx.save();
-                ctx.strokeStyle = root.borderHairline;
-                ctx.lineWidth = 1.0;
-                ctx.beginPath();
-                ctx.arc(cx, cy, rOuter, arcStart, arcEnd, false);
-                ctx.stroke();
-                ctx.restore();
+                if (!(arcStart < capAngleBottom && arcEnd > capAngleTop)) {
+                    ctx.save();
+                    ctx.strokeStyle = ColorUtils.applyAlpha(root.accentGold, 0.75 * root.intensity);
+                    ctx.lineWidth = 1.0;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, rOrnament, arcStart, arcEnd, false);
+                    ctx.stroke();
+                    ctx.restore();
+                }
 
                 // 4 Fine ticklets between each pair of major divisions (6 degree intervals)
                 for (var m = 1; m < 5; m++) {
                     var subAngle = angle + (m * Math.PI / 30);
+                    if (subAngle >= capAngleTop && subAngle <= capAngleBottom) continue;
+
                     var cosS = Math.cos(subAngle);
                     var sinS = Math.sin(subAngle);
                     ctx.save();
-                    ctx.strokeStyle = ColorUtils.applyAlpha(root.accentGold, 0.40 * root.intensity);
+                    ctx.strokeStyle = ColorUtils.applyAlpha(root.accentGold, 0.78 * root.intensity);
                     ctx.lineWidth = 1.0;
                     ctx.beginPath();
-                    ctx.moveTo(cx + cosS * (rOuter - minorTickLen), cy + sinS * (rOuter - minorTickLen));
-                    ctx.lineTo(cx + cosS * rOuter, cy + sinS * rOuter);
+                    ctx.moveTo(cx + cosS * (rOrnament - minorTickLen), cy + sinS * (rOrnament - minorTickLen));
+                    ctx.lineTo(cx + cosS * rOrnament, cy + sinS * rOrnament);
                     ctx.stroke();
                     ctx.restore();
                 }
             }
 
-            // ── 2. FOUR NAVIGATION DIAMONDS ──
-            var diamondR = rOuter - diameter * 0.055;
-            var diamondSize = Math.max(2.5, diameter * 0.012);
+            // ── 3. INNER QUIET RING (rQuiet ~0.60R, broken where crossing capsule) ──
+            ctx.save();
+            ctx.strokeStyle = ColorUtils.applyAlpha(root.borderSubtle, 0.45 * root.intensity);
+            ctx.lineWidth = 1.0;
+            ctx.beginPath();
+            // Arc going around from below capsule to above capsule
+            ctx.arc(cx, cy, rQuiet, capAngleBottom + 0.05, (2 * Math.PI) + capAngleTop - 0.05, false);
+            ctx.stroke();
+            ctx.restore();
 
-            // North (12:00)
-            drawDiamond(ctx, cx, cy - diamondR, diamondSize, root.accentGold);
-            // South (6:00)
-            drawDiamond(ctx, cx, cy + diamondR, diamondSize, root.accentGold);
-            // West (9:00)
-            drawDiamond(ctx, cx - diamondR, cy, diamondSize, root.accentGold);
-            // East (3:00) - only if minute pill is not masking this area
-            if (!root.minutePillVisible) {
-                drawDiamond(ctx, cx + diamondR, cy, diamondSize, root.accentGold);
-            }
+            // ── 4. SOFT FRAMING BRACKET (Upper) ──
+            ctx.save();
+            ctx.strokeStyle = ColorUtils.applyAlpha(root.accentGold, 0.28 * root.intensity);
+            ctx.lineWidth = 1.0;
 
-            // ── 3. INNER CONCENTRIC ACCENT ORBIT ──
-            var rInner = diameter * 0.385;
-            for (var q = 0; q < 4; q++) {
-                var qAngle = -Math.PI / 2 + (q * Math.PI / 2);
-                var qStart = qAngle + (12.0 * Math.PI / 180.0);
-                var qEnd = qAngle + (Math.PI / 2) - (12.0 * Math.PI / 180.0);
-                ctx.save();
-                ctx.strokeStyle = ColorUtils.applyAlpha(root.borderSubtle, 0.35 * root.intensity);
-                ctx.lineWidth = 0.8;
-                ctx.beginPath();
-                ctx.arc(cx, cy, rInner, qStart, qEnd, false);
-                ctx.stroke();
-                ctx.restore();
-            }
+            // Upper bracket (arches over the hour, split to frame the AM/PM label cleanly)
+            // Left wing: from cx - 0.22D to cx - 0.08D
+            ctx.beginPath();
+            ctx.moveTo(cx - diameter * 0.22, cy - diameter * 0.18);
+            ctx.quadraticCurveTo(cx - diameter * 0.15, cy - diameter * 0.235, cx - diameter * 0.08, cy - diameter * 0.23);
+            ctx.stroke();
 
-            // ── 4. FOCAL SIGNATURE (TACET / FREQUENCY MOTIF) ──
-            var sigY = cy + diameter * 0.165;
-            var sigW = diameter * 0.22;
+            // Right wing: from cx + 0.08D to cx + 0.22D
+            ctx.beginPath();
+            ctx.moveTo(cx + diameter * 0.08, cy - diameter * 0.23);
+            ctx.quadraticCurveTo(cx + diameter * 0.15, cy - diameter * 0.235, cx + diameter * 0.22, cy - diameter * 0.18);
+            ctx.stroke();
+            ctx.restore();
+
+            // ── 5. STATIC ECG SIGNATURE (at cy + 0.175D) ──
+            var sigY = geom.yEcg;
+            var sigW = diameter * 0.24;
             var halfW = sigW / 2;
 
             ctx.save();
-            ctx.strokeStyle = ColorUtils.applyAlpha(root.accentGold, 0.70 * root.intensity);
-            ctx.lineWidth = 1.0;
+            ctx.strokeStyle = ColorUtils.applyAlpha(root.accentGold, 0.75 * root.intensity);
+            ctx.lineWidth = 1.2;
             ctx.beginPath();
             ctx.moveTo(cx - halfW, sigY);
-            ctx.lineTo(cx - sigW * 0.16, sigY);
-            ctx.lineTo(cx - sigW * 0.08, sigY - 2.5);
-            ctx.lineTo(cx, sigY + 2.5);
-            ctx.lineTo(cx + sigW * 0.08, sigY - 2.5);
-            ctx.lineTo(cx + sigW * 0.16, sigY);
+            ctx.lineTo(cx - sigW * 0.20, sigY);
+            // P wave
+            ctx.lineTo(cx - sigW * 0.14, sigY - 2.0);
+            ctx.lineTo(cx - sigW * 0.08, sigY);
+            // Q dip
+            ctx.lineTo(cx - sigW * 0.04, sigY + 2.8);
+            // R peak
+            ctx.lineTo(cx, sigY - 7.5);
+            // S dip
+            ctx.lineTo(cx + sigW * 0.04, sigY + 4.5);
+            // T wave
+            ctx.lineTo(cx + sigW * 0.09, sigY - 3.0);
+            ctx.lineTo(cx + sigW * 0.15, sigY);
+            // End baseline
             ctx.lineTo(cx + halfW, sigY);
             ctx.stroke();
             ctx.restore();
 
             // Tiny central node in focal signature
-            drawDiamond(ctx, cx, sigY, Math.max(1.8, diameter * 0.009), root.accentGold);
+            drawPointedDiamond(ctx, cx, sigY, Math.max(1.8, diameter * 0.009), root.accentGold);
+        }
+    }
 
+    scale: ringPulseScale
+    property real ringPulseScale: 1.0
+    readonly property bool pulseAllowed: root.live && root.visible && ResonanceTheme.motionNormal && !Appearance.reducedMotion
+
+    onPulseAllowedChanged: {
+        if (!pulseAllowed && hourPulseAnim.running) {
+            hourPulseAnim.stop();
+            root.ringPulseScale = 1.0;
+        }
+    }
+
+    SequentialAnimation {
+        id: hourPulseAnim
+        onStopped: {
+            root.ringPulseScale = 1.0;
+        }
+        PropertyAnimation {
+            target: root
+            property: "ringPulseScale"
+            from: 1.0
+            to: 1.012
+            duration: 800
+            easing.type: Easing.OutCubic
+        }
+        PropertyAnimation {
+            target: root
+            property: "ringPulseScale"
+            from: 1.012
+            to: 1.0
+            duration: 1200
+            easing.type: Easing.InOutQuad
+        }
+    }
+
+    Connections {
+        target: DateTime.clock
+        function onHoursChanged() {
+            if (root.pulseAllowed) {
+                hourPulseAnim.restart();
+            }
         }
     }
 
