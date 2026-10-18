@@ -257,27 +257,13 @@ The clock skin is exposed natively under:
 
 ## 9. Phase 4 — Harmonic Channel & Bar Frequency Polish
 
-Phase 4 harmonizes top-bar frequency ribbons (`modules/ii/bar/IslandFiller.qml`), the small bar Tacet Mark visualizer (`modules/ii/bar/Visualizer.qml`), and active bar media (`modules/ii/bar/Media.qml`) with the Jinzhou Resonance theme while dramatically reducing compositor load:
+Phase 4 introduced the shared Jinzhou palette and motion safeguards for `IslandFiller.qml`, `Visualizer.qml` and legacy bar media. The follow-up activation restores the user's original smooth Normal motion. Current behavior:
 
-### Component Architecture & Enhancements
+1. **Harmonic gap ribbons** use gold, sage and teal when the global theme is enabled. Existing style selection, gap geometry, tapering and narrow-gap opacity adaptation remain intact. Normal pacing is the original 16 ms with audio and 33 ms idle; Ambient uses 125 ms. Hidden, locked, reduced/off motion, disabled filler, absent gaps and static styles stop the timer.
+2. **Bar Tacet mark** continuously runs its original shader `FrameAnimation`, floating bob, two breathing loops and aura pulse in Normal mode, including paused media. Ambient uses only its low-rate 125 ms driver, including during playback. Normal and Ambient drivers are mutually exclusive. Hidden, locked and reduced/off motion stop both and restore the static silhouette.
+3. **Media functionality** keeps the existing MPRIS interactions, popups and click/scroll handlers. Palette adaptation remains tied to `ResonanceTheme`.
 
-1. **Harmonic Channel Gap Ribbons (`modules/ii/bar/IslandFiller.qml`)**:
-   - **Theme Palette Integration**: When `ResonanceTheme.enabled` is active, waves and stream modes transition to Jinzhou antique gold (`accentGold`), secondary sage (`borderSubtle`), and dark teal backing (`colTealInk`). When disabled, original Matugen colors (`colPrimary`, `colSecondary`, `colTertiary`) are preserved.
-   - **Crowding Adaptation**: Opacity scales gracefully (`gapOpacity`) in narrow gaps (<140px) to prevent visual clutter between floating islands, while tapering to zero at pill boundaries without overlapping active pills.
-   - **Performance & Motion Gating**:
-     - Reduced/off motion or screen lock stops the decorative timer. Motion-off also holds shader audio uniforms at zero.
-     - Paced clock driver: ~30 fps under real audio playback (`interval: 33ms`), 12 fps when idle (`interval: 83ms`), and ~8 fps in ambient mode (`interval: 125ms`), eliminating the legacy 60 fps idle drain.
-
-2. **Small Bar Tacet Mark Visualizer (`modules/ii/bar/Visualizer.qml`)**:
-   - **Elimination of Unconditional Animations**: Removed the 60 fps `FrameAnimation` and 4 infinite `SequentialAnimation` loops.
-   - **Audio-Reactive Bounded Motion**: Active music playback animates the shader at a capped ~30 fps (`interval: 33ms`), modulating vertical needle flex and aura glow in direct response to `audioEnergy` from `GlobalStates.visualizerPoints`.
-   - **Ambient Mode Idle Breath**: In ambient mode (`motionAmbient`), a low-rate ~8 fps timer (`interval: 125ms`) gently breathes without compositor pressure.
-   - **Static Silhouette**: Under reduced motion, screen lock, invisibility, or normal idle without audio, all motion freezes into an elegant static silhouette with zero timer activity.
-   - **No Time Leaps**: Shader time increments by fixed delta (`+0.033`), preventing visual jumps when music starts or stops.
-
-3. **Active Legacy Bar Media Polish (`modules/ii/bar/Media.qml`)**:
-   - Connects `MprisController.activePlayer?.isPlaying` directly to `Local.Visualizer`, ensuring immediate visual reactivity to playback state changes.
-   - All MPRIS interactions, popups, and click/scroll handlers remain unchanged.
+The original phase-4 throttling (33/83 ms ribbons and audio-gated Tacet) was intentionally removed at the user's request. Continuous Normal motion carries a substantial rendering cost on the current 165 Hz display. See [live activation and measured performance](wuwa-resonance-activation.md) for observations and remaining manual checks.
 
 ---
 

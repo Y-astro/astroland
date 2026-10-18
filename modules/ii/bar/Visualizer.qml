@@ -52,48 +52,36 @@ Item {
     // Motion gating
     readonly property bool motionOff: Appearance.reducedMotion || (ResonanceTheme.enabled && ResonanceTheme.motionOff)
     readonly property bool motionAmbient: ResonanceTheme.enabled && ResonanceTheme.motionAmbient && !Appearance.reducedMotion
+    readonly property bool motionNormal: !motionOff && !motionAmbient
     readonly property bool canAnimate: root.visible && root.opacity > 0
         && (!root.Window.window || root.Window.window.visible)
         && !GlobalStates.screenLocked && !root.motionOff
-    readonly property bool activeMotionRunning: canAnimate && hasAudio
+    readonly property bool normalRunning: canAnimate && motionNormal
+    readonly property bool ambientRunning: canAnimate && motionAmbient
 
     property real ambientPhase: 0.0
 
-    function resetIfInactive() {
-        if (!activeMotionRunning && (!canAnimate || !motionAmbient)) {
+    function resetStatic() {
+        if (!normalRunning && !ambientRunning) {
             container.anchors.verticalCenterOffset = 0;
             breathScale.xScale = 1.0;
             breathScale.yScale = 1.0;
             auraOverlay.opacity = 0.35;
+        } else if (ambientRunning) {
+            container.anchors.verticalCenterOffset = 0;
         }
     }
 
-    onActiveMotionRunningChanged: resetIfInactive()
-    onCanAnimateChanged: resetIfInactive()
-    onMotionAmbientChanged: resetIfInactive()
+    onNormalRunningChanged: resetStatic()
+    onAmbientRunningChanged: resetStatic()
+    Component.onCompleted: resetStatic()
 
-    // Active music playback animation driver (~30 fps, bounded motion reacting to audio energy)
-    Timer {
-        id: shaderTimer
-        interval: 33 // ~30 fps
-        repeat: true
-        running: root.activeMotionRunning
-        onTriggered: {
-            animatedShader.time += 0.033;
-            var energy = root.audioEnergy;
-            breathScale.yScale = 1.0 + 0.08 * energy;
-            breathScale.xScale = 1.0 - 0.04 * energy;
-            container.anchors.verticalCenterOffset = -1.5 * energy;
-            auraOverlay.opacity = 0.22 + 0.35 * energy;
-        }
-    }
-
-    // Ambient mode low-rate gentle idle breath (~8 fps, only when ambient motion enabled and idle)
+    // Ambient mode low-rate gentle idle breath (~8 fps, explicitly low-rate including active playback)
     Timer {
         id: ambientTimer
         interval: 125 // ~8 fps
         repeat: true
-        running: root.canAnimate && root.motionAmbient && !root.hasAudio
+        running: root.ambientRunning
         onTriggered: {
             root.ambientPhase = (root.ambientPhase + 0.08) % (2.0 * Math.PI);
             breathScale.yScale = 1.0 + 0.04 * Math.sin(root.ambientPhase);
@@ -112,12 +100,39 @@ Item {
         height: root.visualizerHeight
         rotation: root.vertical ? 90 : 0
 
+        // Subtle floating bob
+        SequentialAnimation on anchors.verticalCenterOffset {
+            id: bobAnim
+            loops: Animation.Infinite
+            running: root.normalRunning
+            NumberAnimation { to: -1.5; duration: 1800; easing.type: Easing.InOutSine }
+            NumberAnimation { to: 1.5; duration: 1800; easing.type: Easing.InOutSine }
+        }
+
         transform: Scale {
             id: breathScale
             origin.x: container.width / 2
             origin.y: container.height / 2
             xScale: 1.0
             yScale: 1.0
+
+            // Vertical needle breathing: stretches and flexes
+            SequentialAnimation on yScale {
+                id: yScaleAnim
+                loops: Animation.Infinite
+                running: root.normalRunning
+                NumberAnimation { to: 1.08; duration: 1500; easing.type: Easing.InOutSine }
+                NumberAnimation { to: 0.92; duration: 1500; easing.type: Easing.InOutSine }
+            }
+
+            // Horizontal breathing: subtle counter-expansion
+            SequentialAnimation on xScale {
+                id: xScaleAnim
+                loops: Animation.Infinite
+                running: root.normalRunning
+                NumberAnimation { to: 1.04; duration: 2000; easing.type: Easing.InOutSine }
+                NumberAnimation { to: 0.96; duration: 2000; easing.type: Easing.InOutSine }
+            }
         }
 
         // Texture provider: high-resolution SVG render of the authentic WuWa Tacet Mark
@@ -157,6 +172,14 @@ Item {
             color: root.auraColor
             scale: 1.08
             opacity: 0.35
+
+            SequentialAnimation on opacity {
+                id: auraOpacityAnim
+                loops: Animation.Infinite
+                running: root.normalRunning
+                NumberAnimation { to: 0.55; duration: 1400; easing.type: Easing.InOutQuad }
+                NumberAnimation { to: 0.18; duration: 1400; easing.type: Easing.InOutQuad }
+            }
         }
 
         FastBlur {
@@ -178,6 +201,12 @@ Item {
             property color colorAccent: root.shaderAccent
 
             fragmentShader: Qt.resolvedUrl("shaders/tacet_animated.frag.qsb")
+
+            FrameAnimation {
+                id: ticker
+                running: root.normalRunning
+                onTriggered: animatedShader.time += Math.min(frameTime, 0.1)
+            }
         }
     }
 }

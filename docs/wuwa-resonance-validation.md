@@ -1,5 +1,7 @@
 # WuWa Resonance validation — 2026-10-18
 
+This is the historical five-phase validation report, before the user requested restoration of continuous Normal motion. Current activation, animation behavior and performance are documented in [live activation](wuwa-resonance-activation.md).
+
 Implemented all five prompt-pack phases in the live `end4-pC` configuration on
 `my-setup`. Local checkpoints: `2935ab0` (foundation), `f342243` (resources),
 `5f55aaa` (clock), `23648b8` (bar). No upstream sync or push was performed.

@@ -58,7 +58,7 @@ Item {
         return root.baseOpacity * crowdFactor;
     }
 
-    // Motion and timer gating: pause when locked/invisible/reduced-motion; 30 fps audio, 12 fps idle, ~8 fps ambient
+    // Motion and timer gating: pause when locked/invisible/reduced-motion; 60 fps audio, 30 fps idle, ~8 fps ambient
     readonly property bool motionOff: Appearance.reducedMotion || (ResonanceTheme.enabled && ResonanceTheme.motionOff)
     readonly property bool motionAmbient: ResonanceTheme.enabled && ResonanceTheme.motionAmbient && !Appearance.reducedMotion
     readonly property bool hasActiveGaps: root.gap1Active || root.gap2Active || root.spanActive
@@ -66,7 +66,7 @@ Item {
 
     readonly property int clockInterval: {
         if (root.motionAmbient) return 125; // ~8 fps in ambient mode
-        return root.hasAudio ? 33 : 83; // 30 fps under audio, 12 fps when idle
+        return root.hasAudio ? 16 : 33; // 60 fps under audio, 30 fps when idle
     }
 
     // Clock driver
