@@ -7,3 +7,5 @@
 - Delegated live architecture/settings audit to persistent AGY main worker.
 
 - Phase1 accepted: Qt6 parser and actual-source offscreen theme harness pass (10 behaviors). Corrected independent settings, light/dark foreground pairing and font tokens. Existing diffs unchanged.
+
+- Phase2: accepted live WuWa horizontal/vertical screenshots, restored classic/orientation/workspace. Fixed Loader blur offsets, CPU palette/visibility refresh, Bound delegate index and orientation binding. Codex integrated thermal spacing and automatic Grid rows (removed intermediate-capacity warnings). Qt6 parser/diff checks pass. Only new resource style key persisted; original user settings unchanged. Physical drag and fractional compositor scaling remain manual.

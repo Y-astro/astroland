@@ -242,6 +242,38 @@ ContentPage {
         }
     }
 
+    // ── Resource Monitor (3-Card Array) ──
+    ContentSection {
+        title: Translation.tr("Resource Monitor (3-Card Array)")
+        icon: "monitor_heart"
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 4
+
+            StyledText {
+                Layout.fillWidth: true
+                text: root.placementNote("resources")
+                color: Appearance.colors.colOnSurfaceVariant
+                font.pixelSize: Appearance.font.pixelSize.small
+                wrapMode: Text.Wrap
+            }
+
+            ContentSubsectionLabel {
+                text: Translation.tr("Card Style")
+            }
+
+            ConfigSelectionArray {
+                currentValue: Config.options.background.widgets.resources.style ?? "classic"
+                onSelected: value => Config.options.background.widgets.resources.style = value
+                options: [
+                    { displayName: Translation.tr("Classic"), icon: "cookie", value: "classic" },
+                    { displayName: Translation.tr("Resonance (WuWa)"), icon: "waves", value: "wuwa" }
+                ]
+            }
+        }
+    }
+
     ContentSection {
         title: Translation.tr("Shared")
         icon: "tune"

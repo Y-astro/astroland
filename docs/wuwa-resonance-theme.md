@@ -147,9 +147,60 @@ Controls are placed directly in the native Settings window under:
 
 ---
 
-## 7. Implementation Rollback
+## 7. Phase 2 — Resonance Monitoring Array (3-Card HUD)
+
+Phase 2 introduces the **Resonance Monitoring Array** skin for the desktop resource widget (`modules/ii/background/widgets/resources/ResourcesWidget.qml`), replacing the oversized cartoon cards with three restrained Jinzhou terminal instruments while preserving geometry (`~420x120`), horizontal/vertical orientation toggle, drag/lock behavior, and classic look when not opted-in.
+
+### Configuration Schema
+
+Persisted in `~/.config/illogical-impulse/config.json` under `background.widgets.resources`:
+
+```json
+{
+  "background": {
+    "widgets": {
+      "resources": {
+        "style": "classic"
+      }
+    }
+  }
+}
+```
+
+| Property | Type | Default | Options | Description |
+|---|---|---|---|---|
+| `style` | `string` | `"classic"` | `"classic"`, `"wuwa"` | Style selection for the 3-card desktop resource monitor. Operates independently of global shell theme. |
+
+### Component Architecture
+
+- **Skin Switching**: Controlled via conditional `Loader`s in `ResourcesWidget.qml`. When `style` is `"classic"`, the original `StatCard` and `TempStatCard` are rendered with zero overhead. When `style` is `"wuwa"` (or global theme is enabled and style is not explicitly `"classic"`), `ResonanceStatCard.qml` is loaded.
+- **Card 1: CPU Resonance**:
+  - Accurate finite clamped CPU percentage (`Math.round(cpuUsage * 100) + "%"`).
+  - Frequency metadata readout.
+  - Sinuous frequency oscilloscope trace rendered on Canvas; redraws **only on CPU usage updates** (`onCpuUsageChanged`), never per-frame.
+- **Card 2: RAM Memory Allocation**:
+  - Accurate RAM percentage.
+  - Exact GB allocation sub-reading (`ResourceUsage.kbToGbString`).
+  - 10-step segmented meter with hairline antique-gold active segment styling.
+- **Card 3: Dual Thermal Sensor Array**:
+  - Combined CPU and GPU temperatures inside a single card separated by a fine vertical hairline divider.
+  - Unavailable/missing sensors (`<= 0°C` or non-finite) display cleanly as `"--"`.
+  - Alert threshold: `ResonanceTheme.textWarning` (thermal orange) activates **only above 75°C**. Missing sensors are never styled orange.
+- **Corner Engravings & Glass**:
+  - Muted dark teal translucent glass (`ResonanceTheme.bgGlass`, radius `10px`).
+  - Corner L-bracket engravings and single diamond accent node (`ResonanceTheme.accentGold`).
+
+### Settings Integration
+
+The style option is exposed natively under:
+**Settings -> Desktop Widgets -> Resource Styles (`modules/settings/configs/widgets/DesktopResourceStylesConfig.qml`) -> "Resource Monitor (3-Card Array)"**:
+- **Card Style**: Segmented switch between **Classic** (`"classic"`) and **Resonance (WuWa)** (`"wuwa"`).
+
+---
+
+## 8. Implementation Rollback
 
 If rollback is needed:
-1. Set `Config.options.appearance.wuwaTheme.enabled = false` in Settings or `~/.config/illogical-impulse/config.json`.
+1. Revert `Config.options.background.widgets.resources.style = "classic"` in Settings or `config.json`.
 2. Inspect `git status` and `git diff` first to ensure uncommitted work in other files is not inadvertently overwritten.
-3. To revert the Phase 1 files safely, restore only the owned files (`modules/common/Config.qml` and `modules/settings/configs/ColorsThemesConfig.qml`) from the private backup directory (`/home/astro/.local/state/wuwa-resonance-20261018/`) or delete `modules/common/ResonanceTheme.qml` and `docs/wuwa-resonance-theme.md`, avoiding blanket `git restore .` which would destroy pre-existing dirty files.
+3. If restoring files from backup, restore only the owned Phase 1 & 2 files from `/home/astro/.local/state/wuwa-resonance-20261018/` (`modules/common/Config.qml`, `modules/ii/background/widgets/resources/ResourcesWidget.qml`, `modules/settings/configs/widgets/DesktopResourceStylesConfig.qml`, `modules/settings/configs/ColorsThemesConfig.qml`), and delete `modules/ii/background/widgets/resources/ResonanceStatCard.qml`, avoiding blanket `git restore .`.

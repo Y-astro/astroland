@@ -4,7 +4,7 @@ Approved source: `/home/astro/Downloads/WuWa_Hyprland_Codex_Prompt_Pack/`.
 Implement all five phases sequentially, verifying each before proceeding.
 
 - [x] Audit live setup and add opt-in palette, preferences and native settings.
-- [ ] Add reversible skin to the existing three resource cards.
+- [x] Add reversible skin to the existing three resource cards.
 - [ ] Add reversible Chrono Resonator to the existing concentric clock.
 - [ ] Polish existing filler, Tacet mark and active media with motion gating.
 - [ ] Verify integration, performance and rollback; document evidence/limitations.

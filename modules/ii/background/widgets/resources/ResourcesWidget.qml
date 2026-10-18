@@ -17,8 +17,11 @@ AbstractBackgroundWidget {
     property real cardSpacing: 12
     property real cardHeight: 120
     property real cardWidth: (widgetWidth - cardSpacing * 2) / 3
-    property bool isVertical: root.configEntry.vertical ?? false
+    readonly property bool isVertical: root.configEntry?.vertical ?? false
     property bool hasBattery: Battery.available
+
+    readonly property string configuredStyle: root.configEntry?.style ?? "classic"
+    readonly property bool isWuWa: configuredStyle === "wuwa"
 
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
@@ -48,8 +51,8 @@ AbstractBackgroundWidget {
             cardRadius: statCard.radius
             tint: Appearance.colors.colLayer1
             tintOpacity: 0.55
-            trackX: statCard.x + root.x
-            trackY: statCard.y + root.y
+            trackX: statCard.x + (statCard.parent ? statCard.parent.x : 0) + row.x + root.x
+            trackY: statCard.y + (statCard.parent ? statCard.parent.y : 0) + row.y + root.y
             visible: Config.options.background.widgets.blurWidgets 
         }
 
@@ -112,8 +115,8 @@ AbstractBackgroundWidget {
             cardRadius: tempCard.radius
             tint: Appearance.colors.colLayer1
             tintOpacity: 0.55
-            trackX: tempCard.x + root.x
-            trackY: tempCard.y + root.y
+            trackX: tempCard.x + (tempCard.parent ? tempCard.parent.x : 0) + row.x + root.x
+            trackY: tempCard.y + (tempCard.parent ? tempCard.parent.y : 0) + row.y + root.y
             visible: Config.options.background.widgets.blurWidgets 
         }
 
@@ -221,22 +224,18 @@ AbstractBackgroundWidget {
         }
     }
 
-    Grid {
-        id: row
-        columns: root.isVertical ? 1 : 3
-        rows: root.isVertical ? 3 : 1
-        spacing: root.cardSpacing
-
-        Behavior on columns {
-            NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-        }
-
+    Component {
+        id: classicCpuCardComp
         StatCard {
             icon: "planner_review"
             value: Math.round(ResourceUsage.cpuUsage * 100) + "%"
             label: "CPU"
             shape: MaterialShape.Shape.Gem
         }
+    }
+
+    Component {
+        id: classicRamCardComp
         StatCard {
             icon: "memory"
             value: Math.round(ResourceUsage.memoryUsedPercentage * 100) + "%"
@@ -245,9 +244,68 @@ AbstractBackgroundWidget {
             bgColor: Appearance.colors.colSecondaryContainer
             shapeColor: Appearance.colors.colSecondary
         }
+    }
+
+    Component {
+        id: classicTempCardComp
         TempStatCard {
             bgColor: Appearance.colors.colTertiaryContainer
             shapeColor: Appearance.colors.colTertiary
+        }
+    }
+
+    Component {
+        id: wuwaCpuCardComp
+        ResonanceStatCard {
+            cardType: "cpu"
+            implicitWidth: root.cardWidth
+            implicitHeight: root.cardHeight
+            wallpaperItem: root.wallpaperItem
+            live: root.live
+            trackX: x + (parent ? parent.x : 0) + row.x + root.x
+            trackY: y + (parent ? parent.y : 0) + row.y + root.y
+        }
+    }
+
+    Component {
+        id: wuwaRamCardComp
+        ResonanceStatCard {
+            cardType: "ram"
+            implicitWidth: root.cardWidth
+            implicitHeight: root.cardHeight
+            wallpaperItem: root.wallpaperItem
+            live: root.live
+            trackX: x + (parent ? parent.x : 0) + row.x + root.x
+            trackY: y + (parent ? parent.y : 0) + row.y + root.y
+        }
+    }
+
+    Component {
+        id: wuwaTempCardComp
+        ResonanceStatCard {
+            cardType: "temp"
+            implicitWidth: root.cardWidth
+            implicitHeight: root.cardHeight
+            wallpaperItem: root.wallpaperItem
+            live: root.live
+            trackX: x + (parent ? parent.x : 0) + row.x + root.x
+            trackY: y + (parent ? parent.y : 0) + row.y + root.y
+        }
+    }
+
+    Grid {
+        id: row
+        columns: root.isVertical ? 1 : 3
+        spacing: root.cardSpacing
+
+        Loader {
+            sourceComponent: root.isWuWa ? wuwaCpuCardComp : classicCpuCardComp
+        }
+        Loader {
+            sourceComponent: root.isWuWa ? wuwaRamCardComp : classicRamCardComp
+        }
+        Loader {
+            sourceComponent: root.isWuWa ? wuwaTempCardComp : classicTempCardComp
         }
     }
     Rectangle {
@@ -289,8 +347,8 @@ AbstractBackgroundWidget {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: {
-                root.isVertical = !root.isVertical
-                root.configEntry.vertical = root.isVertical
+                if (root.configEntry)
+                    root.configEntry.vertical = !root.isVertical;
             }
         }
     }

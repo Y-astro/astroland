@@ -3547,6 +3547,7 @@ Singleton {
                         property real y: 100
                         property real z: 0
                         property bool vertical: false
+                        property string style: "classic" // Options: "classic", "wuwa"
                     }
 
                     property JsonObject timers: JsonObject {
