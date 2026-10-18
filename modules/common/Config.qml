@@ -2050,6 +2050,13 @@ Singleton {
                     property real speed: 4.0 // Duration in tenths of a second
                     property string curve: "iiAppOpen"
                 }
+
+                property JsonObject wuwaTheme: JsonObject {
+                    property bool enabled: false
+                    property string paletteMode: "fixed" // Options: "fixed", "theme"
+                    property real intensity: 0.85 // 0.0 - 1.0 clamped
+                    property string motionMode: "normal" // Options: "normal", "ambient", "off"
+                }
             }
 
             property JsonObject audio: JsonObject {

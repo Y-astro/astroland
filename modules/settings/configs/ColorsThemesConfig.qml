@@ -185,6 +185,66 @@ Item {
                 onEdited: text => Config.options.wallpapers.paths.download = text
             }
         }
+
+        // ── Jinzhou Resonance Theme (WuWa) ──────────────────────────────
+        AppSettingsSection {
+            Layout.topMargin: 12
+            title: Translation.tr("Resonance Theme (WuWa)")
+            symbol: "waves"
+
+            AppToggleRow {
+                symbol: "spark"
+                title: Translation.tr("Enable Jinzhou Resonance theme")
+                description: Translation.tr("Apply antique gold, misty teal glass, and ivory accents to opted-in bar and media components (desktop widgets can opt in independently)")
+                checked: Config.options.appearance.wuwaTheme.enabled
+                onToggled: value => Config.options.appearance.wuwaTheme.enabled = value
+            }
+
+            AppChoiceRow {
+                symbol: "palette"
+                title: Translation.tr("Palette mode")
+                description: Translation.tr("Fixed authentic Jinzhou palette or dynamic wallpaper-derived scheme")
+                options: [
+                    { label: Translation.tr("Fixed (WuWa)"), value: "fixed", icon: "colorize" },
+                    { label: Translation.tr("Theme adaptive"), value: "theme", icon: "wallpaper" }
+                ]
+                currentValue: Config.options.appearance.wuwaTheme.paletteMode ?? "fixed"
+                onSelected: value => Config.options.appearance.wuwaTheme.paletteMode = value
+            }
+
+            AppChoiceRow {
+                symbol: "motion_photos_on"
+                title: Translation.tr("Motion mode")
+                description: Appearance.reducedMotion
+                    ? Translation.tr("Forced to Off by global reduced-motion preference")
+                    : Translation.tr("Frequency animations and fluid breathing dynamics")
+                options: [
+                    { label: Translation.tr("Normal"), value: "normal", icon: "play_arrow" },
+                    { label: Translation.tr("Ambient"), value: "ambient", icon: "air" },
+                    { label: Translation.tr("Off"), value: "off", icon: "block" }
+                ]
+                currentValue: Config.options.appearance.wuwaTheme.motionMode ?? "normal"
+                onSelected: value => Config.options.appearance.wuwaTheme.motionMode = value
+            }
+
+            AppChoiceRow {
+                symbol: "opacity"
+                title: Translation.tr("Theme intensity")
+                description: Translation.tr("Glass density, hairline prominence, and accent saturation")
+                options: [
+                    { label: Translation.tr("Subtle (60%)"), value: 0.60, icon: "exposure_neg_1" },
+                    { label: Translation.tr("Restrained (85%)"), value: 0.85, icon: "contrast" },
+                    { label: Translation.tr("Vivid (100%)"), value: 1.00, icon: "exposure_plus_1" }
+                ]
+                currentValue: {
+                    const raw = Number(Config.options.appearance.wuwaTheme.intensity ?? 0.85);
+                    if (raw <= 0.70) return 0.60;
+                    if (raw >= 0.95) return 1.00;
+                    return 0.85;
+                }
+                onSelected: value => Config.options.appearance.wuwaTheme.intensity = value
+            }
+        }
     }
 
     ConfigSubPageHost {
