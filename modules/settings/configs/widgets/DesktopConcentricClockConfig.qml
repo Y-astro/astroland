@@ -86,6 +86,32 @@ ContentPage {
                 Layout.preferredHeight: 4
             }
 
+            // ── Clock Skin ──
+            ContentSubsection {
+                title: Translation.tr("Clock Skin")
+                icon: "style"
+                Layout.fillWidth: true
+
+                ConfigSelectionArray {
+                    currentValue: Config.options.background.widgets.concentric_clock.skin ?? "classic"
+                    onSelected: newValue => {
+                        Config.options.background.widgets.concentric_clock.skin = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: Translation.tr("Classic"),
+                            icon: "schedule",
+                            value: "classic"
+                        },
+                        {
+                            displayName: Translation.tr("Chrono Resonator (WuWa)"),
+                            icon: "waves",
+                            value: "wuwa"
+                        }
+                    ]
+                }
+            }
+
             ContentSubsection {
                 title: Translation.tr("Appearance")
                 icon: "palette"

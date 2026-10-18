@@ -198,9 +198,69 @@ The style option is exposed natively under:
 
 ---
 
-## 8. Implementation Rollback
+## 8. Phase 3 — Chrono Resonator (Concentric Clock)
+
+Phase 3 introduces the **Chrono Resonator** skin for the desktop concentric clock (`modules/ii/background/widgets/clock/ConcentricClockWidget.qml`), converting the timepiece into an antique gold and translucent teal frequency instrument while maintaining dial styles, complications, 12/24-hour modes, minute capsule alignment, and fluid time accuracy.
+
+### Configuration Schema
+
+Persisted in `~/.config/illogical-impulse/config.json` under `background.widgets.concentric_clock`:
+
+```json
+{
+  "background": {
+    "widgets": {
+      "concentric_clock": {
+        "skin": "classic"
+      }
+    }
+  }
+}
+```
+
+| Property | Type | Default | Options | Description |
+|---|---|---|---|---|
+| `skin` | `string` | `"classic"` | `"classic"`, `"wuwa"` | Skin selection for the concentric clock widget. Operates independently of the global shell theme. |
+
+### Component Architecture & Visual Layers
+
+1. **Outer Etched Ring & Broken Orbit (`modules/ii/background/widgets/clock/concentric/ResonanceRing.qml`)**:
+   - 12 major division radial ticks at each 30° hour position rendered in antique gold (`ResonanceTheme.accentGold`).
+   - Broken hairline outer orbit arc segments separated by 8° gap intervals around each major tick.
+   - 4 fine ticklets at 6° intervals between each pair of major divisions rendered in muted antique gold (`0.40 * intensity`).
+   - 4 navigation diamond markers at North, South, West (and East if minute pill is hidden).
+   - Inner concentric accent orbit at `0.385 * diameter` providing depth without obscuring numerals.
+   - **Static rendering**: Canvas repaints only on size or theme token changes, never per-frame.
+
+2. **Focal Signature (Frequency Motif)**:
+   - Positioned below the central hour readout (`cy + 0.165 * diameter`).
+   - Delicate horizontal hairline waveform (`w = 0.22 * diameter`) with central frequency crest and gold diamond node.
+   - The signature uses geometry only; no unreadable microtype.
+
+3. **Gated Stepped / Smooth Rotation (`ConcentricDialCanvas.qml`)**:
+   - `property bool smoothRotation: true`: When `true`, smooth 60/120 Hz `FrameAnimation` continuously rotates the seconds dial.
+   - When motion is reduced (`Appearance.reducedMotion` or `ResonanceTheme.motionMode` is `"off"` or `"ambient"`), `smoothRotation` becomes `false`: `FrameAnimation` is stopped (0 frame overhead), and `resync()` updates rotation in accurate 1-second stepped increments (`90.0 - (second % 60) * 6.0`) on each second tick.
+   - Paused completely when `!root.live` or `!visible`.
+
+4. **Translucent Glass & Minute Pill Integration**:
+   - Background circle and blur sample wallpaper using Jinzhou dark teal ink (`ResonanceTheme.colTealInk` / `bgGlassElevated`).
+   - Center hour display glows in warm ivory (`ResonanceTheme.textPrimary`).
+   - The minute pill at 3 o'clock uses `ResonanceTheme.bgGlassElevated` fill with `ResonanceTheme.borderAccent` hairline border, preserving exact seconds cutout mask alignment.
+
+### Settings Integration
+
+The clock skin is exposed natively under:
+**Settings -> Desktop Widgets -> Concentric Clock Options (`modules/settings/configs/widgets/DesktopConcentricClockConfig.qml`) -> "Clock Skin"**:
+- **Clock Skin**: Segmented switch between **Classic** (`"classic"`) and **Chrono Resonator (WuWa)** (`"wuwa"`).
+
+---
+
+## 9. Implementation Rollback
 
 If rollback is needed:
-1. Revert `Config.options.background.widgets.resources.style = "classic"` in Settings or `config.json`.
+1. Revert `Config.options.background.widgets.concentric_clock.skin = "classic"` and `resources.style = "classic"` in Settings or `config.json`.
 2. Inspect `git status` and `git diff` first to ensure uncommitted work in other files is not inadvertently overwritten.
-3. If restoring files from backup, restore only the owned Phase 1 & 2 files from `/home/astro/.local/state/wuwa-resonance-20261018/` (`modules/common/Config.qml`, `modules/ii/background/widgets/resources/ResourcesWidget.qml`, `modules/settings/configs/widgets/DesktopResourceStylesConfig.qml`, `modules/settings/configs/ColorsThemesConfig.qml`), and delete `modules/ii/background/widgets/resources/ResonanceStatCard.qml`, avoiding blanket `git restore .`.
+3. If restoring files from backup, restore only the owned Phase 1, 2, and 3 files (`modules/common/Config.qml`, `modules/ii/background/widgets/clock/ConcentricClockWidget.qml`, `modules/ii/background/widgets/clock/concentric/ConcentricDialCanvas.qml`, `modules/settings/configs/widgets/DesktopConcentricClockConfig.qml`, `modules/ii/background/widgets/resources/ResourcesWidget.qml`, `modules/settings/configs/widgets/DesktopResourceStylesConfig.qml`), and remove `modules/ii/background/widgets/clock/concentric/ResonanceRing.qml` and `modules/ii/background/widgets/resources/ResonanceStatCard.qml`, avoiding blanket `git restore .`.
+
+
+Clock integration checks: the dial, capsule and hour display consume the existing local seconds clock. WuWa glass honors the existing transparency slider, multiplied by theme intensity. Motion stepping uses `smoothRotation`, independently of Qt texture smoothing. Actual component checks cover noon/midnight, 12/24h, pause/resume and capsule scales 80/100/125; physical drag and multiple displays remain manual.

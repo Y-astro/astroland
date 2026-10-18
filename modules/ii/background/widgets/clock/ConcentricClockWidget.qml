@@ -32,6 +32,12 @@ AbstractBackgroundWidget {
     implicitHeight: 240 * contentScale
 
     // Config options with safe fallbacks
+    readonly property string cfgSkin: Config.ready ? (Config.options.background.widgets.concentric_clock.skin ?? "classic") : "classic"
+    readonly property bool isWuWa: cfgSkin === "wuwa" || cfgSkin === "chrono_resonator"
+    readonly property bool smoothMotion: isWuWa
+        ? (ResonanceTheme.motionNormal && !Appearance.reducedMotion)
+        : !Appearance.reducedMotion
+
     readonly property string cfgDialStyle: Config.ready ? (Config.options.background.widgets.concentric_clock.dialStyle ?? "concentric") : "concentric"
     readonly property string cfgFrameStyle: Config.ready ? (Config.options.background.widgets.concentric_clock.frameStyle ?? "none") : "none"
     readonly property bool cfgBoldFont: Config.ready ? (Config.options.background.widgets.concentric_clock.boldFont ?? false) : false
@@ -66,10 +72,18 @@ AbstractBackgroundWidget {
     readonly property real cfgBlurRadius: Math.max(0, Math.min(64, Config.ready ? (Config.options.background.widgets.concentric_clock.blurRadius ?? Config.options.background.widgets.blurRadius ?? 32) : 32))
     readonly property real cfgTransparency: Math.max(0.0, Math.min(1.0, Config.ready ? (Config.options.background.widgets.concentric_clock.transparency ?? 0.45) : 0.45))
 
-    readonly property color clockBgColor: root.cfgUseBlackBg ? Appearance.m3colors.m3shadow : Appearance.colors.colPrimaryContainer
-    readonly property color clockTextColor: root.cfgUseBlackBg ? WidgetColorScheme.textColorOnBg : Appearance.colors.colPrimary
-    readonly property color clockSubtextColor: root.cfgUseBlackBg ? WidgetColorScheme.subtextColorOnBg : ColorUtils.applyAlpha(root.clockTextColor, 0.85)
-    readonly property color clockAccentColor: root.cfgUseBlackBg ? WidgetColorScheme.accentColor : Appearance.colors.colOnPrimaryContainer
+    readonly property color clockBgColor: isWuWa
+        ? ResonanceTheme.colTealInk
+        : (root.cfgUseBlackBg ? Appearance.m3colors.m3shadow : Appearance.colors.colPrimaryContainer)
+    readonly property color clockTextColor: isWuWa
+        ? ResonanceTheme.textPrimary
+        : (root.cfgUseBlackBg ? WidgetColorScheme.textColorOnBg : Appearance.colors.colPrimary)
+    readonly property color clockSubtextColor: isWuWa
+        ? ResonanceTheme.textSecondary
+        : (root.cfgUseBlackBg ? WidgetColorScheme.subtextColorOnBg : ColorUtils.applyAlpha(root.clockTextColor, 0.85))
+    readonly property color clockAccentColor: isWuWa
+        ? ResonanceTheme.accentGold
+        : (root.cfgUseBlackBg ? WidgetColorScheme.accentColor : Appearance.colors.colOnPrimaryContainer)
 
     // Dynamic offset for sub-dials based on dialStyle to prevent overlapping numbers
     readonly property real dialInnerMargin: ((cfgDialStyle === "concentric" || cfgDialStyle === "inner_only" || cfgDialStyle === "full_dense") ? 0.08 : 0.02) + cfgSubdialMarginOffset
@@ -101,7 +115,7 @@ AbstractBackgroundWidget {
                 id: clockBgCircle
                 anchors.fill: parent
                 radius: width / 2
-                color: (root.cfgBlurRadius > 0 && root.wallpaperItem !== null) ? "transparent" : ColorUtils.applyAlpha(root.clockBgColor, 1.0 - root.cfgTransparency)
+                color: (root.cfgBlurRadius > 0 && root.wallpaperItem !== null) ? "transparent" : ColorUtils.applyAlpha(root.clockBgColor, (1.0 - root.cfgTransparency) * (root.isWuWa ? ResonanceTheme.intensity : 1.0))
                 clip: true
 
                 layer.enabled: true
@@ -124,8 +138,8 @@ AbstractBackgroundWidget {
                     blurRadius: root.cfgBlurRadius
                     trackX: root.x
                     trackY: root.y
-                    tint: root.clockBgColor
-                    tintOpacity: 1.0 - root.cfgTransparency
+                    tint: root.isWuWa ? ResonanceTheme.colTealInk : root.clockBgColor
+                    tintOpacity: (1.0 - root.cfgTransparency) * (root.isWuWa ? ResonanceTheme.intensity : 1.0)
                     visible: root.cfgBlurRadius > 0 && root.wallpaperItem !== null
                 }
 
@@ -186,6 +200,9 @@ AbstractBackgroundWidget {
                         anchors.fill: parent
                         rotateSeconds: root.cfgDialStyle === "concentric"
                         animationActive: root.live
+                        smoothRotation: root.smoothMotion
+                        currentSecond: localSystemClock.seconds
+                        currentMinute: localSystemClock.minutes
                         dialStyle: root.cfgDialStyle
                         showMinuteDot: root.cfgShowMinuteDot
                         boldFont: root.cfgBoldFont
@@ -195,6 +212,14 @@ AbstractBackgroundWidget {
                         subtextColor: root.clockSubtextColor
                         accentColor: root.clockAccentColor
                     }
+                }
+
+                // WuWa Chrono Resonator Outer Etched Ring & Focal Signature
+                ResonanceRing {
+                    anchors.fill: parent
+                    visible: root.isWuWa
+                    live: root.live
+                    minutePillVisible: root.cfgMinuteStyle !== "hide"
                 }
 
                 // Cookie Clock Big Hour Numbers overlay (Style 7: numbers)
@@ -299,6 +324,7 @@ AbstractBackgroundWidget {
                     anchors.centerIn: parent
                     shown: root.cfgShowHourText
                     sourceComponent: ConcentricHourDisplay {
+                        hour: localSystemClock.hours
                         baseWidth: clockContainer.width
                         use24h: root.cfgUse24h
                         boldFont: root.cfgBoldFont
@@ -322,9 +348,9 @@ AbstractBackgroundWidget {
                         boldFont: root.cfgBoldFont
                         textColor: root.clockTextColor
                         accentColor: root.clockAccentColor
-                        outlineColor: ColorUtils.applyAlpha(root.clockTextColor, 0.5)
-                        pillBg: root.cfgUseBlackBg ? WidgetColorScheme.pillBgColor : ColorUtils.applyAlpha(root.clockBgColor, 0.45)
-                        filled: !root.cfgUseBlackBg
+                        outlineColor: root.isWuWa ? ResonanceTheme.borderAccent : ColorUtils.applyAlpha(root.clockTextColor, 0.5)
+                        pillBg: root.isWuWa ? ResonanceTheme.bgGlassElevated : (root.cfgUseBlackBg ? WidgetColorScheme.pillBgColor : ColorUtils.applyAlpha(root.clockBgColor, 0.45))
+                        filled: root.isWuWa ? true : !root.cfgUseBlackBg
                         showSeconds: root.cfgDialStyle === "concentric" && root.cfgMinuteStyle === "pill_horizontal"
                         second: localSystemClock.seconds
                         minute: localSystemClock.minutes

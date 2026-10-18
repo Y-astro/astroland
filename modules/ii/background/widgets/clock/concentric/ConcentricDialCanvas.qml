@@ -15,6 +15,7 @@ Canvas {
     property real dialMarginOffset: 0.0
     property bool rotateSeconds: false
     property bool animationActive: true
+    property bool smoothRotation: true
 
     property color textColor: WidgetColorScheme.textColorOnBg
     property color subtextColor: WidgetColorScheme.subtextColorOnBg
@@ -33,6 +34,10 @@ Canvas {
             return;
         }
         if (!animationActive || !visible) {
+            return;
+        }
+        if (!smoothRotation) {
+            root.rotation = 90.0 - (root.currentSecond % 60) * 6.0;
             return;
         }
         root.rotation = 90.0 - (Date.now() % 60000) * 0.006;
@@ -58,6 +63,22 @@ Canvas {
         }
     }
 
+    onSmoothRotationChanged: {
+        if (rotateSeconds && animationActive && visible) {
+            resync();
+        }
+    }
+
+    onCurrentSecondChanged: {
+        if (root.dialStyle === "minimal_arc" || root.dialStyle === "full_pixel3")
+            root.requestPaint();
+        if (!smoothRotation && rotateSeconds && animationActive && visible) {
+            resync();
+        }
+    }
+
+    onCurrentMinuteChanged: requestPaint()
+
     Component.onCompleted: {
         if (rotateSeconds && animationActive && visible) {
             resync();
@@ -68,7 +89,7 @@ Canvas {
 
     FrameAnimation {
         id: frameAnim
-        running: root.rotateSeconds && root.animationActive && root.visible
+        running: root.rotateSeconds && root.animationActive && root.visible && root.smoothRotation
         onTriggered: {
             root.rotation = 90.0 - (Date.now() % 60000) * 0.006;
         }
