@@ -122,34 +122,76 @@ Canvas {
         if (measured.span > maxSpan && sepIdx !== -1) {
             var tempPart = trimmed.substring(0, sepIdx);
             var descPart = trimmed.substring(sepIdx + sep.length);
-            var descChars = splitGraphemes(descPart);
 
-            var fit = false;
-            // Shorten description character by character from the end with ellipsis
-            for (var len = descChars.length - 1; len >= 1; len--) {
-                var candidate = tempPart + sep + descChars.slice(0, len).join("") + "…";
-                var cChars = splitGraphemes(candidate);
-                var cMeasured = measureChars(cChars);
-                if (cMeasured.span <= maxSpan) {
-                    finalText = candidate;
-                    chars = cChars;
-                    measured = cMeasured;
-                    fit = true;
-                    shortened = true;
-                    break;
+            // 1. Canonical deterministic abbreviations for verbose weather conditions
+            var upperDesc = descPart.trim().toUpperCase();
+            var abbrevTable = {
+                "OVERCAST CLOUDS": ["OVERCAST"],
+                "CLEAR SKY": ["CLEAR"],
+                "SCATTERED CLOUDS": ["CLOUDY", "SCATTERED CLOUDS"],
+                "BROKEN CLOUDS": ["CLOUDY", "BROKEN CLOUDS"],
+                "FEW CLOUDS": ["FEW CLOUDS"],
+                "LIGHT INTENSITY SHOWER RAIN": ["LIGHT SHOWERS", "LIGHT RAIN"],
+                "HEAVY INTENSITY SHOWER RAIN": ["HEAVY SHOWERS", "HEAVY RAIN"],
+                "LIGHT INTENSITY DRIZZLE": ["LIGHT DRIZZLE", "DRIZZLE"],
+                "HEAVY INTENSITY DRIZZLE": ["HEAVY DRIZZLE", "DRIZZLE"],
+                "LIGHT INTENSITY RAIN": ["LIGHT RAIN"],
+                "HEAVY INTENSITY RAIN": ["HEAVY RAIN"],
+                "MODERATE RAIN": ["RAIN"],
+                "THUNDERSTORM WITH HEAVY DRIZZLE": ["THUNDERSTORM…", "T-STORM…"],
+                "THUNDERSTORM WITH LIGHT DRIZZLE": ["THUNDERSTORM…", "T-STORM…"],
+                "THUNDERSTORM WITH DRIZZLE": ["THUNDERSTORM…", "T-STORM…"],
+                "THUNDERSTORM WITH HEAVY RAIN": ["THUNDERSTORM…", "T-STORM…"],
+                "THUNDERSTORM WITH LIGHT RAIN": ["THUNDERSTORM…", "T-STORM…"],
+                "THUNDERSTORM WITH RAIN": ["THUNDERSTORM…", "T-STORM…"],
+                "LIGHT THUNDERSTORM": ["LIGHT T-STORM", "THUNDERSTORM"],
+                "HEAVY THUNDERSTORM": ["HEAVY T-STORM", "THUNDERSTORM"]
+            };
+
+            var candidates = [];
+            if (abbrevTable[upperDesc]) {
+                var abbrevs = abbrevTable[upperDesc];
+                for (var a = 0; a < abbrevs.length; a++) {
+                    candidates.push(tempPart + sep + abbrevs[a]);
                 }
             }
 
-            // If even 1 description character with ellipsis does not fit, keep temperature alone
-            if (!fit) {
-                var tempChars = splitGraphemes(tempPart);
-                var tMeasured = measureChars(tempChars);
-                if (tMeasured.span <= maxSpan) {
-                    finalText = tempPart;
-                    chars = tempChars;
-                    measured = tMeasured;
+            // 2. Word-boundary candidates with ellipsis for multi-word descriptions
+            var words = descPart.trim().split(/\s+/);
+            if (words.length > 1) {
+                for (var w = words.length - 1; w >= 1; w--) {
+                    var wordStem = words.slice(0, w).join(" ");
+                    candidates.push(tempPart + sep + wordStem + "…");
+                }
+            }
+
+            // 3. Sub-word character candidates (fallback for long single words or tight scales)
+            // Strictly avoids leaving an isolated single character or cutting words with < 3 characters
+            var descChars = splitGraphemes(descPart);
+            for (var len = descChars.length - 1; len >= 3; len--) {
+                var subStem = descChars.slice(0, len).join("").trim();
+                if (!subStem) continue;
+                var tokens = subStem.split(/\s+/);
+                if (tokens.length > 1 && tokens[tokens.length - 1].length <= 1) continue;
+                if (tokens.length === 1 && tokens[0].length < 3) continue;
+                candidates.push(tempPart + sep + subStem + "…");
+            }
+
+            // 4. Strict temperature priority fallback
+            candidates.push(tempPart);
+
+            var fit = false;
+            for (var c = 0; c < candidates.length; c++) {
+                var candStr = candidates[c];
+                var cChars = splitGraphemes(candStr);
+                var cMeasured = measureChars(cChars);
+                if (cMeasured.span <= maxSpan) {
+                    finalText = candStr;
+                    chars = cChars;
+                    measured = cMeasured;
                     fit = true;
-                    shortened = true;
+                    shortened = (candStr !== trimmed);
+                    break;
                 }
             }
         }
@@ -157,7 +199,11 @@ Canvas {
         // Fallback truncation if string still exceeds maxSpan (e.g. very long temp or battery string)
         if (measured.span > maxSpan) {
             for (var tLen = chars.length - 1; tLen >= 1; tLen--) {
-                var tCandidate = chars.slice(0, tLen).join("") + "…";
+                var tSub = chars.slice(0, tLen).join("").trim();
+                if (!tSub) continue;
+                var tTokens = tSub.split(/\s+/);
+                if (tTokens.length > 1 && tTokens[tTokens.length - 1].length <= 1) continue;
+                var tCandidate = tSub + "…";
                 var tcChars = splitGraphemes(tCandidate);
                 var tcMeasured = measureChars(tcChars);
                 if (tcMeasured.span <= maxSpan) {

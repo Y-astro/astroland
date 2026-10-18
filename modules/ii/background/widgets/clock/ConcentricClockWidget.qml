@@ -118,7 +118,10 @@ AbstractBackgroundWidget {
     readonly property string wuwaWeatherDesc: {
         var d = Weather.data?.description;
         if (d !== undefined && d !== null && String(d).trim() !== "") {
-            return String(d).trim().toUpperCase();
+            var raw = String(d).trim().toUpperCase();
+            if (raw === "OVERCAST CLOUDS") return "OVERCAST";
+            if (raw === "CLEAR SKY") return "CLEAR";
+            return raw;
         }
         return "";
     }
@@ -167,6 +170,7 @@ AbstractBackgroundWidget {
                 clip: true
 
                 layer.enabled: true
+                layer.smooth: true
                 layer.effect: OpacityMask {
                     maskSource: Rectangle {
                         width: clockBgCircle.width
@@ -291,6 +295,7 @@ AbstractBackgroundWidget {
                         && ((root.cfgDialStyle === "concentric" && root.cfgMinuteStyle === "pill_horizontal") || root.isWuWa)
 
                     layer.enabled: maskActive
+                    layer.smooth: true
                     layer.effect: OpacityMask {
                         maskSource: Canvas {
                             id: dialFadeMask
