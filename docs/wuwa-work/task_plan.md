@@ -7,7 +7,7 @@ Implement all five phases sequentially, verifying each before proceeding.
 - [x] Add reversible skin to the existing three resource cards.
 - [x] Add reversible Chrono Resonator to the existing concentric clock.
 - [x] Polish existing filler, Tacet mark and active media with motion gating.
-- [ ] Verify integration, performance and rollback; document evidence/limitations.
+- [x] Verify integration, performance and rollback; document evidence/limitations.
 
 Preserve pre-existing edits, ResourceUsage service, desktop visualizer governor,
 placement, blur, seconds capsule, media interactions and all legacy styles.

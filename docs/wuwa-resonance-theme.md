@@ -173,7 +173,7 @@ Persisted in `~/.config/illogical-impulse/config.json` under `background.widgets
 
 ### Component Architecture
 
-- **Skin Switching**: Controlled via conditional `Loader`s in `ResourcesWidget.qml`. When `style` is `"classic"`, the original `StatCard` and `TempStatCard` are rendered with zero overhead. When `style` is `"wuwa"` (or global theme is enabled and style is not explicitly `"classic"`), `ResonanceStatCard.qml` is loaded.
+- **Skin Switching**: Conditional `Loader`s retain the original `StatCard` and `TempStatCard` for `"classic"`. Only an explicit `style: "wuwa"` loads `ResonanceStatCard.qml`; the global bar/media toggle does not select desktop skins.
 - **Card 1: CPU Resonance**:
   - Accurate finite clamped CPU percentage (`Math.round(cpuUsage * 100) + "%"`).
   - Frequency metadata readout.
@@ -265,7 +265,7 @@ Phase 4 harmonizes top-bar frequency ribbons (`modules/ii/bar/IslandFiller.qml`)
    - **Theme Palette Integration**: When `ResonanceTheme.enabled` is active, waves and stream modes transition to Jinzhou antique gold (`accentGold`), secondary sage (`borderSubtle`), and dark teal backing (`colTealInk`). When disabled, original Matugen colors (`colPrimary`, `colSecondary`, `colTertiary`) are preserved.
    - **Crowding Adaptation**: Opacity scales gracefully (`gapOpacity`) in narrow gaps (<140px) to prevent visual clutter between floating islands, while tapering to zero at pill boundaries without overlapping active pills.
    - **Performance & Motion Gating**:
-     - Reduced/off motion or screen lock freezes the decorative clock (`running: false`), maintaining static ribbons with 0 CPU overhead.
+     - Reduced/off motion or screen lock stops the decorative timer. Motion-off also holds shader audio uniforms at zero.
      - Paced clock driver: ~30 fps under real audio playback (`interval: 33ms`), 12 fps when idle (`interval: 83ms`), and ~8 fps in ambient mode (`interval: 125ms`), eliminating the legacy 60 fps idle drain.
 
 2. **Small Bar Tacet Mark Visualizer (`modules/ii/bar/Visualizer.qml`)**:
