@@ -255,12 +255,37 @@ The clock skin is exposed natively under:
 
 ---
 
-## 9. Implementation Rollback
+## 9. Phase 4 — Harmonic Channel & Bar Frequency Polish
+
+Phase 4 harmonizes top-bar frequency ribbons (`modules/ii/bar/IslandFiller.qml`), the small bar Tacet Mark visualizer (`modules/ii/bar/Visualizer.qml`), and active bar media (`modules/ii/bar/Media.qml`) with the Jinzhou Resonance theme while dramatically reducing compositor load:
+
+### Component Architecture & Enhancements
+
+1. **Harmonic Channel Gap Ribbons (`modules/ii/bar/IslandFiller.qml`)**:
+   - **Theme Palette Integration**: When `ResonanceTheme.enabled` is active, waves and stream modes transition to Jinzhou antique gold (`accentGold`), secondary sage (`borderSubtle`), and dark teal backing (`colTealInk`). When disabled, original Matugen colors (`colPrimary`, `colSecondary`, `colTertiary`) are preserved.
+   - **Crowding Adaptation**: Opacity scales gracefully (`gapOpacity`) in narrow gaps (<140px) to prevent visual clutter between floating islands, while tapering to zero at pill boundaries without overlapping active pills.
+   - **Performance & Motion Gating**:
+     - Reduced/off motion or screen lock freezes the decorative clock (`running: false`), maintaining static ribbons with 0 CPU overhead.
+     - Paced clock driver: ~30 fps under real audio playback (`interval: 33ms`), 12 fps when idle (`interval: 83ms`), and ~8 fps in ambient mode (`interval: 125ms`), eliminating the legacy 60 fps idle drain.
+
+2. **Small Bar Tacet Mark Visualizer (`modules/ii/bar/Visualizer.qml`)**:
+   - **Elimination of Unconditional Animations**: Removed the 60 fps `FrameAnimation` and 4 infinite `SequentialAnimation` loops.
+   - **Audio-Reactive Bounded Motion**: Active music playback animates the shader at a capped ~30 fps (`interval: 33ms`), modulating vertical needle flex and aura glow in direct response to `audioEnergy` from `GlobalStates.visualizerPoints`.
+   - **Ambient Mode Idle Breath**: In ambient mode (`motionAmbient`), a low-rate ~8 fps timer (`interval: 125ms`) gently breathes without compositor pressure.
+   - **Static Silhouette**: Under reduced motion, screen lock, invisibility, or normal idle without audio, all motion freezes into an elegant static silhouette with zero timer activity.
+   - **No Time Leaps**: Shader time increments by fixed delta (`+0.033`), preventing visual jumps when music starts or stops.
+
+3. **Active Legacy Bar Media Polish (`modules/ii/bar/Media.qml`)**:
+   - Connects `MprisController.activePlayer?.isPlaying` directly to `Local.Visualizer`, ensuring immediate visual reactivity to playback state changes.
+   - All MPRIS interactions, popups, and click/scroll handlers remain unchanged.
+
+---
+
+## 10. Implementation Rollback
 
 If rollback is needed:
-1. Revert `Config.options.background.widgets.concentric_clock.skin = "classic"` and `resources.style = "classic"` in Settings or `config.json`.
+1. Revert `ResonanceTheme.enabled = false` and reset widget skins in Settings or `config.json`.
 2. Inspect `git status` and `git diff` first to ensure uncommitted work in other files is not inadvertently overwritten.
-3. If restoring files from backup, restore only the owned Phase 1, 2, and 3 files (`modules/common/Config.qml`, `modules/ii/background/widgets/clock/ConcentricClockWidget.qml`, `modules/ii/background/widgets/clock/concentric/ConcentricDialCanvas.qml`, `modules/settings/configs/widgets/DesktopConcentricClockConfig.qml`, `modules/ii/background/widgets/resources/ResourcesWidget.qml`, `modules/settings/configs/widgets/DesktopResourceStylesConfig.qml`), and remove `modules/ii/background/widgets/clock/concentric/ResonanceRing.qml` and `modules/ii/background/widgets/resources/ResonanceStatCard.qml`, avoiding blanket `git restore .`.
+3. If restoring files from backup, restore only the owned Phase 1, 2, 3, and 4 files, and remove newly created component files.
 
-
-Clock integration checks: the dial, capsule and hour display consume the existing local seconds clock. WuWa glass honors the existing transparency slider, multiplied by theme intensity. Motion stepping uses `smoothRotation`, independently of Qt texture smoothing. Actual component checks cover noon/midnight, 12/24h, pause/resume and capsule scales 80/100/125; physical drag and multiple displays remain manual.
+Bar integration: non-finite/negative samples are quiet; motion-off freezes audio uniforms as well as time. Both drivers stop with their host window hidden. Parent actual-source tests cover these gates and all nine filler selections; native rendering/performance results are in the validation report.

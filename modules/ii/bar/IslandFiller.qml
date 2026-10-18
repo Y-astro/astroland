@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Window
 import Quickshell
 import qs
 import qs.services
@@ -21,10 +22,10 @@ Item {
     readonly property string fillerStyle: Config.options?.bar?.islandFiller?.style ?? "waves"
     readonly property real fillerOpacity: Config.options?.bar?.islandFiller?.opacity ?? 0.85
 
-    // Matugen theme colors
-    readonly property color primaryColor: Appearance.colors.colPrimary
-    readonly property color secondaryColor: Appearance.colors.colSecondary
-    readonly property color tertiaryColor: Appearance.colors.colTertiary
+    // Theme colors (ResonanceTheme when enabled, fallback to Matugen Appearance.colors)
+    readonly property color primaryColor: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
+    readonly property color secondaryColor: ResonanceTheme.enabled ? ResonanceTheme.borderSubtle : Appearance.colors.colSecondary
+    readonly property color tertiaryColor: ResonanceTheme.enabled ? ResonanceTheme.colTealInk : Appearance.colors.colTertiary
     readonly property vector4d vecColPrimary: Qt.vector4d(primaryColor.r, primaryColor.g, primaryColor.b, 1.0)
     readonly property vector4d vecColSecondary: Qt.vector4d(secondaryColor.r, secondaryColor.g, secondaryColor.b, 1.0)
     readonly property vector4d vecColTertiary: Qt.vector4d(tertiaryColor.r, tertiaryColor.g, tertiaryColor.b, 1.0)
@@ -35,18 +36,48 @@ Item {
         if (!pts || pts.length === 0) return 0;
         let sum = 0;
         const len = Math.min(pts.length, 16);
-        for (let i = 0; i < len; i++) sum += (pts[i] || 0);
+        for (let i = 0; i < len; i++)
+            sum += Number.isFinite(pts[i]) ? Math.max(0, pts[i]) : 0;
         return Math.min(1.0, (sum / len) / 60.0);
     }
     readonly property bool hasAudio: audioEnergy > 0.05
+    readonly property real visualEnergy: root.motionOff ? 0 : root.audioEnergy
+    readonly property bool visualHasAudio: root.visualEnergy > 0.05
 
-    // Clock driver: paced at 30 fps idle, 60 fps under audio playback
+    // Opacity with crowding and audio modulation
+    readonly property real baseOpacity: {
+        if (!ResonanceTheme.enabled) return root.fillerOpacity;
+        const idleLevel = 0.45 * ResonanceTheme.intensity;
+        const activeLevel = (0.45 + 0.40 * root.visualEnergy) * ResonanceTheme.intensity;
+        return root.fillerOpacity * (root.visualHasAudio ? activeLevel : idleLevel);
+    }
+
+    function gapOpacity(gapW) {
+        if (!ResonanceTheme.enabled) return root.fillerOpacity;
+        const crowdFactor = Math.min(1.0, Math.max(0.25, (gapW - 12) / 120.0));
+        return root.baseOpacity * crowdFactor;
+    }
+
+    // Motion and timer gating: pause when locked/invisible/reduced-motion; 30 fps audio, 12 fps idle, ~8 fps ambient
+    readonly property bool motionOff: Appearance.reducedMotion || (ResonanceTheme.enabled && ResonanceTheme.motionOff)
+    readonly property bool motionAmbient: ResonanceTheme.enabled && ResonanceTheme.motionAmbient && !Appearance.reducedMotion
+    readonly property bool hasActiveGaps: root.gap1Active || root.gap2Active || root.spanActive
+    readonly property bool isAnimatedMode: root.fillerStyle !== "bridge" && root.fillerStyle !== "none"
+
+    readonly property int clockInterval: {
+        if (root.motionAmbient) return 125; // ~8 fps in ambient mode
+        return root.hasAudio ? 33 : 83; // 30 fps under audio, 12 fps when idle
+    }
+
+    // Clock driver
     property real time: 0
     Timer {
         id: clock
-        interval: root.hasAudio ? 16 : 33
+        interval: root.clockInterval
         repeat: true
-        running: root.visible && root.fillerEnabled && (root.fillerStyle !== "bridge" && root.fillerStyle !== "none")
+        running: root.visible && root.opacity > 0
+            && (!root.Window.window || root.Window.window.visible)
+            && !GlobalStates.screenLocked && !root.motionOff && root.fillerEnabled && root.hasActiveGaps && root.isAnimatedMode
         onTriggered: root.time += interval / 1000.0
     }
 
@@ -97,10 +128,10 @@ Item {
         y: 0
         width: root.gap1W
         height: parent.height
-        opacity: root.fillerOpacity
+        opacity: root.gapOpacity(root.gap1W)
 
         property real time: root.time
-        property real aud: root.audioEnergy
+        property real aud: root.visualEnergy
         property real gapX: root.gap1X
         property real gapW: width
         property real gapH: height
@@ -120,10 +151,10 @@ Item {
         y: 0
         width: root.gap2W
         height: parent.height
-        opacity: root.fillerOpacity
+        opacity: root.gapOpacity(root.gap2W)
 
         property real time: root.time
-        property real aud: root.audioEnergy
+        property real aud: root.visualEnergy
         property real gapX: root.gap2X
         property real gapW: width
         property real gapH: height
@@ -143,10 +174,10 @@ Item {
         y: 0
         width: root.spanW
         height: parent.height
-        opacity: root.fillerOpacity
+        opacity: root.gapOpacity(root.spanW)
 
         property real time: root.time
-        property real aud: root.audioEnergy
+        property real aud: root.visualEnergy
         property real gapX: root.spanX
         property real gapW: width
         property real gapH: height
@@ -169,10 +200,10 @@ Item {
         y: 0
         width: root.gap1W
         height: parent.height
-        opacity: root.fillerOpacity
+        opacity: root.gapOpacity(root.gap1W)
 
         property real time: root.time
-        property real aud: root.audioEnergy
+        property real aud: root.visualEnergy
         property real gapX: root.gap1X
         property real gapW: width
         property real gapH: height
@@ -190,10 +221,10 @@ Item {
         y: 0
         width: root.gap2W
         height: parent.height
-        opacity: root.fillerOpacity
+        opacity: root.gapOpacity(root.gap2W)
 
         property real time: root.time
-        property real aud: root.audioEnergy
+        property real aud: root.visualEnergy
         property real gapX: root.gap2X
         property real gapW: width
         property real gapH: height
@@ -211,10 +242,10 @@ Item {
         y: 0
         width: root.spanW
         height: parent.height
-        opacity: root.fillerOpacity
+        opacity: root.gapOpacity(root.spanW)
 
         property real time: root.time
-        property real aud: root.audioEnergy
+        property real aud: root.visualEnergy
         property real gapX: root.spanX
         property real gapW: width
         property real gapH: height
@@ -245,7 +276,7 @@ Item {
             width: parent.width - 20
             height: 1
             color: root.primaryColor
-            opacity: root.hasAudio ? 0.28 : 0.08
+            opacity: root.visualHasAudio ? 0.28 : 0.08
             visible: width > 10
             Behavior on opacity { NumberAnimation { duration: 400 } }
         }
@@ -268,7 +299,7 @@ Item {
             width: parent.width - 20
             height: 1
             color: root.primaryColor
-            opacity: root.hasAudio ? 0.28 : 0.08
+            opacity: root.visualHasAudio ? 0.28 : 0.08
             visible: width > 10
             Behavior on opacity { NumberAnimation { duration: 400 } }
         }
@@ -291,7 +322,7 @@ Item {
             width: parent.width - 20
             height: 1
             color: root.primaryColor
-            opacity: root.hasAudio ? 0.28 : 0.08
+            opacity: root.visualHasAudio ? 0.28 : 0.08
             visible: width > 10
             Behavior on opacity { NumberAnimation { duration: 400 } }
         }

@@ -137,6 +137,7 @@ Item {
         vertical: root.vertical
         isMaterial: root.isMaterial
         mirrored: root.mirrored
+        isPlaying: root.isPlaying
         visualizerWidth: root.visualizerWidth
         visualizerHeight: root.visualizerHeight
     }
