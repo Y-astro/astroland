@@ -6,6 +6,7 @@ IMPORTED_PRESETS_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/quickshell/presets_importe
 CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/illogical-impulse/config.json"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SWITCHWALL="$SCRIPT_DIR/colors/switchwall.sh"
+BACKUP_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/ii/preset-backups"
 
 mkdir -p "$LOCAL_PRESETS_DIR" "$ONLINE_PRESETS_DIR" "$IMPORTED_PRESETS_DIR"
 
@@ -24,6 +25,7 @@ case "$action" in
     delete) action="remove" ;;
     export) action="export-zip" ;;
     import) action="import-zip" ;;
+    undo) action="revert" ;;
 esac
 
 online=false
@@ -109,7 +111,7 @@ if [ "$action" = "import-zip" ]; then
     exit 0
 fi
 
-if [ -z "$name" ]; then
+if [ "$action" != "revert" ] && [ -z "$name" ]; then
     echo "Error: missing preset name" >&2
     exit 1
 fi
@@ -124,7 +126,11 @@ fi
 
 case "$action" in
     save)
-        jq "$BLACKLIST_FILTER" "$CONFIG_FILE" > "$PRESETS_DIR/${name}.json"
+        if $online || $imported; then
+            jq "$BLACKLIST_FILTER" "$CONFIG_FILE" > "$PRESETS_DIR/${name}.json"
+        else
+            jq 'del(._presetMeta)' "$CONFIG_FILE" > "$PRESETS_DIR/${name}.json"
+        fi
         if [ -n "$description" ]; then
             jq --arg desc "$description" '._presetMeta = {"description": $desc}' \
                 "$PRESETS_DIR/${name}.json" > "$PRESETS_DIR/${name}.json.tmp" \
@@ -153,18 +159,136 @@ case "$action" in
         fi
         echo "Removed preset $name"
         ;;
+    revert)
+        if [ ! -d "$BACKUP_DIR" ]; then
+            echo "Error: no backups found" >&2
+            exit 1
+        fi
+        snapshot=$(find "$BACKUP_DIR" -maxdepth 1 -name "*-config.json" -type f 2>/dev/null | sort | tail -n1)
+        if [ -z "$snapshot" ] || [ ! -f "$snapshot" ]; then
+            echo "Error: no revert snapshot found" >&2
+            exit 1
+        fi
+        if ! jq -e 'type == "object"' "$snapshot" >/dev/null 2>&1; then
+            echo "Error: backup snapshot is corrupted" >&2
+            exit 1
+        fi
+        tmp="${CONFIG_FILE}.tmp.$$"
+        if ! cp "$snapshot" "$tmp"; then
+            echo "Error: failed to stage restored config" >&2
+            exit 1
+        fi
+        if ! mv "$tmp" "$CONFIG_FILE"; then
+            rm -f "$tmp"
+            echo "Error: failed to atomically restore config" >&2
+            exit 1
+        fi
+        bname=$(basename "$snapshot" -config.json)
+        if [[ "$bname" =~ __act__(.*)$ ]]; then
+            prev_act="${BASH_REMATCH[1]}"
+            if [ -n "$prev_act" ] && [ "$prev_act" != "none" ]; then
+                echo "$prev_act" > "$LOCAL_PRESETS_DIR/.active"
+            else
+                rm -f "$LOCAL_PRESETS_DIR/.active"
+            fi
+        else
+            rm -f "$LOCAL_PRESETS_DIR/.active"
+        fi
+        rm -f "$snapshot"
+        "$SWITCHWALL" --noswitch 2>/dev/null || true
+        echo "Reverted configuration"
+        ;;
     apply)
         preset_file="$PRESETS_DIR/${name}.json"
         if [ ! -f "$preset_file" ]; then
             echo "Error: preset not found: $name" >&2
             exit 1
         fi
+        if ! jq -e 'type == "object"' "$preset_file" >/dev/null 2>&1; then
+            echo "Error: preset is not a valid JSON object" >&2
+            exit 1
+        fi
+        if [ -f "$SCRIPT_DIR/presets_helper.py" ]; then
+            compat_json=$(python3 "$SCRIPT_DIR/presets_helper.py" compat "$preset_file" 2>/dev/null || true)
+            if [ -n "$compat_json" ]; then
+                is_ok=$(echo "$compat_json" | jq -r 'if has("ok") then .ok else true end' 2>/dev/null || echo "true")
+                if [ "$is_ok" = "false" ]; then
+                    reason=$(echo "$compat_json" | jq -r '.reason // "This preset was made for a newer version of the shell."' 2>/dev/null)
+                    echo "Error: $reason" >&2
+                    exit 1
+                fi
+            fi
+        fi
+
+        if ! mkdir -p "$BACKUP_DIR" 2>/dev/null || [ ! -d "$BACKUP_DIR" ] || [ ! -w "$BACKUP_DIR" ]; then
+            echo "Error: cannot write to backup directory: $BACKUP_DIR" >&2
+            exit 1
+        fi
+
+        prev_active="none"
+        if [ -f "$LOCAL_PRESETS_DIR/.active" ]; then
+            prev_active=$(cat "$LOCAL_PRESETS_DIR/.active" 2>/dev/null || echo "none")
+            [ -z "$prev_active" ] && prev_active="none"
+        fi
+
+        if ! $online && ! $imported; then
+            if [ "$prev_active" != "none" ] && [ "$prev_active" != "$name" ] && [ -f "$LOCAL_PRESETS_DIR/${prev_active}.json" ]; then
+                desc=$(jq -r '._presetMeta.description // empty' "$LOCAL_PRESETS_DIR/${prev_active}.json" 2>/dev/null || true)
+                jq --arg desc "$desc" 'del(._presetMeta) + (if $desc != "" then {._presetMeta: {description: $desc}} else {} end)' "$CONFIG_FILE" > "$LOCAL_PRESETS_DIR/${prev_active}.json.tmp" 2>/dev/null && mv "$LOCAL_PRESETS_DIR/${prev_active}.json.tmp" "$LOCAL_PRESETS_DIR/${prev_active}.json"
+                cur_w=$(jq -r '.background.wallpaperPath // empty' "$CONFIG_FILE" 2>/dev/null)
+                cur_w="${cur_w/\$HOME/$HOME}"
+                if [ -n "$cur_w" ] && [ -f "$cur_w" ]; then
+                    wext="${cur_w##*.}"
+                    cp -L "$cur_w" "$LOCAL_PRESETS_DIR/${prev_active}.${wext}" 2>/dev/null || true
+                fi
+            fi
+        fi
+
+        ts=$(date +%s%N 2>/dev/null || date +%s)
+        snapshot="$BACKUP_DIR/${ts}__act__${prev_active}-config.json"
+        if ! cp -p "$CONFIG_FILE" "$snapshot" 2>/dev/null; then
+            echo "Error: failed to create config backup" >&2
+            exit 1
+        fi
+        chmod 600 "$snapshot" 2>/dev/null || true
+
         tmp=$(mktemp)
-        jq "$BLACKLIST_FILTER" "$preset_file" > "$tmp"
-        sed -i "s|\\\$HOME|$HOME|g" "$tmp"
-        jq -s '.[0] * .[1] | del(._presetMeta)' "$CONFIG_FILE" "$tmp" > "${CONFIG_FILE}.tmp" && mv "${CONFIG_FILE}.tmp" "$CONFIG_FILE"
+        sed "s|\\\$HOME|$HOME|g" "$preset_file" > "$tmp"
+        stage_file="${CONFIG_FILE}.tmp.$$"
+
+        if $online || $imported; then
+            filtered=$(mktemp)
+            jq "$BLACKLIST_FILTER" "$tmp" > "$filtered" 2>/dev/null
+            if ! jq -s '.[0] * .[1] | del(._presetMeta)' "$CONFIG_FILE" "$filtered" > "$stage_file" 2>/dev/null; then
+                rm -f "$tmp" "$filtered" "$stage_file" "$snapshot"
+                echo "Error: failed to merge preset" >&2
+                exit 1
+            fi
+            rm -f "$filtered"
+        else
+            if ! jq -s '
+              .[0] as $cfg | .[1] as $pre |
+              ($pre | del(._presetMeta)) as $cleanPre |
+              ($cfg * $cleanPre) |
+              .appearance.wuwaTheme //= {enabled: false, intensity: 0.85, motionMode: "normal", paletteMode: "fixed"} |
+              .background.widgets.concentric_clock.skin //= "classic" |
+              .background.widgets.resources.style //= "classic" |
+              if ($cleanPre | has("background")) and ($cleanPre.background | has("activeWidgets")) then .background.activeWidgets = $cleanPre.background.activeWidgets else . end
+            ' "$CONFIG_FILE" "$tmp" > "$stage_file" 2>/dev/null; then
+                rm -f "$tmp" "$stage_file" "$snapshot"
+                echo "Error: failed to merge local preset" >&2
+                exit 1
+            fi
+        fi
         rm -f "$tmp"
-        wall=$(jq -r '.background.wallpaperPath // empty' "$CONFIG_FILE")
+
+        if ! mv "$stage_file" "$CONFIG_FILE"; then
+            rm -f "$stage_file" "$snapshot"
+            echo "Error: failed to update config" >&2
+            exit 1
+        fi
+
+        wall=$(jq -r '.background.wallpaperPath // empty' "$CONFIG_FILE" 2>/dev/null)
         if [ -z "$wall" ] || [ ! -f "$wall" ]; then
             for ext in png jpg jpeg webp gif mp4; do
                 if [ -f "$PRESETS_DIR/${name}.${ext}" ]; then
@@ -173,8 +297,9 @@ case "$action" in
                 fi
             done
         fi
+
         echo "$name" > "$LOCAL_PRESETS_DIR/.active"
-        "$SWITCHWALL" --noswitch
+        "$SWITCHWALL" --noswitch 2>/dev/null || true
         echo "Applied preset $name"
         ;;
     export-zip)
