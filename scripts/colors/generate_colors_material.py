@@ -2,6 +2,7 @@
 import argparse
 import math
 import json
+import os
 from PIL import Image
 from materialyoucolor.quantize import QuantizeCelebi
 from materialyoucolor.score.score import Score
@@ -24,6 +25,9 @@ parser.add_argument('--harmonize_threshold', type=float , default=100, help='(0-
 parser.add_argument('--term_fg_boost', type=float , default=0.35, help='Make terminal foreground more different from the background')
 parser.add_argument('--blend_bg_fg', action='store_true', default=False, help='Shift terminal background or foreground towards accent')
 parser.add_argument('--cache', type=str, default=None, help='file path to store the generated color')
+parser.add_argument('--all-previews', type=str, default=None, help='file path to store all scheme preview colors JSON')
+parser.add_argument('--request-token', type=str, default=None, help='file path to stale-write guard token')
+parser.add_argument('--request-value', type=str, default=None, help='expected token value for stale-write guard')
 parser.add_argument('--debug', action='store_true', default=False, help='debug mode')
 args = parser.parse_args()
 
@@ -86,6 +90,63 @@ if args.path is not None:
 elif args.color is not None:
     argb = hex_to_argb(args.color)
     hct = Hct.from_int(argb)
+
+if args.all_previews:
+    should_write = True
+    if args.request_token is not None and args.request_value is not None:
+        if os.path.exists(args.request_token):
+            try:
+                with open(args.request_token, 'r') as tf:
+                    tok = tf.read().strip()
+                if tok and tok != str(args.request_value).strip():
+                    should_write = False
+            except Exception:
+                pass
+    if should_write:
+        from materialyoucolor.scheme.scheme_content import SchemeContent
+        from materialyoucolor.scheme.scheme_expressive import SchemeExpressive
+        from materialyoucolor.scheme.scheme_fidelity import SchemeFidelity
+        from materialyoucolor.scheme.scheme_fruit_salad import SchemeFruitSalad
+        from materialyoucolor.scheme.scheme_monochrome import SchemeMonochrome
+        from materialyoucolor.scheme.scheme_neutral import SchemeNeutral
+        from materialyoucolor.scheme.scheme_rainbow import SchemeRainbow
+        from materialyoucolor.scheme.scheme_tonal_spot import SchemeTonalSpot
+        from materialyoucolor.scheme.scheme_vibrant import SchemeVibrant
+
+        scheme_classes = {
+            "scheme-content": SchemeContent,
+            "scheme-tonal-spot": SchemeTonalSpot,
+            "scheme-fidelity": SchemeFidelity,
+            "scheme-intense": SchemeFidelity,
+            "scheme-vibrant": SchemeVibrant,
+            "scheme-fruit-salad": SchemeFruitSalad,
+            "scheme-expressive": SchemeExpressive,
+            "scheme-rainbow": SchemeRainbow,
+            "scheme-neutral": SchemeNeutral,
+            "scheme-monochrome": SchemeMonochrome
+        }
+
+        auto_cls = SchemeNeutral if hct.chroma < 20 else SchemeTonalSpot
+        auto_inst = auto_cls(hct, darkmode, 0.0)
+
+        def extract_preview(s):
+            return {
+                "primary": rgba_to_hex(MaterialDynamicColors.primary.get_hct(s).to_rgba()),
+                "primary_container": rgba_to_hex(MaterialDynamicColors.primaryContainer.get_hct(s).to_rgba()),
+                "secondary": rgba_to_hex(MaterialDynamicColors.secondary.get_hct(s).to_rgba()),
+                "tertiary": rgba_to_hex(MaterialDynamicColors.tertiary.get_hct(s).to_rgba())
+            }
+
+        all_data = {
+            "scheme-auto": extract_preview(auto_inst)
+        }
+        for sname, scls in scheme_classes.items():
+            all_data[sname] = extract_preview(scls(hct, darkmode, 0.0))
+
+        out_path = os.path.abspath(args.all_previews)
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+        with open(out_path, 'w') as pf:
+            json.dump(all_data, pf, indent=2)
 
 if args.scheme == 'scheme-fruit-salad':
     from materialyoucolor.scheme.scheme_fruit_salad import SchemeFruitSalad as Scheme

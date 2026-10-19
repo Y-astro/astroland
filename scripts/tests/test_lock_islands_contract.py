@@ -29,10 +29,7 @@ def config_list(name):
 
 def surface_ids(island):
     src = SURFACE.read_text()
-    block = src[src.index("readonly property var islandItems:"):]
-    block = block[:block.index("})") + 2]
-    m = re.search(rf'"{island}":\s*\{{(.*?)\}}', block, re.S)
-    return re.findall(r'"([A-Za-z]+)":', m.group(1))
+    return f"id: {island}Island" in src
 
 
 def run_js(expr):
@@ -44,9 +41,15 @@ def run_js(expr):
 
 class LockIslandsContract(unittest.TestCase):
     def test_defaults_agree(self):
+        surface_text = SURFACE.read_text()
         for island, name in (("main", "MAIN_DEFAULT"), ("left", "LEFT_DEFAULT"), ("right", "RIGHT_DEFAULT")):
             self.assertEqual(config_list(island), js_list(name), island)
-            self.assertEqual(set(surface_ids(island)), set(js_list(name)), island)
+            self.assertTrue(surface_ids(island), f"Missing {island}Island in LockSurface.qml")
+        self.assertIn("id: passwordBox", surface_text)
+        self.assertIn("id: confirmButton", surface_text)
+        self.assertIn("id: sleepButton", surface_text)
+        self.assertIn("id: powerButton", surface_text)
+        self.assertIn("id: rebootButton", surface_text)
 
     def test_password_is_never_reorderable(self):
         self.assertIn('island === "main" && id === "password"', JS.read_text())

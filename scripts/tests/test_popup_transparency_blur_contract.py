@@ -4,12 +4,16 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 APPEARANCE_PATH = ROOT / "modules" / "common" / "Appearance.qml"
-RULES_LUA_PATH = Path("/home/pedro/.config/hypr/hyprland/rules.lua")
+HYPR_BLUR_JS_PATH = ROOT / "modules" / "common" / "HyprlandBlur.js"
+RULES_LUA_PATH = Path.home() / ".config/hypr/hyprland/rules.lua"
+if not RULES_LUA_PATH.exists():
+    RULES_LUA_PATH = Path("/home/pedro/.config/hypr/hyprland/rules.lua")
 
 
 class PopupTransparencyBlurContract(unittest.TestCase):
     def setUp(self):
         self.appearance_text = APPEARANCE_PATH.read_text(encoding="utf-8")
+        self.hypr_blur_text = HYPR_BLUR_JS_PATH.read_text(encoding="utf-8")
         if RULES_LUA_PATH.exists():
             self.rules_lua_text = RULES_LUA_PATH.read_text(encoding="utf-8")
         else:
@@ -20,22 +24,24 @@ class PopupTransparencyBlurContract(unittest.TestCase):
         self.assertIn("readonly property real popupIgnoreAlpha:", self.appearance_text)
 
     def test_appearance_defines_push_and_script_functions(self):
-        self.assertIn("function getLayerRulesScript(): string", self.appearance_text)
-        self.assertIn("function pushHyprlandLayerRules()", self.appearance_text)
+        self.assertIn("readonly property string blurConfigScript:", self.appearance_text)
+        self.assertIn("readonly property string backgroundWidgetsRules:", self.appearance_text)
+        self.assertIn("HyprlandBlur.buildScript(", self.appearance_text)
+        self.assertIn("function buildScript(size, options)", self.hypr_blur_text)
 
     def test_popup_blur_conditional_logic(self):
-        self.assertIn("if (root.popupBlurEnabled)", self.appearance_text)
-        self.assertIn("blur = false, blur_popups = false", self.appearance_text)
+        self.assertIn("Config.options?.appearance?.transparency?.enable", self.appearance_text)
+        self.assertIn("Config.options?.appearance?.transparency?.popups", self.appearance_text)
+        self.assertIn("popups: booleanValue(blur.popups", self.hypr_blur_text)
+        self.assertIn("popups_ignorealpha: numberInRange(", self.hypr_blur_text)
 
     def test_transparency_connections_exist(self):
-        self.assertIn("onPopupBlurEnabledChanged: root.pushHyprlandLayerRules()", self.appearance_text)
-        self.assertIn("Connections", self.appearance_text)
-        self.assertIn("function onPopupsChanged() { root.pushHyprlandLayerRules(); }", self.appearance_text)
-        self.assertIn("function onEnableChanged() { root.pushHyprlandLayerRules(); }", self.appearance_text)
+        self.assertIn("readonly property bool popupBlurEnabled: (Config.options?.appearance?.transparency?.enable ?? false) && (Config.options?.appearance?.transparency?.popups ?? false)", self.appearance_text)
+        self.assertIn("readonly property real popupIgnoreAlpha: Math.min(root.ignoreAlpha, Math.max(0, 1 - root.backgroundTransparency - 0.01))", self.appearance_text)
 
     def test_no_forbidden_borders_introduced(self):
         # Ensure our changes did not introduce border.width into Appearance.qml
-        lines = [line for line in self.appearance_text.splitlines() if "getLayerRulesScript" in line or "popupBlur" in line]
+        lines = [line for line in self.appearance_text.splitlines() if "blurConfigScript" in line or "popupBlur" in line]
         for line in lines:
             self.assertNotIn("border.width", line)
 
