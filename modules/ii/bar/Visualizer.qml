@@ -60,21 +60,65 @@ Item {
     readonly property bool ambientRunning: canAnimate && motionAmbient
 
     property real ambientPhase: 0.0
+    property real phaseTime: 0.0
+    property real smoothEnergy: 0.0
+
+    function advanceMotion(dt) {
+        root.phaseTime += dt;
+        const twoPi = 2.0 * Math.PI;
+        const pBob = root.phaseTime * (twoPi / 3.6);
+        const pY = root.phaseTime * (twoPi / 3.0);
+        const pX = root.phaseTime * (twoPi / 4.0);
+        const pGlow = root.phaseTime * (twoPi / 2.8);
+
+        const idleBob = -1.5 * Math.sin(pBob);
+        const idleScaleY = 1.0 + 0.08 * Math.sin(pY);
+        const idleScaleX = 1.0 - 0.04 * Math.sin(pX);
+        const idleGlow = 0.28 + 0.14 * Math.sin(pGlow);
+
+        const targetEnergy = root.hasAudio ? root.audioEnergy : 0.0;
+        root.smoothEnergy += (targetEnergy - root.smoothEnergy) * Math.min(1.0, dt * 10.0);
+        const energy = root.smoothEnergy;
+
+        container.anchors.verticalCenterOffset = idleBob * (1.0 - energy * 0.5) - 2.0 * energy;
+        breathScale.yScale = idleScaleY + 0.08 * energy;
+        breathScale.xScale = idleScaleX - 0.04 * energy;
+        auraBlur.opacity = Math.min(0.85, idleGlow + 0.30 * energy);
+        animatedShader.time += dt * (1.0 + energy * 1.5);
+    }
 
     function resetStatic() {
         if (!normalRunning && !ambientRunning) {
             container.anchors.verticalCenterOffset = 0;
             breathScale.xScale = 1.0;
             breathScale.yScale = 1.0;
-            auraOverlay.opacity = 0.35;
+            auraBlur.opacity = 0.28;
+            root.smoothEnergy = 0.0;
         } else if (ambientRunning) {
             container.anchors.verticalCenterOffset = 0;
+            root.smoothEnergy = 0.0;
         }
     }
 
     onNormalRunningChanged: resetStatic()
     onAmbientRunningChanged: resetStatic()
     Component.onCompleted: resetStatic()
+
+    // Full-rate audio reactive driver during music playback
+    FrameAnimation {
+        id: audioTicker
+        running: root.normalRunning && root.hasAudio
+        onTriggered: root.advanceMotion(Math.min(frameTime, 0.05))
+    }
+
+    // Paced gentle breathing driver during idle silence (~30 fps)
+    Timer {
+        id: idleTimer
+        interval: 33
+        repeat: true
+        running: root.normalRunning && !root.hasAudio
+        onTriggered: root.advanceMotion(interval / 1000.0)
+    }
 
     // Ambient mode low-rate gentle idle breath (~8 fps, explicitly low-rate including active playback)
     Timer {
@@ -87,7 +131,7 @@ Item {
             breathScale.yScale = 1.0 + 0.04 * Math.sin(root.ambientPhase);
             breathScale.xScale = 1.0 - 0.02 * Math.sin(root.ambientPhase);
             container.anchors.verticalCenterOffset = 0;
-            auraOverlay.opacity = 0.25 + 0.15 * Math.sin(root.ambientPhase);
+            auraBlur.opacity = 0.20 + 0.12 * Math.sin(root.ambientPhase);
             animatedShader.time += 0.008;
         }
     }
@@ -100,39 +144,12 @@ Item {
         height: root.visualizerHeight
         rotation: root.vertical ? 90 : 0
 
-        // Subtle floating bob
-        SequentialAnimation on anchors.verticalCenterOffset {
-            id: bobAnim
-            loops: Animation.Infinite
-            running: root.normalRunning
-            NumberAnimation { to: -1.5; duration: 1800; easing.type: Easing.InOutSine }
-            NumberAnimation { to: 1.5; duration: 1800; easing.type: Easing.InOutSine }
-        }
-
         transform: Scale {
             id: breathScale
             origin.x: container.width / 2
             origin.y: container.height / 2
             xScale: 1.0
             yScale: 1.0
-
-            // Vertical needle breathing: stretches and flexes
-            SequentialAnimation on yScale {
-                id: yScaleAnim
-                loops: Animation.Infinite
-                running: root.normalRunning
-                NumberAnimation { to: 1.08; duration: 1500; easing.type: Easing.InOutSine }
-                NumberAnimation { to: 0.92; duration: 1500; easing.type: Easing.InOutSine }
-            }
-
-            // Horizontal breathing: subtle counter-expansion
-            SequentialAnimation on xScale {
-                id: xScaleAnim
-                loops: Animation.Infinite
-                running: root.normalRunning
-                NumberAnimation { to: 1.04; duration: 2000; easing.type: Easing.InOutSine }
-                NumberAnimation { to: 0.96; duration: 2000; easing.type: Easing.InOutSine }
-            }
         }
 
         // Texture provider: high-resolution SVG render of the authentic WuWa Tacet Mark
@@ -155,6 +172,9 @@ Item {
         }
 
         // Layer 1: Soft luminous aura / glow behind the tacet mark
+        // The aura SVG and ColorOverlay are completely static.
+        // Animating FastBlur.opacity directly avoids dirtying the blur source, so FastBlur
+        // never needs to re-execute multi-pass GPU blur passes each frame.
         Image {
             id: auraImage
             source: Qt.resolvedUrl("../../../assets/icons/tacet-mark.svg")
@@ -171,22 +191,16 @@ Item {
             source: auraImage
             color: root.auraColor
             scale: 1.08
-            opacity: 0.35
-
-            SequentialAnimation on opacity {
-                id: auraOpacityAnim
-                loops: Animation.Infinite
-                running: root.normalRunning
-                NumberAnimation { to: 0.55; duration: 1400; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: 0.18; duration: 1400; easing.type: Easing.InOutQuad }
-            }
+            cached: true
         }
 
         FastBlur {
+            id: auraBlur
             anchors.fill: auraOverlay
             source: auraOverlay
             radius: 8
-            opacity: 0.8
+            cached: true
+            opacity: 0.28
         }
 
         // Layer 2: Sharp animated tacet mark with resonant energy wave & highlight crest
@@ -201,12 +215,6 @@ Item {
             property color colorAccent: root.shaderAccent
 
             fragmentShader: Qt.resolvedUrl("shaders/tacet_animated.frag.qsb")
-
-            FrameAnimation {
-                id: ticker
-                running: root.normalRunning
-                onTriggered: animatedShader.time += Math.min(frameTime, 0.1)
-            }
         }
     }
 }
