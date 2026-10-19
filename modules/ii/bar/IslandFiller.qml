@@ -5,6 +5,7 @@ import Quickshell
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 
 Item {
     id: root
@@ -22,35 +23,30 @@ Item {
     readonly property string fillerStyle: Config.options?.bar?.islandFiller?.style ?? "waves"
     readonly property real fillerOpacity: Config.options?.bar?.islandFiller?.opacity ?? 0.85
 
-    // Theme colors (ResonanceTheme when enabled, fallback to Matugen Appearance.colors)
-    readonly property color primaryColor: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
-    readonly property color secondaryColor: ResonanceTheme.enabled ? ResonanceTheme.borderSubtle : Appearance.colors.colSecondary
-    readonly property color tertiaryColor: ResonanceTheme.enabled ? ResonanceTheme.colTealInk : Appearance.colors.colTertiary
+    // Theme colors (borrowed golden shell theme: ResonanceTheme when enabled, fallback to Matugen Appearance.colors)
+    readonly property color primaryColor: ResonanceTheme.enabled
+        ? ResonanceTheme.accentGold
+        : (Appearance.colors?.colPrimary ?? "#ECC06C")
+    readonly property color secondaryColor: ResonanceTheme.enabled
+        ? ResonanceTheme.colWarmIvory
+        : (Appearance.m3colors?.m3primaryFixed ?? Appearance.colors?.colSecondary ?? "#D9C4A0")
+    readonly property color tertiaryColor: ResonanceTheme.enabled
+        ? ColorUtils.mix(ResonanceTheme.colMistySage, ResonanceTheme.colWarmIvory, 0.45)
+        : (Appearance.colors ? ColorUtils.mix(Appearance.colors.colSecondary, Appearance.colors.colPrimary, 0.25) : "#B0C0B8")
     readonly property vector4d vecColPrimary: Qt.vector4d(primaryColor.r, primaryColor.g, primaryColor.b, 1.0)
     readonly property vector4d vecColSecondary: Qt.vector4d(secondaryColor.r, secondaryColor.g, secondaryColor.b, 1.0)
     readonly property vector4d vecColTertiary: Qt.vector4d(tertiaryColor.r, tertiaryColor.g, tertiaryColor.b, 1.0)
 
-    // Audio energy derived from visualizer points
-    readonly property real audioEnergy: {
-        const pts = GlobalStates.visualizerPoints;
-        if (!pts || pts.length === 0) return 0;
-        let sum = 0;
-        const len = Math.min(pts.length, 16);
-        for (let i = 0; i < len; i++)
-            sum += Number.isFinite(pts[i]) ? Math.max(0, pts[i]) : 0;
-        return Math.min(1.0, (sum / len) / 60.0);
-    }
-    readonly property bool hasAudio: audioEnergy > 0.05
+    // Audio energy derived from unified GlobalStates telemetry
+    readonly property real audioEnergy: GlobalStates.audioEnergy
+    readonly property bool hasAudio: GlobalStates.hasAudioEnergy
     readonly property real visualEnergy: root.motionOff ? 0 : root.audioEnergy
     readonly property bool visualHasAudio: root.visualEnergy > 0.05
 
-    // Opacity with crowding and audio modulation
-    readonly property real baseOpacity: {
-        if (!ResonanceTheme.enabled) return root.fillerOpacity;
-        const idleLevel = 0.45 * ResonanceTheme.intensity;
-        const activeLevel = (0.45 + 0.40 * root.visualEnergy) * ResonanceTheme.intensity;
-        return root.fillerOpacity * (root.visualHasAudio ? activeLevel : idleLevel);
-    }
+    // The user opacity is applied once. The premultiplied shader already owns
+    // strand falloff, luminous cores and audio response; extra idle dimming
+    // obscures those cores against the wallpaper.
+    readonly property real baseOpacity: root.fillerOpacity
 
     function gapOpacity(gapW) {
         if (!ResonanceTheme.enabled) return root.fillerOpacity;
@@ -76,8 +72,8 @@ Item {
         interval: root.clockInterval
         repeat: true
         running: root.visible && root.opacity > 0
-            && (!root.Window.window || root.Window.window.visible)
-            && !GlobalStates.screenLocked && !root.motionOff && root.fillerEnabled && root.hasActiveGaps && root.isAnimatedMode
+            && (!root.Window.window || (root.Window.window.visible && root.Window.window.opacity > 0))
+            && !GlobalStates.screenLocked && !GlobalStates.presetBarHidden && !root.motionOff && root.fillerEnabled && root.hasActiveGaps && root.isAnimatedMode
         onTriggered: root.time += interval / 1000.0
     }
 
@@ -130,8 +126,8 @@ Item {
         height: parent.height
         opacity: root.gapOpacity(root.gap1W)
 
-        property real time: root.time
-        property real aud: root.visualEnergy
+        property real time: visible ? root.time : 0
+        property real aud: visible ? root.visualEnergy : 0
         property real gapX: root.gap1X
         property real gapW: width
         property real gapH: height
@@ -153,8 +149,8 @@ Item {
         height: parent.height
         opacity: root.gapOpacity(root.gap2W)
 
-        property real time: root.time
-        property real aud: root.visualEnergy
+        property real time: visible ? root.time : 0
+        property real aud: visible ? root.visualEnergy : 0
         property real gapX: root.gap2X
         property real gapW: width
         property real gapH: height
@@ -176,8 +172,8 @@ Item {
         height: parent.height
         opacity: root.gapOpacity(root.spanW)
 
-        property real time: root.time
-        property real aud: root.visualEnergy
+        property real time: visible ? root.time : 0
+        property real aud: visible ? root.visualEnergy : 0
         property real gapX: root.spanX
         property real gapW: width
         property real gapH: height
@@ -191,140 +187,162 @@ Item {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STYLE: "stream", "bolt", "surge" (Ryoku Fragment Shader modes)
+    // STYLE: "stream", "bolt", "surge" (Ryoku Fragment Shader modes - lazy loaded)
     // ─────────────────────────────────────────────────────────────────────────
-    ShaderEffect {
-        id: streamGap1
-        visible: (root.fillerStyle === "stream" || root.fillerStyle === "bolt" || root.fillerStyle === "surge" || root.fillerStyle === "spark" || root.fillerStyle === "transfer" || root.fillerStyle === "collider") && root.gap1Active
-        x: root.gap1X
-        y: 0
-        width: root.gap1W
-        height: parent.height
-        opacity: root.gapOpacity(root.gap1W)
+    Loader {
+        id: streamLoader
+        active: root.fillerStyle === "stream" || root.fillerStyle === "bolt" || root.fillerStyle === "surge" || root.fillerStyle === "spark" || root.fillerStyle === "transfer" || root.fillerStyle === "collider"
+        anchors.fill: parent
+        sourceComponent: Component {
+            Item {
+                anchors.fill: parent
 
-        property real time: root.time
-        property real aud: root.visualEnergy
-        property real gapX: root.gap1X
-        property real gapW: width
-        property real gapH: height
-        property real gapIndex: 0.0
-        property real mode: root.streamModeNumber
-        property vector4d seal: root.vecColPrimary
+                ShaderEffect {
+                    id: streamGap1
+                    visible: root.gap1Active
+                    x: root.gap1X
+                    y: 0
+                    width: root.gap1W
+                    height: parent.height
+                    opacity: root.gapOpacity(root.gap1W)
 
-        fragmentShader: "shaders/stream.frag.qsb"
-    }
+                    property real time: visible ? root.time : 0
+                    property real aud: visible ? root.visualEnergy : 0
+                    property real gapX: root.gap1X
+                    property real gapW: width
+                    property real gapH: height
+                    property real gapIndex: 0.0
+                    property real mode: root.streamModeNumber
+                    property vector4d seal: root.vecColPrimary
 
-    ShaderEffect {
-        id: streamGap2
-        visible: (root.fillerStyle === "stream" || root.fillerStyle === "bolt" || root.fillerStyle === "surge" || root.fillerStyle === "spark" || root.fillerStyle === "transfer" || root.fillerStyle === "collider") && root.gap2Active
-        x: root.gap2X
-        y: 0
-        width: root.gap2W
-        height: parent.height
-        opacity: root.gapOpacity(root.gap2W)
+                    fragmentShader: "shaders/stream.frag.qsb"
+                }
 
-        property real time: root.time
-        property real aud: root.visualEnergy
-        property real gapX: root.gap2X
-        property real gapW: width
-        property real gapH: height
-        property real gapIndex: 1.0
-        property real mode: root.streamModeNumber
-        property vector4d seal: root.vecColPrimary
+                ShaderEffect {
+                    id: streamGap2
+                    visible: root.gap2Active
+                    x: root.gap2X
+                    y: 0
+                    width: root.gap2W
+                    height: parent.height
+                    opacity: root.gapOpacity(root.gap2W)
 
-        fragmentShader: "shaders/stream.frag.qsb"
-    }
+                    property real time: visible ? root.time : 0
+                    property real aud: visible ? root.visualEnergy : 0
+                    property real gapX: root.gap2X
+                    property real gapW: width
+                    property real gapH: height
+                    property real gapIndex: 1.0
+                    property real mode: root.streamModeNumber
+                    property vector4d seal: root.vecColPrimary
 
-    ShaderEffect {
-        id: streamSpan
-        visible: (root.fillerStyle === "stream" || root.fillerStyle === "bolt" || root.fillerStyle === "surge" || root.fillerStyle === "spark" || root.fillerStyle === "transfer" || root.fillerStyle === "collider") && root.spanActive
-        x: root.spanX
-        y: 0
-        width: root.spanW
-        height: parent.height
-        opacity: root.gapOpacity(root.spanW)
+                    fragmentShader: "shaders/stream.frag.qsb"
+                }
 
-        property real time: root.time
-        property real aud: root.visualEnergy
-        property real gapX: root.spanX
-        property real gapW: width
-        property real gapH: height
-        property real gapIndex: 0.0
-        property real mode: root.streamModeNumber
-        property vector4d seal: root.vecColPrimary
+                ShaderEffect {
+                    id: streamSpan
+                    visible: root.spanActive
+                    x: root.spanX
+                    y: 0
+                    width: root.spanW
+                    height: parent.height
+                    opacity: root.gapOpacity(root.spanW)
 
-        fragmentShader: "shaders/stream.frag.qsb"
-    }
+                    property real time: visible ? root.time : 0
+                    property real aud: visible ? root.visualEnergy : 0
+                    property real gapX: root.spanX
+                    property real gapW: width
+                    property real gapH: height
+                    property real gapIndex: 0.0
+                    property real mode: root.streamModeNumber
+                    property vector4d seal: root.vecColPrimary
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // STYLE: "bridge" (Physical Dock Plate connector)
-    // ─────────────────────────────────────────────────────────────────────────
-    Rectangle {
-        id: bridgeGap1
-        visible: root.fillerStyle === "bridge" && root.gap1Active
-        x: root.gap1X - 6
-        y: Math.round((parent.height - root.bridgeH) / 2)
-        width: root.gap1W + 12
-        height: root.bridgeH
-        radius: root.bridgeH / 2
-        color: Qt.rgba(Appearance.colors.colLayer0.r, Appearance.colors.colLayer0.g, Appearance.colors.colLayer0.b, root.fillerOpacity * 0.5)
-        border.width: 1
-        border.color: Qt.rgba(Appearance.colors.colLayer0Border.r, Appearance.colors.colLayer0Border.g, Appearance.colors.colLayer0Border.b, 0.3)
-
-        Rectangle {
-            anchors.centerIn: parent
-            width: parent.width - 20
-            height: 1
-            color: root.primaryColor
-            opacity: root.visualHasAudio ? 0.28 : 0.08
-            visible: width > 10
-            Behavior on opacity { NumberAnimation { duration: 400 } }
+                    fragmentShader: "shaders/stream.frag.qsb"
+                }
+            }
         }
     }
 
-    Rectangle {
-        id: bridgeGap2
-        visible: root.fillerStyle === "bridge" && root.gap2Active
-        x: root.gap2X - 6
-        y: Math.round((parent.height - root.bridgeH) / 2)
-        width: root.gap2W + 12
-        height: root.bridgeH
-        radius: root.bridgeH / 2
-        color: Qt.rgba(Appearance.colors.colLayer0.r, Appearance.colors.colLayer0.g, Appearance.colors.colLayer0.b, root.fillerOpacity * 0.5)
-        border.width: 1
-        border.color: Qt.rgba(Appearance.colors.colLayer0Border.r, Appearance.colors.colLayer0Border.g, Appearance.colors.colLayer0Border.b, 0.3)
+    // ─────────────────────────────────────────────────────────────────────────
+    // STYLE: "bridge" (Physical Dock Plate connector - lazy loaded)
+    // ─────────────────────────────────────────────────────────────────────────
+    Loader {
+        id: bridgeLoader
+        active: root.fillerStyle === "bridge"
+        anchors.fill: parent
+        sourceComponent: Component {
+            Item {
+                anchors.fill: parent
 
-        Rectangle {
-            anchors.centerIn: parent
-            width: parent.width - 20
-            height: 1
-            color: root.primaryColor
-            opacity: root.visualHasAudio ? 0.28 : 0.08
-            visible: width > 10
-            Behavior on opacity { NumberAnimation { duration: 400 } }
-        }
-    }
+                Rectangle {
+                    id: bridgeGap1
+                    visible: root.gap1Active
+                    x: root.gap1X - 6
+                    y: Math.round((parent.height - root.bridgeH) / 2)
+                    width: root.gap1W + 12
+                    height: root.bridgeH
+                    radius: root.bridgeH / 2
+                    color: Qt.rgba(Appearance.colors.colLayer0.r, Appearance.colors.colLayer0.g, Appearance.colors.colLayer0.b, root.fillerOpacity * 0.5)
+                    border.width: 1
+                    border.color: Qt.rgba(Appearance.colors.colLayer0Border.r, Appearance.colors.colLayer0Border.g, Appearance.colors.colLayer0Border.b, 0.3)
 
-    Rectangle {
-        id: bridgeSpan
-        visible: root.fillerStyle === "bridge" && root.spanActive
-        x: root.spanX - 6
-        y: Math.round((parent.height - root.bridgeH) / 2)
-        width: root.spanW + 12
-        height: root.bridgeH
-        radius: root.bridgeH / 2
-        color: Qt.rgba(Appearance.colors.colLayer0.r, Appearance.colors.colLayer0.g, Appearance.colors.colLayer0.b, root.fillerOpacity * 0.5)
-        border.width: 1
-        border.color: Qt.rgba(Appearance.colors.colLayer0Border.r, Appearance.colors.colLayer0Border.g, Appearance.colors.colLayer0Border.b, 0.3)
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: parent.width - 20
+                        height: 1
+                        color: root.primaryColor
+                        opacity: root.visualHasAudio ? 0.28 : 0.08
+                        visible: width > 10
+                        Behavior on opacity { NumberAnimation { duration: 400 } }
+                    }
+                }
 
-        Rectangle {
-            anchors.centerIn: parent
-            width: parent.width - 20
-            height: 1
-            color: root.primaryColor
-            opacity: root.visualHasAudio ? 0.28 : 0.08
-            visible: width > 10
-            Behavior on opacity { NumberAnimation { duration: 400 } }
+                Rectangle {
+                    id: bridgeGap2
+                    visible: root.gap2Active
+                    x: root.gap2X - 6
+                    y: Math.round((parent.height - root.bridgeH) / 2)
+                    width: root.gap2W + 12
+                    height: root.bridgeH
+                    radius: root.bridgeH / 2
+                    color: Qt.rgba(Appearance.colors.colLayer0.r, Appearance.colors.colLayer0.g, Appearance.colors.colLayer0.b, root.fillerOpacity * 0.5)
+                    border.width: 1
+                    border.color: Qt.rgba(Appearance.colors.colLayer0Border.r, Appearance.colors.colLayer0Border.g, Appearance.colors.colLayer0Border.b, 0.3)
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: parent.width - 20
+                        height: 1
+                        color: root.primaryColor
+                        opacity: root.visualHasAudio ? 0.28 : 0.08
+                        visible: width > 10
+                        Behavior on opacity { NumberAnimation { duration: 400 } }
+                    }
+                }
+
+                Rectangle {
+                    id: bridgeSpan
+                    visible: root.spanActive
+                    x: root.spanX - 6
+                    y: Math.round((parent.height - root.bridgeH) / 2)
+                    width: root.spanW + 12
+                    height: root.bridgeH
+                    radius: root.bridgeH / 2
+                    color: Qt.rgba(Appearance.colors.colLayer0.r, Appearance.colors.colLayer0.g, Appearance.colors.colLayer0.b, root.fillerOpacity * 0.5)
+                    border.width: 1
+                    border.color: Qt.rgba(Appearance.colors.colLayer0Border.r, Appearance.colors.colLayer0Border.g, Appearance.colors.colLayer0Border.b, 0.3)
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: parent.width - 20
+                        height: 1
+                        color: root.primaryColor
+                        opacity: root.visualHasAudio ? 0.28 : 0.08
+                        visible: width > 10
+                        Behavior on opacity { NumberAnimation { duration: 400 } }
+                    }
+                }
+            }
         }
     }
 }

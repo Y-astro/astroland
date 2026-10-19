@@ -262,6 +262,17 @@ Singleton {
     property string settingsPage: ""
     property Item currentPageInstance: null
     property list<real> visualizerPoints: []
+    // Unified 16-point audio energy telemetry for bar visualizers and island filler
+    readonly property real audioEnergy: {
+        const pts = root.visualizerPoints;
+        if (!pts || pts.length === 0) return 0;
+        let sum = 0;
+        const len = Math.min(pts.length, 16);
+        for (let i = 0; i < len; i++)
+            sum += Number.isFinite(pts[i]) ? Math.max(0, pts[i]) : 0;
+        return Math.min(1.0, (sum / len) / 60.0);
+    }
+    readonly property bool hasAudioEnergy: audioEnergy > 0.05
     property bool desktopWidgetKeyboardFocus: false
     property string widgetTypingOwner: ""
     signal editWidgetOptionsRequested()

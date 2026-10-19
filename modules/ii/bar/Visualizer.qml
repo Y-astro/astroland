@@ -32,17 +32,9 @@ Item {
         origin.x: root.width / 2
     }
 
-    // Audio energy derived from visualizer points
-    readonly property real audioEnergy: {
-        const pts = GlobalStates.visualizerPoints;
-        if (!pts || pts.length === 0) return 0;
-        let sum = 0;
-        const len = Math.min(pts.length, 16);
-        for (let i = 0; i < len; i++)
-            sum += Number.isFinite(pts[i]) ? Math.max(0, pts[i]) : 0;
-        return Math.min(1.0, (sum / len) / 60.0);
-    }
-    readonly property bool hasAudio: audioEnergy > 0.05 || root.isPlaying
+    // Audio energy derived from unified GlobalStates telemetry
+    readonly property real audioEnergy: GlobalStates.audioEnergy
+    readonly property bool hasAudio: GlobalStates.hasAudioEnergy || root.isPlaying
 
     // Theme color adaptation
     readonly property color auraColor: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary

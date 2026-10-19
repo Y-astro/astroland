@@ -56,11 +56,13 @@ void main() {
     float winAmp = pow(win, 0.7);
     float winAlpha = pow(win, 0.5);
 
-    // Color definitions from Matugen theme
+    // Color definitions from theme
     vec3 cPri = colPrimary.rgb;
     vec3 cSec = colSecondary.rgb;
     vec3 cTer = colTertiary.rgb;
-    vec3 cWhite = vec3(1.0);
+
+    // Radiant warm champagne/ivory crest core
+    vec3 cChampagne = vec3(0.98, 0.95, 0.88);
 
     // Wave parameters (harmonic frequencies, speeds, and phase offsets)
     float audioBoost = clamp(aud, 0.0, 1.0);
@@ -93,49 +95,51 @@ void main() {
 
     vec4 acc = vec4(0.0);
 
-    // ── 1. Sheer Translucent Ribbon Fills (between crossing waves) ──
+    // ── 1. Airy Translucent Ribbon Fills (delicate sheer between crossing waves) ──
     // Ribbon between Wave 1 and Wave 2
     float rMin1 = min(y1, y2);
     float rMax1 = max(y1, y2);
     float inRibbon1 = smoothstep(rMin1 - 1.5, rMin1 + 0.5, py) * (1.0 - smoothstep(rMax1 - 0.5, rMax1 + 1.5, py));
     float ribbonDist1 = abs(py - (rMin1 + rMax1) * 0.5) / max(1.0, (rMax1 - rMin1) * 0.5);
-    float ribbonAlpha1 = inRibbon1 * (0.18 + 0.09 * (1.0 - ribbonDist1)) * winAlpha;
-    over(acc, mix(cSec, cPri, 0.45), ribbonAlpha1);
+    float ribbonAlpha1 = inRibbon1 * (0.07 + 0.04 * (1.0 - ribbonDist1)) * winAlpha;
+    over(acc, mix(cPri, cSec, 0.45), ribbonAlpha1);
 
     // Ribbon between Wave 2 and Wave 3
     float rMin2 = min(y2, y3);
     float rMax2 = max(y2, y3);
     float inRibbon2 = smoothstep(rMin2 - 1.5, rMin2 + 0.5, py) * (1.0 - smoothstep(rMax2 - 0.5, rMax2 + 1.5, py));
     float ribbonDist2 = abs(py - (rMin2 + rMax2) * 0.5) / max(1.0, (rMax2 - rMin2) * 0.5);
-    float ribbonAlpha2 = inRibbon2 * (0.14 + 0.07 * (1.0 - ribbonDist2)) * winAlpha;
-    over(acc, mix(cTer, cPri, 0.35), ribbonAlpha2);
+    float ribbonAlpha2 = inRibbon2 * (0.05 + 0.03 * (1.0 - ribbonDist2)) * winAlpha;
+    over(acc, mix(cTer, cPri, 0.30), ribbonAlpha2);
 
-    // ── 2. Glowing Crest Lines for each Wave ──
-    // Wave 1 Crest
+    // ── 2. Glowing Crest Lines for each Wave (luminous champagne core + soft golden halo) ──
+    // Wave 1 Crest (Lead harmonic: warm champagne core wrapped in pure gold aura)
     float d1 = abs(py - y1);
-    float glow1 = exp(-d1 / 3.8) * 0.30 * winAlpha;
-    float core1 = exp(-d1 * d1 / 1.5) * 0.88 * winAlpha;
+    float glow1 = exp(-d1 / 3.6) * 0.32 * winAlpha;
+    float core1 = exp(-d1 * d1 / 1.5) * 0.82 * winAlpha;
     over(acc, cPri, glow1);
-    over(acc, mix(cPri, cWhite, 0.68), core1);
+    over(acc, mix(cPri, cChampagne, 0.65), core1);
 
-    // Wave 2 Crest
+    // Wave 2 Crest (Counter harmonic: soft warm ivory filament)
+    vec3 cWave2 = mix(cPri, cSec, 0.50);
     float d2 = abs(py - y2);
-    float glow2 = exp(-d2 / 3.4) * 0.25 * winAlpha;
-    float core2 = exp(-d2 * d2 / 1.4) * 0.80 * winAlpha;
-    over(acc, cSec, glow2);
-    over(acc, mix(cSec, cWhite, 0.62), core2);
+    float glow2 = exp(-d2 / 3.2) * 0.24 * winAlpha;
+    float core2 = exp(-d2 * d2 / 1.4) * 0.68 * winAlpha;
+    over(acc, cWave2, glow2);
+    over(acc, mix(cSec, cChampagne, 0.70), core2);
 
-    // Wave 3 Crest
+    // Wave 3 Crest (Ambient harmonic: subtle translucent background wave)
+    vec3 cWave3 = mix(cPri, cTer, 0.50);
     float d3 = abs(py - y3);
-    float glow3 = exp(-d3 / 3.0) * 0.20 * winAlpha;
-    float core3 = exp(-d3 * d3 / 1.3) * 0.72 * winAlpha;
-    over(acc, cTer, glow3);
-    over(acc, mix(cTer, cWhite, 0.58), core3);
+    float glow3 = exp(-d3 / 2.8) * 0.16 * winAlpha;
+    float core3 = exp(-d3 * d3 / 1.3) * 0.52 * winAlpha;
+    over(acc, cWave3, glow3);
+    over(acc, mix(cTer, cChampagne, 0.55), core3);
 
-    // Wave 4 Crest (faint resonant wave)
+    // Wave 4 Crest (Fine micro-resonant whisper)
     float d4 = abs(py - y4);
-    float core4 = exp(-d4 * d4 / 1.2) * 0.50 * winAlpha;
-    over(acc, mix(cPri, cTer, 0.5), core4);
+    float core4 = exp(-d4 * d4 / 1.1) * 0.36 * winAlpha;
+    over(acc, mix(cPri, cChampagne, 0.45), core4);
 
     // ── 3. Drifting Stardust / Particle Embers ──
     // 16 particles spaced out across the gap, drifting with time
@@ -144,8 +148,14 @@ void main() {
         float pSpeed = 22.0 + hash(fi * 13.7) * 24.0 + audioBoost * 45.0;
         float pOffset = hash(fi * 71.3) * gapW;
         float partLocalX = mod(pOffset + t * pSpeed, gapW);
+
+        // Fast horizontal rejection: particle max core radius 1.9 + bloom 4.75 = 6.65 px.
+        float dx = abs((px - gapX) - partLocalX);
+        if (dx > 7.5) continue;
+
         float partU = partLocalX / max(gapW, 1.0);
         float partWin = pow(sin(partU * PI), 0.6);
+        if (partWin < 0.01) continue;
 
         // Particle y-position rides between wave 1 and wave 2
         float waveMix = hash(fi * 33.1);
@@ -154,15 +164,19 @@ void main() {
         float waveY2 = cy + (baseAmp * 0.88) * sin(globalPartX * k2 + t * s2 + p2);
         float partY = mix(waveY1, waveY2, waveMix) + (hash(fi * 91.5) - 0.5) * 5.0;
 
-        float pDist = length(vec2(px - globalPartX, py - partY));
+        // Fast vertical rejection
+        float dy = abs(py - partY);
+        if (dy > 7.5) continue;
+
+        float pDist = length(vec2(dx, dy));
         float pRadius = 1.0 + hash(fi * 47.9) * 0.9;
         float pPulse = 0.55 + 0.45 * sin(t * 3.5 + fi * 2.2);
 
         // Core dot and soft bloom
-        float pCore = (1.0 - smoothstep(pRadius - 0.8, pRadius, pDist)) * 0.92 * pPulse * partWin;
-        float pGlow = max(0.0, 1.0 - pDist / (pRadius * 3.5)) * 0.35 * pPulse * partWin;
+        float pCore = (1.0 - smoothstep(pRadius - 0.8, pRadius, pDist)) * 0.88 * pPulse * partWin;
+        float pGlow = max(0.0, 1.0 - pDist / (pRadius * 3.5)) * 0.26 * pPulse * partWin;
 
-        vec3 pCol = mix(cPri, cWhite, hash(fi * 19.3) * 0.75);
+        vec3 pCol = mix(cPri, cChampagne, 0.60 + hash(fi * 19.3) * 0.25);
         over(acc, cPri, pGlow);
         over(acc, pCol, pCore);
     }
