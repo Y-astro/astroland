@@ -1,4 +1,5 @@
 pragma ComponentBehavior: Bound
+import qs
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.services
@@ -1116,7 +1117,7 @@ Item {
             Panel {
                 id: railPanel
                 Layout.fillWidth: false
-                Layout.preferredWidth: Math.round(bodyRow.width * 0.34)
+                Layout.preferredWidth: Math.round(mainColumn.width * 0.34)
                 Layout.fillHeight: true
 
                 ColumnLayout {

@@ -230,17 +230,17 @@ Button {
             longPressTimer.fired = false;
             if (root.altAction && PanelFamily.touchFirst)
                 longPressTimer.restart();
+            if (root.rippleEnabled && root.animationsEnabled && typeof root.startRipple === "function") {
+                const {
+                    x,
+                    y
+                } = event;
+                root.startRipple(x, y);
+            }
             if (root.pressedAction)
                 root.pressedAction(event);
             if (root.downAction)
                 root.downAction();
-            if (!root.rippleEnabled || !root.animationsEnabled)
-                return;
-            const {
-                x,
-                y
-            } = event;
-            startRipple(x, y);
         }
         onReleased: event => {
             root.down = false;
