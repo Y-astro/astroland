@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 
+import qs
 import qs.modules.common
 import qs.modules.ii.background
 import qs.modules.ii.bar
@@ -40,7 +41,12 @@ Scope {
     PanelUrlLoader { extraCondition: !Config.options.bar.vertical; panelUrl: Qt.resolvedUrl("../modules/ii/bar/Bar.qml") }
     PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/background/Background.qml") }
     PanelUrlLoader { extraCondition: Config.options.dock.enable; panelUrl: Qt.resolvedUrl("../modules/ii/dock/Dock.qml") }
-    PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/equalizer/EqualizerPopup.qml") }
+    PanelUrlLoader {
+        lazy: true
+        lazyOpen: GlobalStates.equalizerOpen
+        retainAfterOpen: false
+        panelUrl: Qt.resolvedUrl("../modules/ii/equalizer/EqualizerPopup.qml")
+    }
     PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/lock/Lock.qml") }
     PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/mediaControls/MediaControls.qml") }
     PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/notificationPopup/NotificationPopup.qml") }
@@ -67,8 +73,18 @@ Scope {
     PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/reminderAlertPopup/ReminderAlertPopup.qml") }
     // Legacy 2-column layer-shell settings disabled in favor of SettingsWindow.qml in shell.qml
     // PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii//Settings.qml") }
-    PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/desktopMenu/DesktopMenu.qml") }
-    PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/dropover/DropShelfPanel.qml") }
+    PanelUrlLoader {
+        lazy: true
+        lazyOpen: GlobalStates.desktopMenuOpen
+        retainAfterOpen: true
+        panelUrl: Qt.resolvedUrl("../modules/ii/desktopMenu/DesktopMenu.qml")
+    }
+    PanelUrlLoader {
+        lazy: true
+        lazyOpen: GlobalStates.dropShelfOpen
+        retainAfterOpen: true
+        panelUrl: Qt.resolvedUrl("../modules/ii/dropover/DropShelfPanel.qml")
+    }
     PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/background/NiriBackdrop.qml") }
     PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/frame/ScreenFrame.qml") }
 }

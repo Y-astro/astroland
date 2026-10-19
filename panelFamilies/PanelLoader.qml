@@ -15,8 +15,18 @@ LazyLoader {
     id: root
 
     property bool extraCondition: true
+    property bool lazy: false
+    property bool lazyOpen: false
+    property bool retainAfterOpen: false
+    property bool everOpened: false
 
-    readonly property bool wanted: Config.ready && root.extraCondition
+    onLazyOpenChanged: {
+        if (root.lazy && root.lazyOpen) {
+            root.everOpened = true;
+        }
+    }
+
+    readonly property bool wanted: Config.ready && root.extraCondition && (!root.lazy || (root.retainAfterOpen ? root.everOpened : root.lazyOpen))
 
     /// Zero until this panel has asked for a slot. It is released when the panel is no
     /// longer wanted so inactive panel families do not retain a schedule ticket.
@@ -25,6 +35,11 @@ LazyLoader {
     function takeTicket() {
         if (!root.wanted || root.ticket !== 0)
             return;
+        if (root.lazy && PanelSchedule.idle) {
+            root.ticket = PanelSchedule.take();
+            PanelSchedule.released = root.ticket;
+            return;
+        }
         root.ticket = PanelSchedule.take();
     }
 
@@ -37,4 +52,18 @@ LazyLoader {
             root.ticket = 0;
     }
     Component.onCompleted: root.takeTicket()
+
+    Timer {
+        id: releaseCollect
+        interval: 500
+        onTriggered: {
+            if (!root.active && typeof gc === "function")
+                gc();
+        }
+    }
+
+    onActiveChanged: {
+        if (!root.active && root.lazy && !root.retainAfterOpen)
+            releaseCollect.restart();
+    }
 }
