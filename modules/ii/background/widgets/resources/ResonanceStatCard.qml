@@ -11,7 +11,7 @@ Item {
     id: rootCard
 
     required property string cardType // "cpu" | "ram" | "temp"
-    property var wallpaperItem: null
+    property Item wallpaperItem: null
     property bool live: true
     property real trackX: 0
     property real trackY: 0
@@ -63,13 +63,13 @@ Item {
         // Fast wallpaper blur when enabled in shell settings
         FastBlurred {
             anchors.fill: parent
-            blurSource: rootCard.wallpaperItem
+            blurSource: rootCard.wallpaperItem ?? null
             cardRadius: bgRect.radius
             tint: ResonanceTheme.colTealInk
             tintOpacity: 0.25 * ResonanceTheme.intensity
             trackX: rootCard.trackX
             trackY: rootCard.trackY
-            visible: (Config.options.background?.widgets?.blurWidgets ?? false) && rootCard.wallpaperItem !== null
+            visible: Boolean((Config.options.background?.widgets?.blurWidgets ?? false) && rootCard.wallpaperItem)
         }
 
         // Cached Jinzhou Terminal Frame Ornaments & Header Icon Canvas

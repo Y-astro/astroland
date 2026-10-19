@@ -48,13 +48,13 @@ AbstractBackgroundWidget {
 
         FastBlurred {
             anchors.fill: parent
-            blurSource: root.wallpaperItem
+            blurSource: root.wallpaperItem ?? null
             cardRadius: statCard.radius
             tint: Appearance.colors.colLayer1
             tintOpacity: 0.55
             trackX: statCard.x + (statCard.parent ? statCard.parent.x : 0) + row.x + root.x
             trackY: statCard.y + (statCard.parent ? statCard.parent.y : 0) + row.y + root.y
-            visible: Config.options.background.widgets.blurWidgets 
+            visible: Boolean(Config.options.background.widgets.blurWidgets && root.wallpaperItem)
         }
 
         ColumnLayout {

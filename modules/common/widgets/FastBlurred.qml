@@ -5,7 +5,7 @@ import qs.services
 
 Item {
     id: root
-    required property Item blurSource
+    property Item blurSource: null
     property real cardRadius: 30
     property color tint: "white"
     property real tintOpacity: 0.15
@@ -46,9 +46,7 @@ Item {
     }
 
     // Monitor wallpaper transition if blurSource provides transition telemetry
-    readonly property bool sourceIsTransitioning: (root.blurSource && root.blurSource.isTransitioning !== undefined)
-        ? Boolean(root.blurSource.isTransitioning)
-        : false
+    readonly property bool sourceIsTransitioning: Boolean(root.blurSource && root.blurSource.isTransitioning)
 
     onSourceIsTransitioningChanged: {
         if (sourceIsTransitioning) {
@@ -59,7 +57,7 @@ Item {
     }
 
     // Invalidate when blurSource signals an update serial change
-    readonly property int sourceUpdateSerial: (root.blurSource && root.blurSource.updateSerial !== undefined)
+    readonly property int sourceUpdateSerial: (root.blurSource && typeof root.blurSource.updateSerial === "number")
         ? root.blurSource.updateSerial
         : 0
     onSourceUpdateSerialChanged: scheduleUpdate()
@@ -109,21 +107,24 @@ Item {
         width: root.width + root.oversample * 2
         height: root.height + root.oversample * 2
         radius: root.blurRadius
-        visible: root.blurSource !== null
+        visible: Boolean(root.blurSource)
         source: root.blurSource ? shaderSource : null
 
         ShaderEffectSource {
             id: shaderSource
-            sourceItem: root.blurSource
+            sourceItem: root.blurSource ?? null
             sourceRect: {
                 var _fx = root.trackX
                 var _fy = root.trackY
                 if (!root.blurSource) return Qt.rect(0, 0, 0, 0)
-                var pt = root.mapToItem(root.blurSource, -root.oversample, -root.oversample)
-                return Qt.rect(pt.x, pt.y, blur.width, blur.height)
+                try {
+                    var pt = root.mapToItem(root.blurSource, -root.oversample, -root.oversample)
+                    if (pt) return Qt.rect(pt.x, pt.y, blur.width, blur.height)
+                } catch (e) {}
+                return Qt.rect(0, 0, 0, 0)
             }
             hideSource: false
-            live: root.dynamicUpdates || root.sourceIsTransitioning || root._activeLive
+            live: Boolean(root.dynamicUpdates || root.sourceIsTransitioning || root._activeLive)
         }
     }
 

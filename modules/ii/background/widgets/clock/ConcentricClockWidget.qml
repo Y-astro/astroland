@@ -264,13 +264,13 @@ AbstractBackgroundWidget {
                     id: bgBlur
                     anchors.fill: parent
                     cardRadius: width / 2
-                    blurSource: root.wallpaperItem
+                    blurSource: root.wallpaperItem ?? null
                     blurRadius: root.cfgBlurRadius
                     trackX: root.x
                     trackY: root.y
                     tint: root.isWuWa ? ResonanceTheme.colTealInk : root.clockBgColor
                     tintOpacity: root.isWuWa ? root.wuwaBgAlpha : (1.0 - root.cfgTransparency)
-                    visible: root.cfgBlurRadius > 0 && root.wallpaperItem !== null
+                    visible: Boolean(root.cfgBlurRadius > 0 && root.wallpaperItem)
 
                     layer.effect: OpacityMask {
                         maskSource: root.isWuWa ? wuwaGlassMask : bgBlurClassicMask
@@ -281,7 +281,7 @@ AbstractBackgroundWidget {
                 Item {
                     id: wuwaGlassFallback
                     anchors.fill: parent
-                    visible: root.isWuWa && (root.cfgBlurRadius <= 0 || root.wallpaperItem === null)
+                    visible: Boolean(root.isWuWa && (root.cfgBlurRadius <= 0 || !root.wallpaperItem))
 
                     Rectangle {
                         anchors.fill: parent
