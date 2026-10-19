@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.ii.background.widgets
 
 // Additive adapter for registry instances. Legacy singleton widgets keep their
@@ -14,10 +15,21 @@ Item {
     property var wallpaperItem: null
     property bool wallpaperSafetyTriggered: false
 
+    readonly property bool atLock: GlobalStates.screenLocked || (GlobalStates.lockLookActive ?? false)
+    readonly property var resolvedPlacement: WidgetPlacement.resolve(
+        root.instance,
+        root.screen.name,
+        root.atLock,
+        root.screen.width,
+        root.screen.height,
+        240,
+        240
+    )
     readonly property var placement: ({
-        x: Number(root.instance.x ?? 200),
-        y: Number(root.instance.y ?? 200),
+        x: Number(root.resolvedPlacement.x ?? root.instance.x ?? 200),
+        y: Number(root.resolvedPlacement.y ?? root.instance.y ?? 200),
         z: Number(root.instance.z ?? 0),
+        scale: Number(root.resolvedPlacement.scale ?? root.instance.scale ?? 1.0),
         pinned: root.instance.pinned === true,
         placementStrategy: root.instance.placementStrategy ?? "free"
     })

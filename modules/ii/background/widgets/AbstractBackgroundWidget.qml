@@ -37,15 +37,16 @@ AbstractWidget {
     property bool isPreview: false
     property bool visibleWhenLocked: Config.options.lock.showWidgets
     property var configEntry: Config.options.background.widgets[configEntryName]
-    property string placementStrategy: configEntry.placementStrategy
-    property real targetX: Math.max(0, Math.min(configEntry.x, scaledScreenWidth - width))
-    property real targetY : Math.max(0, Math.min(configEntry.y, scaledScreenHeight - height))
-    property real targetZ: configEntry.z
+    property string placementStrategy: configEntry?.placementStrategy ?? "free"
+    property real targetX: isPreview ? 0 : Math.max(0, Math.min(configEntry?.x ?? 0, scaledScreenWidth - width))
+    property real targetY : isPreview ? 0 : Math.max(0, Math.min(configEntry?.y ?? 0, scaledScreenHeight - height))
+    property real targetZ: configEntry?.z ?? 0
     x: targetX
     y: targetY
     z: targetZ
     visible: opacity > 0
-    opacity: (GlobalStates.screenLocked && !visibleWhenLocked) ? 0 : 1
+    readonly property bool atLock: GlobalStates.screenLocked || (GlobalStates.lockLookActive ?? false)
+    opacity: (root.atLock && !visibleWhenLocked) ? 0 : 1
     Behavior on opacity {
         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
     }

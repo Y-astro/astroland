@@ -81,6 +81,9 @@ Singleton {
     property bool screenLocked: false
     property bool screenLockContainsCharacters: false
     property bool screenUnlockFailed: false
+    property bool editLockPreviewExplicit: false
+    property bool editLockPreview: editLockPreviewExplicit || (root.editMode && root.editModePage === "lockscreen")
+    readonly property bool lockLookActive: root.screenLocked || root.editLockPreview
     property bool screenTranslatorOpen: false
     property bool sessionOpen: false
     property bool superDown: false
@@ -132,6 +135,8 @@ Singleton {
         target: "editMode"
         function open(): void { root.openEditMode("widgets", ""); }
         function bar(): void { root.openEditMode("bar", ""); }
+        function lockscreen(): void { root.openEditMode("lockscreen", ""); }
+        function previewLock(enabled: bool): void { root.editLockPreviewExplicit = enabled; }
         function close(): void { root.closeEditMode(); }
         function toggle(): void { if (root.editMode) root.closeEditMode(); else root.openEditMode("widgets", ""); }
     }

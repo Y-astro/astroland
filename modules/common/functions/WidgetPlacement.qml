@@ -39,7 +39,7 @@ Singleton {
     // the desktop there.
     function ownsLockPlacement(entry) {
         const behavior = entry ? (entry.lockBehavior || "hide") : "hide";
-        return behavior === "custom" || behavior === "lockOnly";
+        return behavior === "center" || behavior === "custom" || behavior === "lockOnly";
     }
 
     function fork(entry, monitorName, lock = false) {
@@ -71,9 +71,22 @@ Singleton {
     // What `entry` shows on `monitorName`: {x, y, scale, forked}. Never null.
     // With `lock`, the lock screen's placement: its own fork when there is
     // one, the desktop's placement otherwise.
-    function resolve(entry, monitorName, lock = false, screenW = 0, screenH = 0) {
+    function resolve(entry, monitorName, lock = false, screenW = 0, screenH = 0, itemW = 0, itemH = 0) {
         if (!entry)
             return { "x": 0, "y": 0, "scale": 1.0, "forked": false };
+        const behavior = entry ? (entry.lockBehavior || "hide") : "hide";
+        if (lock && behavior === "center" && screenW > 0 && screenH > 0) {
+            const w = itemW > 0 ? itemW : 240;
+            const h = itemH > 0 ? itemH : 240;
+            const bottomReserved = (typeof Config !== "undefined" && Config.options && Config.options.lock && Config.options.lock.showToolbars === false) ? 0 : 80;
+            const rawScale = Number(entry.scale ?? 1.0);
+            return {
+                "x": Math.round((screenW - w) / 2),
+                "y": Math.round((screenH - bottomReserved - h) / 2),
+                "scale": rawScale,
+                "forked": false
+            };
+        }
         lock = lock && root.ownsLockPlacement(entry);
         const localDesktop = root.fork(entry, monitorName, false);
         const localLock = lock ? root.fork(entry, monitorName, true) : null;
@@ -118,8 +131,8 @@ Singleton {
         return null;
     }
 
-    function resolveIn(list, instanceId, monitorName, lock = false, screenW = 0, screenH = 0) {
-        return root.resolve(root.findEntry(list, instanceId), monitorName, lock, screenW, screenH);
+    function resolveIn(list, instanceId, monitorName, lock = false, screenW = 0, screenH = 0, itemW = 0, itemH = 0) {
+        return root.resolve(root.findEntry(list, instanceId), monitorName, lock, screenW, screenH, itemW, itemH);
     }
 
     // The fork starts from whatever the surface currently shows, so forking

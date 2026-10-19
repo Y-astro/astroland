@@ -12,6 +12,7 @@ AbstractBackgroundWidget {
     id: root
     configEntryName: "resources"
     hoverEnabled: true
+    visibleWhenLocked: false
 
     property real widgetWidth: 420
     property real cardSpacing: 12

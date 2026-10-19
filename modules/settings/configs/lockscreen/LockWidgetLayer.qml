@@ -102,12 +102,14 @@ Item {
                     return null;
                 const layout = root.centeredLayout();
                 const offset = layout.offsets[slot.modelData.id] ?? { "start": 0, "length": 0 };
+                const bottomReserved = (root.lock.showToolbars ?? true) ? 80 : 0;
+                const availableHeight = root.height - bottomReserved;
                 // The scaled box's start along the axis, then back to the unscaled item's corner.
-                const visualStart = (layout.vertical ? root.height : root.width) / 2 - layout.total / 2 + offset.start;
+                const visualStart = (layout.vertical ? availableHeight : root.width) / 2 - layout.total / 2 + offset.start;
                 const along = visualStart - ((layout.vertical ? slot.height : slot.width) * (1 - slot.scale)) / 2;
                 return layout.vertical
                     ? { "x": (root.width - slot.width) / 2, "y": along }
-                    : { "x": along, "y": (root.height - slot.height) / 2 };
+                    : { "x": along, "y": (availableHeight - slot.height) / 2 };
             }
 
             width: slot.naturalWidth
@@ -141,6 +143,12 @@ Item {
                     target: widgetLoader.item
                     property: "isPreview"
                     value: true
+                    when: widgetLoader.status === Loader.Ready
+                }
+                Binding {
+                    target: widgetLoader.item
+                    property: "configEntry"
+                    value: slot.modelData
                     when: widgetLoader.status === Loader.Ready
                 }
                 Binding {
