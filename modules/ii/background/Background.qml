@@ -83,6 +83,7 @@ Variants {
 
         property real transitionProgress: 1.0
         property bool transitionPending: false
+        property int wallpaperUpdateSerial: 0
 
         screen: modelData
         exclusionMode: ExclusionMode.Ignore
@@ -173,6 +174,7 @@ Variants {
                 bgRoot.previousWallpaperSource = ""
                 bgRoot.transitionProgress = 1.0
                 bgRoot.videoRevealed = bgRoot.wallpaperIsVideo
+                bgRoot.wallpaperUpdateSerial++
             }
         }
 
@@ -219,6 +221,10 @@ Variants {
                 id: wallpaperSurface
                 anchors.fill: parent
 
+                readonly property real transitionProgress: bgRoot.transitionProgress
+                readonly property bool isTransitioning: bgRoot.transitionProgress < 1.0 || bgRoot.transitionPending
+                readonly property int updateSerial: bgRoot.wallpaperUpdateSerial
+
                 Image {
                     id: previousWallpaper
                     anchors.fill: parent
@@ -245,10 +251,14 @@ Variants {
                         && !centeredWallpaper.centeredHidesFullWallpaper
                     opacity: centeredWallpaper.centeredFullWallpaperOpacity()
                     onStatusChanged: {
-                        if (status === Image.Ready && bgRoot.transitionPending) {
-                            bgRoot.transitionPending = false
-                            bgRoot.transitionProgress = 0.0
-                            transitionAnim.restart()
+                        if (status === Image.Ready) {
+                            if (bgRoot.transitionPending) {
+                                bgRoot.transitionPending = false
+                                bgRoot.transitionProgress = 0.0
+                                transitionAnim.restart()
+                            } else {
+                                bgRoot.wallpaperUpdateSerial++
+                            }
                         }
                     }
                 }
