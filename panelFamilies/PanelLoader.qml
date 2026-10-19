@@ -53,9 +53,10 @@ LazyLoader {
     }
     Component.onCompleted: root.takeTicket()
 
-    Timer {
+    property Timer releaseCollect: Timer {
         id: releaseCollect
         interval: 500
+        repeat: false
         onTriggered: {
             if (!root.active && typeof gc === "function")
                 gc();
@@ -63,7 +64,9 @@ LazyLoader {
     }
 
     onActiveChanged: {
-        if (!root.active && root.lazy && !root.retainAfterOpen)
-            releaseCollect.restart();
+        if (!root.active && root.lazy && !root.retainAfterOpen && root.everOpened)
+            root.releaseCollect.restart();
+        else
+            root.releaseCollect.stop();
     }
 }
