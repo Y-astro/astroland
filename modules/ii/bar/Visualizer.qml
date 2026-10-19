@@ -17,8 +17,8 @@ Item {
     property bool isPlaying: MprisController.activePlayer?.isPlaying ?? false
 
     // Target dimensions for the tacet mark inside the bar pill
-    property real visualizerWidth: 105
-    property real visualizerHeight: 22
+    property real visualizerWidth: 92
+    property real visualizerHeight: 27
 
     implicitWidth: vertical
         ? Appearance.sizes.verticalBarWidth
@@ -71,9 +71,9 @@ Item {
         const pX = root.phaseTime * (twoPi / 4.0);
         const pGlow = root.phaseTime * (twoPi / 2.8);
 
-        const idleBob = -0.8 * Math.sin(pBob);
-        const idleScaleY = 1.0 + 0.06 * Math.sin(pY);
-        const idleScaleX = 1.0 - 0.03 * Math.sin(pX);
+        const idleBob = -0.6 * Math.sin(pBob);
+        const idleScaleY = 1.0 + 0.05 * Math.sin(pY);
+        const idleScaleX = 1.0 - 0.025 * Math.sin(pX);
         const idleGlow = 0.28 + 0.14 * Math.sin(pGlow);
 
         const targetEnergy = root.hasAudio ? root.audioEnergy : 0.0;
@@ -81,8 +81,8 @@ Item {
         const energy = root.smoothEnergy;
 
         container.anchors.verticalCenterOffset = idleBob * (1.0 - energy * 0.5);
-        breathScale.yScale = idleScaleY + 0.07 * energy;
-        breathScale.xScale = idleScaleX - 0.03 * energy;
+        breathScale.yScale = idleScaleY + 0.05 * energy;
+        breathScale.xScale = idleScaleX - 0.02 * energy;
         auraBlur.opacity = Math.min(0.85, idleGlow + 0.30 * energy);
         animatedShader.time += dt * (1.0 + energy * 1.5);
     }
@@ -128,8 +128,8 @@ Item {
         running: root.ambientRunning
         onTriggered: {
             root.ambientPhase = (root.ambientPhase + 0.08) % (2.0 * Math.PI);
-            breathScale.yScale = 1.0 + 0.04 * Math.sin(root.ambientPhase);
-            breathScale.xScale = 1.0 - 0.02 * Math.sin(root.ambientPhase);
+            breathScale.yScale = 1.0 + 0.035 * Math.sin(root.ambientPhase);
+            breathScale.xScale = 1.0 - 0.018 * Math.sin(root.ambientPhase);
             container.anchors.verticalCenterOffset = 0;
             auraBlur.opacity = 0.20 + 0.12 * Math.sin(root.ambientPhase);
             animatedShader.time += 0.008;
@@ -140,7 +140,7 @@ Item {
         id: container
         anchors.centerIn: parent
         anchors.verticalCenterOffset: 0
-        width: root.visualizerWidth
+        width: Math.round(root.visualizerHeight * 3)
         height: root.visualizerHeight
         rotation: root.vertical ? 90 : 0
 
@@ -158,8 +158,8 @@ Item {
             source: Qt.resolvedUrl("../../../assets/icons/tacet-mark.svg")
             anchors.fill: parent
             fillMode: Image.PreserveAspectFit
-            sourceSize.width: 496
-            sourceSize.height: 165
+            sourceSize.width: 576
+            sourceSize.height: 192
             smooth: true
             mipmap: true
         }
@@ -180,8 +180,8 @@ Item {
             source: Qt.resolvedUrl("../../../assets/icons/tacet-mark.svg")
             anchors.fill: parent
             fillMode: Image.PreserveAspectFit
-            sourceSize.width: 496
-            sourceSize.height: 165
+            sourceSize.width: 576
+            sourceSize.height: 192
             smooth: true
         }
 
