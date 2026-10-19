@@ -306,79 +306,83 @@ AbstractBackgroundWidget {
                     layer.enabled: maskActive
                     layer.smooth: true
                     layer.effect: OpacityMask {
-                        maskSource: Canvas {
-                            id: dialFadeMask
-                            width: dialCanvasWrapper.width
-                            height: dialCanvasWrapper.height
-                            visible: false
-                            contextType: "2d"
+                        maskSource: dialFadeMask
+                    }
 
-                            onPaint: {
-                                var ctx = getContext("2d");
-                                var w = width;
-                                var h = height;
-                                ctx.reset();
-                                ctx.fillStyle = "white";
-                                ctx.fillRect(0, 0, w, h);
+                    // Keep the mask outside the disposable layer effect: switching
+                    // skins can disable the layer during maskActiveChanged delivery.
+                    Canvas {
+                        id: dialFadeMask
+                        width: dialCanvasWrapper.width
+                        height: dialCanvasWrapper.height
+                        visible: false
+                        contextType: "2d"
 
-                                ctx.globalCompositeOperation = "destination-out";
-                                if (root.isWuWa) {
-                                    var geom = clockGeom.get(w);
-                                    var clr = geom.maskClearance;
-                                    var capX = geom.capsuleX - clr;
-                                    var capY = (geom.capsuleYCenter - (geom.capsuleHeight / 2.0)) - clr;
-                                    var capW = geom.capsuleWidth + (clr * 2.0);
-                                    var capH = geom.capsuleHeight + (clr * 2.0);
-                                    var capR = capH / 2.0;
+                        onPaint: {
+                            var ctx = getContext("2d");
+                            var w = width;
+                            var h = height;
+                            ctx.reset();
+                            ctx.fillStyle = "white";
+                            ctx.fillRect(0, 0, w, h);
 
-                                    ctx.fillStyle = "rgba(0, 0, 0, 1.0)";
-                                    ctx.beginPath();
-                                    ctx.moveTo(capX + capR, capY);
-                                    ctx.lineTo(capX + capW - capR, capY);
-                                    ctx.arc(capX + capW - capR, capY + capR, capR, -Math.PI / 2, 0, false);
-                                    ctx.lineTo(capX + capW, capY + capH - capR);
-                                    ctx.arc(capX + capW - capR, capY + capH - capR, capR, 0, Math.PI / 2, false);
-                                    ctx.lineTo(capX + capR, capY + capH);
-                                    ctx.arc(capX + capR, capY + capH - capR, capR, Math.PI / 2, Math.PI, false);
-                                    ctx.lineTo(capX, capY + capR);
-                                    ctx.arc(capX + capR, capY + capR, capR, Math.PI, 3 * Math.PI / 2, false);
-                                    ctx.closePath();
-                                    ctx.fill();
-                                } else {
-                                    var cx = w * 0.93;
-                                    var cy = h * 0.5;
-                                    var rOuter = w * 0.075;
-                                    var rInner = w * 0.04;
-                                    var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, rOuter);
-                                    grad.addColorStop(0.0, "rgba(0, 0, 0, 1.0)");
-                                    grad.addColorStop(rInner / rOuter, "rgba(0, 0, 0, 1.0)");
-                                    grad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
-                                    ctx.fillStyle = grad;
-                                    ctx.beginPath();
-                                    ctx.arc(cx, cy, rOuter, 0, 2 * Math.PI);
-                                    ctx.fill();
-                                }
+                            ctx.globalCompositeOperation = "destination-out";
+                            if (root.isWuWa) {
+                                var geom = clockGeom.get(w);
+                                var clr = geom.maskClearance;
+                                var capX = geom.capsuleX - clr;
+                                var capY = (geom.capsuleYCenter - (geom.capsuleHeight / 2.0)) - clr;
+                                var capW = geom.capsuleWidth + (clr * 2.0);
+                                var capH = geom.capsuleHeight + (clr * 2.0);
+                                var capR = capH / 2.0;
+
+                                ctx.fillStyle = "rgba(0, 0, 0, 1.0)";
+                                ctx.beginPath();
+                                ctx.moveTo(capX + capR, capY);
+                                ctx.lineTo(capX + capW - capR, capY);
+                                ctx.arc(capX + capW - capR, capY + capR, capR, -Math.PI / 2, 0, false);
+                                ctx.lineTo(capX + capW, capY + capH - capR);
+                                ctx.arc(capX + capW - capR, capY + capH - capR, capR, 0, Math.PI / 2, false);
+                                ctx.lineTo(capX + capR, capY + capH);
+                                ctx.arc(capX + capR, capY + capH - capR, capR, Math.PI / 2, Math.PI, false);
+                                ctx.lineTo(capX, capY + capR);
+                                ctx.arc(capX + capR, capY + capR, capR, Math.PI, 3 * Math.PI / 2, false);
+                                ctx.closePath();
+                                ctx.fill();
+                            } else {
+                                var cx = w * 0.93;
+                                var cy = h * 0.5;
+                                var rOuter = w * 0.075;
+                                var rInner = w * 0.04;
+                                var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, rOuter);
+                                grad.addColorStop(0.0, "rgba(0, 0, 0, 1.0)");
+                                grad.addColorStop(rInner / rOuter, "rgba(0, 0, 0, 1.0)");
+                                grad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+                                ctx.fillStyle = grad;
+                                ctx.beginPath();
+                                ctx.arc(cx, cy, rOuter, 0, 2 * Math.PI);
+                                ctx.fill();
                             }
+                        }
 
-                            Connections {
-                                target: dialCanvasWrapper
-                                function onMaskActiveChanged() {
-                                    if (dialCanvasWrapper.maskActive) {
-                                        dialFadeMask.requestPaint();
-                                    }
-                                }
-                            }
-
-                            Connections {
-                                target: root
-                                function onIsWuWaChanged() {
+                        Connections {
+                            target: dialCanvasWrapper
+                            function onMaskActiveChanged() {
+                                if (dialCanvasWrapper.maskActive) {
                                     dialFadeMask.requestPaint();
                                 }
                             }
-
-                            onWidthChanged: requestPaint()
-                            onHeightChanged: requestPaint()
                         }
+
+                        Connections {
+                            target: root
+                            function onIsWuWaChanged() {
+                                dialFadeMask.requestPaint();
+                            }
+                        }
+
+                        onWidthChanged: requestPaint()
+                        onHeightChanged: requestPaint()
                     }
 
                     ConcentricDialCanvas {
