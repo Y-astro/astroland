@@ -78,7 +78,8 @@ MouseArea {
             leftPadding: 5
             rightPadding: 3
             font.pixelSize: Appearance.font.pixelSize.small
-            color: root.isMaterial ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1
+            color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary
+                : (root.isMaterial ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1)
             text: Updates.count
         }
     }
@@ -90,7 +91,8 @@ MouseArea {
             rightPadding: 3
             text: "progress_activity"
             iconSize: Appearance.font.pixelSize.normal
-            color: root.isMaterial ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1
+            color: ResonanceTheme.enabled ? ResonanceTheme.accentGold
+                : (root.isMaterial ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1)
             RotationAnimation on rotation {
                 from: 0; to: 360
                 duration: 1000
@@ -117,9 +119,9 @@ MouseArea {
                 Layout.alignment: Qt.AlignVCenter
                 text: "deployed_code_update"
                 iconSize: Appearance.font.pixelSize.normal
-                color: Updates.updateStronglyAdvised ? Appearance.m3colors.m3error
-                    : Updates.updateAdvised ? Appearance.colors.colTertiary
-                    : Appearance.colors.colOnLayer1
+                color: Updates.updateStronglyAdvised ? (ResonanceTheme.enabled ? ResonanceTheme.textWarning : Appearance.m3colors.m3error)
+                    : Updates.updateAdvised ? (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colTertiary)
+                    : (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnLayer1)
             }
 
             // Material
@@ -157,9 +159,9 @@ MouseArea {
                 Layout.alignment: Qt.AlignHCenter
                 text: "deployed_code_update"
                 iconSize: Appearance.font.pixelSize.normal
-                color: Updates.updateStronglyAdvised ? Appearance.m3colors.m3error
-                    : Updates.updateAdvised ? Appearance.colors.colTertiary
-                    : Appearance.colors.colOnLayer1
+                color: Updates.updateStronglyAdvised ? (ResonanceTheme.enabled ? ResonanceTheme.textWarning : Appearance.m3colors.m3error)
+                    : Updates.updateAdvised ? (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colTertiary)
+                    : (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnLayer1)
             }
 
             Rectangle {

@@ -77,6 +77,7 @@ Singleton {
     // Surface & Glass
     readonly property color bgGlass: ColorUtils.applyAlpha(colTealInk, 0.72 * root.intensity)
     readonly property color bgGlassElevated: ColorUtils.applyAlpha(colTealInk, 0.85 * root.intensity)
+    readonly property color bgGlassPill: ColorUtils.applyAlpha(colTealInk, Math.min(0.94, 0.76 + 0.08 * root.intensity))
     readonly property color bgGlassSubtle: ColorUtils.applyAlpha(colTealInk, 0.40 * root.intensity)
 
     // Borders & Hairlines

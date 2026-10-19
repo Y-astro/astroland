@@ -130,7 +130,7 @@ MouseArea {
             Layout.preferredWidth: root.vertical ? -1 : regularRateMetrics.width
             horizontalAlignment: Text.AlignRight
             text: speedLine.rateText
-            color: Appearance.colors.colOnLayer1
+            color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer1
             font.pixelSize: Appearance.font.pixelSize.smallest
             font.weight: Font.Medium
             font.features: { "tnum": 1 }
@@ -145,13 +145,13 @@ MouseArea {
         SpeedLine {
             iconName: "arrow_upward"
             rate: root.uploadBytesPerSecond
-            accentColor: Appearance.colors.colTertiary
+            accentColor: ResonanceTheme.enabled ? ResonanceTheme.colMistySage : Appearance.colors.colTertiary
         }
 
         SpeedLine {
             iconName: "arrow_downward"
             rate: root.downloadBytesPerSecond
-            accentColor: Appearance.colors.colPrimary
+            accentColor: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
         }
     }
 

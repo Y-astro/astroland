@@ -25,7 +25,9 @@ Item {
             lineWidth: Appearance.rounding.unsharpen
             value: root.percentage
             implicitSize: vertical ? 20 : 20
-            colPrimary: root.warning ? Appearance.colors.colError : Appearance.colors.colOnSecondaryContainer
+            colPrimary: root.warning
+                ? (ResonanceTheme.enabled ? ResonanceTheme.textWarning : Appearance.colors.colError)
+                : (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnSecondaryContainer)
             enableAnimation: false
             Item {
                 anchors.centerIn: parent
@@ -37,7 +39,9 @@ Item {
                     fill: 1
                     text: root.iconName
                     iconSize: Appearance.font.pixelSize.normal
-                    color: Appearance.colors.colOnSecondaryContainer
+                    color: ResonanceTheme.enabled
+                        ? (root.warning ? ResonanceTheme.textWarning : ResonanceTheme.accentGold)
+                        : Appearance.colors.colOnSecondaryContainer
                 }
 
                 Rectangle {
@@ -75,7 +79,9 @@ Item {
             lineWidth: Appearance.rounding.unsharpen
             value: root.percentage
             implicitSize: 20
-            colPrimary: root.warning ? Appearance.colors.colError : Appearance.colors.colOnSecondaryContainer
+            colPrimary: root.warning
+                ? (ResonanceTheme.enabled ? ResonanceTheme.textWarning : Appearance.colors.colError)
+                : (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnSecondaryContainer)
             accountForLightBleeding: !root.warning
             enableAnimation: false
             Item {
@@ -88,7 +94,9 @@ Item {
                     fill: 1
                     text: root.iconName
                     iconSize: Appearance.font.pixelSize.normal
-                    color: Appearance.m3colors.m3onSecondaryContainer
+                    color: ResonanceTheme.enabled
+                        ? (root.warning ? ResonanceTheme.textWarning : ResonanceTheme.accentGold)
+                        : Appearance.m3colors.m3onSecondaryContainer
                 }
 
                 Rectangle {
@@ -157,7 +165,7 @@ Item {
             StyledText {
                 id: percentageText
                 anchors.centerIn: parent
-                color: Appearance.colors.colOnLayer1
+                color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer1
                 font.pixelSize: Appearance.font.pixelSize.small
                 text: `${Math.round(root.percentage * 100).toString()}`
             }

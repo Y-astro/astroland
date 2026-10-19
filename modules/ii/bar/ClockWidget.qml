@@ -43,7 +43,7 @@ BarWidgetSwitcher {
                             else
                                 return Appearance.font.pixelSize.large;
                         }
-                        color: Appearance.colors.colOnLayer1
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer1
                         text: modelData.padStart(2, "0")
                     }
                 }
@@ -53,7 +53,7 @@ BarWidgetSwitcher {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.bottomMargin: 5
                 font.pixelSize: Appearance.font.pixelSize.smallest
-                color: Appearance.colors.colOnLayer1
+                color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colOnLayer1
                 text: DateTime.shortDate
             }
         }
@@ -111,18 +111,18 @@ BarWidgetSwitcher {
             StyledText {
                 visible: root.showDate
                 font.pixelSize: Appearance.font.pixelSize.small
-                color: Appearance.colors.colOnLayer1
+                color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colOnLayer1
                 text: DateTime.longDate
             }
             StyledText {
                 visible: root.showDate
                 font.pixelSize: Appearance.font.pixelSize.small
-                color: Appearance.colors.colOnLayer1
+                color: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnLayer1
                 text: "•"
             }
             StyledText {
                 font.pixelSize: Appearance.font.pixelSize.large
-                color: Appearance.colors.colOnLayer1
+                color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer1
                 text: DateTime.time
                 font.letterSpacing: -0.4
                 font.features: { "tnum": 1 }

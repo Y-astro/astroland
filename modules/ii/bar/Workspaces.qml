@@ -192,7 +192,9 @@ ButtonMouseArea {
             id: occupiedIndicatorsBg
             anchors.fill: parent
             contentLayer: StyledRectangle.ContentLayer.Group
-            color: ColorUtils.transparentize(Appearance.m3colors.m3secondaryContainer, 0.4)
+            color: ResonanceTheme.enabled
+                ? ColorUtils.applyAlpha(ResonanceTheme.colMistySage, 0.25)
+                : ColorUtils.transparentize(Appearance.m3colors.m3secondaryContainer, 0.4)
             visible: false
         }
 
@@ -408,7 +410,7 @@ ButtonMouseArea {
                 Text {
                     anchors.centerIn: parent
                     text: String.fromCodePoint(0xF0BAF)
-                    color: Appearance.colors.colPrimary
+                    color: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
                     font.family: Appearance.font.family.iconNerd || "JetBrainsMono Nerd Font"
                     font.pixelSize: Math.round(root.workspaceButtonWidth * 0.58)
                     font.weight: Font.Bold
@@ -423,7 +425,7 @@ ButtonMouseArea {
                     width: Math.round(root.workspaceButtonWidth * 0.65)
                     height: width
                     property real closure: root.pacmanMouthClosure
-                    property color fillColor: Appearance.colors.colPrimary
+                    property color fillColor: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
 
                     onClosureChanged: requestPaint()
                     onFillColorChanged: requestPaint()
@@ -514,7 +516,7 @@ ButtonMouseArea {
                     return base;
                 return specialWsText.implicitWidth + undirectionalWidth;
             }
-            color: Appearance.colors.colPrimary
+            color: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
 
             implicitWidth: root.vertical ? undirectionalWidth : undirectionalLength
             implicitHeight: root.vertical ? undirectionalLength : undirectionalWidth
@@ -523,7 +525,7 @@ ButtonMouseArea {
                 id: specialWsText
                 anchors.centerIn: parent
                 text: (!root.vertical ? wsModel.specialWorkspaceName : "S")
-                color: Appearance.colors.colOnPrimary
+                color: ResonanceTheme.enabled ? ResonanceTheme.colTealInk : Appearance.colors.colOnPrimary
                 font.pixelSize: root.specialTextSize
             }
 
@@ -587,7 +589,9 @@ ButtonMouseArea {
         property bool isFocused: wsNum.wsId === wsModel.activeNumber
         property bool isOccupied: (wsData ? wsData.occupied : false) && wsNum.wsId !== wsModel.fakeWorkspace
         property bool hasBiggestWindow: !!(wsData ? wsData.biggestWindow : null)
-        property color contentColor: ((wsData ? wsData.occupied : false) && wsId !== wsModel.fakeWorkspace) ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer1Inactive
+        property color contentColor: ResonanceTheme.enabled
+            ? (((wsData ? wsData.occupied : false) && wsId !== wsModel.fakeWorkspace) ? ResonanceTheme.accentGold : ResonanceTheme.borderSubtle)
+            : (((wsData ? wsData.occupied : false) && wsId !== wsModel.fakeWorkspace) ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer1Inactive)
         property bool showingNumbers: {
             if (root.isPacmanStyle)
                 return false;
@@ -621,10 +625,10 @@ ButtonMouseArea {
                             ? root.pacmanEatProgress : 0
                         eatDirection: root.pacmanTravelDirection
                         isVertical: root.vertical
-                        activeColor: Appearance.colors.colPrimary
-                        occupiedColor: Appearance.colors.colPrimary
-                        emptyColor: Appearance.colors.colPrimary
-                        hoverColor: Appearance.colors.colPrimaryHover
+                        activeColor: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
+                        occupiedColor: ResonanceTheme.enabled ? ResonanceTheme.colWarmIvory : Appearance.colors.colPrimary
+                        emptyColor: ResonanceTheme.enabled ? ResonanceTheme.borderSubtle : Appearance.colors.colPrimary
+                        hoverColor: ResonanceTheme.enabled ? ResonanceTheme.borderAccent : Appearance.colors.colPrimaryHover
                     }
                 }
 
@@ -703,7 +707,7 @@ ButtonMouseArea {
 
             contentLayer: StyledRectangle.ContentLayer.Group
             radius: indicatorThickness / 2
-            color: Appearance.colors.colPrimary
+            color: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
 
             x: root.vertical ? null : indicatorPosition
             y: root.vertical ? indicatorPosition : null

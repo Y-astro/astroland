@@ -1,4 +1,5 @@
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.services
 import QtQuick
@@ -58,7 +59,12 @@ MouseArea {
         anchors.centerIn: parent
         value: percentage
         rotation: root.vertical ? -90 : 0
-        highlightColor: (isLow && !isCharging) ? Appearance.m3colors.m3error : Appearance.colors.colOnSecondaryContainer
+        highlightColor: (isLow && !isCharging)
+            ? (ResonanceTheme.enabled ? ResonanceTheme.textWarning : Appearance.m3colors.m3error)
+            : (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnSecondaryContainer)
+        trackColor: ResonanceTheme.enabled
+            ? ColorUtils.applyAlpha(ResonanceTheme.accentGold, 0.22)
+            : ColorUtils.transparentize(highlightColor, 0.5)
         text: `${Math.round(value * 100)}${root.modeChar}`
         valueBarWidth: text.length > 3 ? 38 : (text.length > 2 ? 34 : 30)
         Item {

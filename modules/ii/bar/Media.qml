@@ -79,7 +79,7 @@ Item {
 
     Layout.fillHeight: true
     property real visualizerWidth: 105
-    property real visualizerHeight: 30
+    property real visualizerHeight: 22
 
     implicitWidth: vertical 
         ? Appearance.sizes.verticalBarWidth 

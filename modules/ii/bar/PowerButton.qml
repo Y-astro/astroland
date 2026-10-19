@@ -15,8 +15,10 @@ RippleButton {
 
     buttonRadius: Appearance.rounding.full
     colBackground: isMaterial ? Appearance.colors.colPrimary : "transparent"
-    colBackgroundHover: isMaterial ? Appearance.colors.colPrimaryHover : Appearance.colors.colLayer1Hover
-    colRipple: isMaterial ? Appearance.colors.colPrimaryActive : Appearance.colors.colLayer1Active
+    colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.borderAccent
+        : (isMaterial ? Appearance.colors.colPrimaryHover : Appearance.colors.colLayer1Hover)
+    colRipple: ResonanceTheme.enabled ? ResonanceTheme.borderHairline
+        : (isMaterial ? Appearance.colors.colPrimaryActive : Appearance.colors.colLayer1Active)
 
     onPressed: {
         GlobalStates.sessionOpen = !GlobalStates.sessionOpen
@@ -27,7 +29,7 @@ RippleButton {
         visible: !root.isMaterial
         text: "power_settings_new"
         iconSize: 18
-        color: Appearance.colors.colOnLayer0
+        color: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnLayer0
     }
 
     MaterialShapeWrappedMaterialSymbol {

@@ -11,10 +11,10 @@ Item {
     property int eatDirection: 1
     property int facingDirection: 1
     property bool isVertical: false
-    property color activeColor: Appearance.colors.colPrimary
-    property color occupiedColor: Appearance.colors.colPrimary
-    property color emptyColor: Appearance.colors.colPrimary
-    property color hoverColor: Appearance.colors.colPrimaryHover
+    property color activeColor: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
+    property color occupiedColor: ResonanceTheme.enabled ? ResonanceTheme.colWarmIvory : Appearance.colors.colPrimary
+    property color emptyColor: ResonanceTheme.enabled ? ResonanceTheme.borderSubtle : Appearance.colors.colPrimary
+    property color hoverColor: ResonanceTheme.enabled ? ResonanceTheme.borderAccent : Appearance.colors.colPrimaryHover
 
     property int glyphSize: 15
     property int pelletSize: 5

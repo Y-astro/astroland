@@ -118,13 +118,15 @@ Item {
         anchors.fill: parent
         anchors.margins: Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0
         color: (!centerOnly && Config.options.bar.showBackground && Config.options.bar.cornerStyle !== 2 && !root.isMaterial)
-            ? (Config.options.bar.followFrameColor
-                ? Appearance.getColorFromName(Config.options.bar.frameColor)
-                : Appearance.colors.colLayer0)
+            ? (ResonanceTheme.enabled
+                ? ResonanceTheme.bgGlassPill
+                : (Config.options.bar.followFrameColor
+                    ? Appearance.getColorFromName(Config.options.bar.frameColor)
+                    : Appearance.colors.colLayer0))
             : "transparent"
         radius: Config.options.bar.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
         border.width: (!centerOnly && Config.options.bar.cornerStyle === 1) ? 1 : 0
-        border.color: Config.options.bar.cornerStyle === 1 && !Config.options.bar.showBackground ? "transparent" : Appearance.colors.colLayer0Border
+        border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : (Config.options.bar.cornerStyle === 1 && !Config.options.bar.showBackground ? "transparent" : Appearance.colors.colLayer0Border)
     }
 
     // center-only
@@ -177,12 +179,14 @@ Item {
             ? (Config.options.bar.cornerStyle === 1 ? middleRow.implicitWidth + 8 : middleRow.implicitWidth - 4)
             : middleRow.implicitWidth + 10
         height: GlobalStates.dynamicIslandEnabled ? parent.height : parent.height - (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut * 2 : 0)
-        color: Config.options.bar.followFrameColor
-            ? Appearance.getColorFromName(Config.options.bar.frameColor)
-            : Appearance.colors.colLayer0
+        color: ResonanceTheme.enabled
+            ? ResonanceTheme.bgGlassPill
+            : (Config.options.bar.followFrameColor
+                ? Appearance.getColorFromName(Config.options.bar.frameColor)
+                : Appearance.colors.colLayer0)
         radius: Config.options.bar.cornerStyle === 1 || root.isMaterial ? Appearance.rounding.windowRounding : 0
-        border.width: Config.options.bar.cornerStyle === 1 ? 1 : 0
-        border.color: Appearance.colors.colLayer0Border
+        border.width: ResonanceTheme.enabled ? 1 : (Config.options.bar.cornerStyle === 1 ? 1 : 0)
+        border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : Appearance.colors.colLayer0Border
 
         bottomLeftRadius:  Config.options.bar.cornerStyle === 0 && !Config.options.bar.bottom ? Appearance.rounding.screenRounding : radius
         bottomRightRadius: Config.options.bar.cornerStyle === 0 && !Config.options.bar.bottom ? Appearance.rounding.screenRounding : radius
@@ -251,7 +255,9 @@ Item {
                 implicitWidth: leftMaterialRow.implicitWidth + 10
                 implicitHeight: leftMaterialRow.implicitHeight
                 radius: Appearance.rounding.full
-                color: Appearance.colors.colLayer0
+                color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPill : Appearance.colors.colLayer0
+                border.width: ResonanceTheme.enabled ? 1 : 0
+                border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
 
                 RowLayout {
                     id: leftMaterialRow
@@ -347,7 +353,9 @@ Item {
                 implicitWidth: centerMaterialRow.implicitWidth + 10
                 implicitHeight: centerMaterialRow.implicitHeight 
                 radius: Appearance.rounding.full
-                color: Appearance.colors.colLayer0
+                color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPill : Appearance.colors.colLayer0
+                border.width: ResonanceTheme.enabled ? 1 : 0
+                border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
 
                 RowLayout {
                     id: centerMaterialRow
@@ -446,7 +454,9 @@ Item {
                 implicitWidth: rightMaterialRow.implicitWidth + 10
                 implicitHeight: rightMaterialRow.implicitHeight 
                 radius: Appearance.rounding.full
-                color: Appearance.colors.colLayer0
+                color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPill : Appearance.colors.colLayer0
+                border.width: ResonanceTheme.enabled ? 1 : 0
+                border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
 
                 RowLayout {
                     id: rightMaterialRow

@@ -40,6 +40,7 @@ QtObject {
 
     // ── Colors ────────────────────────────────────────────────────────────────
     readonly property color colBackground: {
+        if (ResonanceTheme.enabled) return ResonanceTheme.bgGlassPill;
         if (Config.options.bar.expressiveColors) return activeTheme.componentBackground;
         if (Config.options.bar.expressiveGroupColor && (barGroupStyle === 0 || barGroupStyle === 1))
             return Appearance.colors.colPrimaryContainer;

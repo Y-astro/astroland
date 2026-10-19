@@ -15,6 +15,10 @@ Item {
     property bool vertical: Config.options.bar.vertical
     property bool isMaterial: Config.options.bar.cornerStyle === 3
 
+    readonly property color contentColor: ResonanceTheme.enabled
+        ? ResonanceTheme.textPrimary
+        : (root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1)
+
     implicitWidth: root.vertical ? 32 : flow.implicitWidth + 4
     implicitHeight: root.vertical ? flow.implicitHeight + 4 : 32
 
@@ -52,7 +56,7 @@ Item {
                             return "volume_up";
                         }
                         iconSize: Appearance.font.pixelSize.larger
-                        color: root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
+                        color: root.contentColor
                     }
 
                     StyledText {
@@ -60,7 +64,7 @@ Item {
                         visible: volumeItem.hovered
                         font.pixelSize: Appearance.font.pixelSize.small
                         font.features: { "tnum": 1 }
-                        color: root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
+                        color: root.contentColor
                         text: `${Math.round((Audio.sink?.audio?.volume ?? 0) * 100)}`
                     }
                 }
@@ -78,7 +82,7 @@ Item {
                             return "volume_up";
                         }
                         iconSize: Appearance.font.pixelSize.larger
-                        color: root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
+                        color: root.contentColor
                     }
 
                     StyledText {
@@ -86,7 +90,7 @@ Item {
                         visible: volumeItem.hovered
                         font.pixelSize: Appearance.font.pixelSize.smallest
                         font.features: { "tnum": 1 }
-                        color: root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
+                        color: root.contentColor
                         text: `${Math.round((Audio.sink?.audio?.volume ?? 0) * 100)}`
                     }
                 }
@@ -115,7 +119,7 @@ Item {
             MaterialSymbol {
                 text: "mic"
                 iconSize: Appearance.font.pixelSize.larger
-                color: root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
+                color: root.contentColor
                 StyledToolTip {
                     text: Translation.tr("Microphone is on")
                 }
@@ -123,18 +127,18 @@ Item {
         }
         Loader {
             source: "HyprlandXkbIndicator.qml"
-            onLoaded: item.color = root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
+            onLoaded: item.color = root.contentColor
         }
         MaterialSymbol {
             text: Network.materialSymbol
             iconSize: Appearance.font.pixelSize.larger
-            color: root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
+            color: root.contentColor
         }
         MaterialSymbol {
             visible: BluetoothStatus.available
             text: BluetoothStatus.connected ? "bluetooth_connected" : BluetoothStatus.enabled ? "bluetooth" : "bluetooth_disabled"
             iconSize: Appearance.font.pixelSize.larger
-            color: root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
+            color: root.contentColor
         }
         Loader {
             id: notifLoader

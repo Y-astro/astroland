@@ -18,7 +18,7 @@ Item {
 
     // Target dimensions for the tacet mark inside the bar pill
     property real visualizerWidth: 105
-    property real visualizerHeight: 30
+    property real visualizerHeight: 22
 
     implicitWidth: vertical
         ? Appearance.sizes.verticalBarWidth
@@ -71,18 +71,18 @@ Item {
         const pX = root.phaseTime * (twoPi / 4.0);
         const pGlow = root.phaseTime * (twoPi / 2.8);
 
-        const idleBob = -1.5 * Math.sin(pBob);
-        const idleScaleY = 1.0 + 0.08 * Math.sin(pY);
-        const idleScaleX = 1.0 - 0.04 * Math.sin(pX);
+        const idleBob = -0.8 * Math.sin(pBob);
+        const idleScaleY = 1.0 + 0.06 * Math.sin(pY);
+        const idleScaleX = 1.0 - 0.03 * Math.sin(pX);
         const idleGlow = 0.28 + 0.14 * Math.sin(pGlow);
 
         const targetEnergy = root.hasAudio ? root.audioEnergy : 0.0;
         root.smoothEnergy += (targetEnergy - root.smoothEnergy) * Math.min(1.0, dt * 10.0);
         const energy = root.smoothEnergy;
 
-        container.anchors.verticalCenterOffset = idleBob * (1.0 - energy * 0.5) - 2.0 * energy;
-        breathScale.yScale = idleScaleY + 0.08 * energy;
-        breathScale.xScale = idleScaleX - 0.04 * energy;
+        container.anchors.verticalCenterOffset = idleBob * (1.0 - energy * 0.5);
+        breathScale.yScale = idleScaleY + 0.07 * energy;
+        breathScale.xScale = idleScaleX - 0.03 * energy;
         auraBlur.opacity = Math.min(0.85, idleGlow + 0.30 * energy);
         animatedShader.time += dt * (1.0 + energy * 1.5);
     }
@@ -190,7 +190,7 @@ Item {
             anchors.fill: auraImage
             source: auraImage
             color: root.auraColor
-            scale: 1.08
+            scale: 1.05
             cached: true
         }
 
@@ -198,7 +198,7 @@ Item {
             id: auraBlur
             anchors.fill: auraOverlay
             source: auraOverlay
-            radius: 8
+            radius: 6
             cached: true
             opacity: 0.28
         }

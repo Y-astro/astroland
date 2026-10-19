@@ -55,15 +55,17 @@ Item {
             : (root.isMaterial && !root.paintMaterialPill)
                 ? "transparent"
                 : (root.isMaterial && root.paintMaterialPill)
-                    ? root.bgColor
+                    ? (ResonanceTheme.enabled ? ResonanceTheme.bgGlassPill : root.bgColor)
                     : (Config.options?.bar.borderless === "transparent"
                         ? "transparent"
                         : Config.options.bar.cornerStyle === 2 || (Config.options?.bar.borderless === "segmented" && !Config.options.bar.showBackground)
-                            ? Appearance.colors.colLayer0
-                            : root.resolvedGroupColor)
+                            ? (ResonanceTheme.enabled ? ResonanceTheme.bgGlassPill : Appearance.colors.colLayer0)
+                            : (ResonanceTheme.enabled ? ResonanceTheme.bgGlassPill : root.resolvedGroupColor))
 
-        border.width: root.paintBackground && root.isSegmented && !root.isMaterial ? 1 : 0
-        border.color: Appearance.colors.colLayer0Border
+        border.width: ResonanceTheme.enabled
+            ? (root.paintBackground ? 1 : 0)
+            : (root.paintBackground && root.isSegmented && !root.isMaterial ? 1 : 0)
+        border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : Appearance.colors.colLayer0Border
 
         topLeftRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.borderless === "separated" ? root.fullRadius : root.startRadius)
         bottomLeftRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.borderless === "separated" ? root.fullRadius : root.vertical ? root.endRadius : root.startRadius)
