@@ -45,7 +45,8 @@ AbstractWidget {
     y: targetY
     z: targetZ
     visible: opacity > 0
-    readonly property bool atLock: GlobalStates.screenLocked || (GlobalStates.lockLookActive ?? false)
+    property bool lockContext: false
+    readonly property bool atLock: lockContext || GlobalStates.screenLocked || (GlobalStates.lockLookActive ?? false)
     opacity: (root.atLock && !visibleWhenLocked) ? 0 : 1
     Behavior on opacity {
         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)

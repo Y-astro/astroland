@@ -147,6 +147,12 @@ Item {
                 }
                 Binding {
                     target: widgetLoader.item
+                    property: "lockContext"
+                    value: true
+                    when: widgetLoader.status === Loader.Ready
+                }
+                Binding {
+                    target: widgetLoader.item
                     property: "configEntry"
                     value: slot.modelData
                     when: widgetLoader.status === Loader.Ready

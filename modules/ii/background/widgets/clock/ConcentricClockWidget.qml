@@ -92,7 +92,11 @@ AbstractBackgroundWidget {
     // Stage 3: WuWa Perceptual Contrast Mapping
     // Non-linear sqrt(rawAlpha) curve provides solid deep teal contrast support behind
     // foreground numerals/text against bright sunset skies while preserving transparency=1 -> 0, transparency=0 -> 1 (before theme intensity scaling).
+    // On the lock screen (root.atLock), calibrate baseline opacity to bgGlassElevated (0.85 * intensity) so the dark radial gradient disc is consistently prominent and high-contrast behind the ivory numerals.
     readonly property real wuwaBgAlpha: {
+        if (root.atLock) {
+            return Math.max(0.85 * ResonanceTheme.intensity, Math.sqrt(1.0 - root.cfgTransparency) * ResonanceTheme.intensity);
+        }
         var rawAlpha = 1.0 - root.cfgTransparency;
         return Math.max(0.0, Math.min(1.0, Math.sqrt(rawAlpha) * ResonanceTheme.intensity));
     }
@@ -169,7 +173,7 @@ AbstractBackgroundWidget {
                 color: root.isWuWa ? "transparent" : ((root.cfgBlurRadius > 0 && root.wallpaperItem !== null) ? "transparent" : ColorUtils.applyAlpha(root.clockBgColor, 1.0 - root.cfgTransparency))
                 clip: true
 
-                layer.enabled: true
+                layer.enabled: !root.isWuWa
                 layer.smooth: true
                 layer.effect: OpacityMask {
                     maskSource: Rectangle {
@@ -191,6 +195,11 @@ AbstractBackgroundWidget {
 
                     onWidthChanged: requestPaint()
                     onHeightChanged: requestPaint()
+                    Component.onCompleted: requestPaint()
+                    Connections {
+                        target: root
+                        function onAtLockChanged() { wuwaGlassMask.requestPaint() }
+                    }
 
                     onPaint: {
                         var ctx = getContext("2d");
@@ -291,8 +300,8 @@ AbstractBackgroundWidget {
                     id: dialCanvasWrapper
                     anchors.fill: parent
 
-                    readonly property bool maskActive: root.cfgMinuteStyle !== "hide"
-                        && ((root.cfgDialStyle === "concentric" && root.cfgMinuteStyle === "pill_horizontal") || root.isWuWa)
+                    readonly property bool maskActive: !root.isWuWa && root.cfgMinuteStyle !== "hide"
+                        && (root.cfgDialStyle === "concentric" && root.cfgMinuteStyle === "pill_horizontal")
 
                     layer.enabled: maskActive
                     layer.smooth: true
