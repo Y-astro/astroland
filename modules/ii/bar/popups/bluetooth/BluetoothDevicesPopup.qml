@@ -83,13 +83,13 @@ StyledPopup {
                     Layout.alignment: Qt.AlignHCenter
                     shapeString: "Cookie6Sided"
                     implicitSize: 64
-                    color: Appearance.colors.colSurfaceContainerHighest
+                    color: BarPopupTheme.isWuWa ? BarPopupTheme.colIconContainer : Appearance.colors.colSurfaceContainerHighest
 
                     MaterialSymbol {
                         anchors.centerIn: parent
                         text: "bluetooth_disabled"
                         iconSize: Appearance.font.pixelSize.hugeass
-                        color: Appearance.colors.colOnSurfaceVariant
+                        color: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colOnSurfaceVariant
                     }
                 }
 
@@ -99,14 +99,14 @@ StyledPopup {
                     font.pixelSize: Appearance.font.pixelSize.large
                     font.family: Appearance.font.family.title
                     font.weight: Font.Bold
-                    color: Appearance.colors.colOnSurfaceVariant
+                    color: BarPopupTheme.colTextPrimary
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: Translation.tr("Connect a Bluetooth device to see it here")
                     font.pixelSize: Appearance.font.pixelSize.small
-                    color: Appearance.colors.colOutline
+                    color: BarPopupTheme.colTextSecondary
                 }
             }
         }
@@ -143,8 +143,10 @@ StyledPopup {
                     id: deviceCard
                     width: parent.width
                     implicitHeight: layoutRow.implicitHeight + 28
-                    radius: Appearance.rounding.large
-                    color: Appearance.colors.colSurfaceContainerHigh
+                    radius: BarPopupTheme.radiusCard
+                    color: BarPopupTheme.colCardBackground
+                    border.width: BarPopupTheme.cardBorderWidth
+                    border.color: BarPopupTheme.colCardBorder
 
                     // The logic to smoothly swap items
                     readonly property int totalCount: BluetoothStatus.connectedDevices.length
@@ -276,7 +278,7 @@ StyledPopup {
                                 id: bgShape
                                 anchors.centerIn: parent
                                 implicitSize: 80
-                                color: Appearance.colors.colPrimary
+                                color: BarPopupTheme.isWuWa ? BarPopupTheme.colIconContainer : Appearance.colors.colPrimary
 
                                 function rollShape() {
                                     const shapes = ["Cookie6Sided", "Cookie7Sided", "Cookie9Sided", "Cookie12Sided", "Clover8Leaf", "SoftBurst", "Circle", "Sunny"];
@@ -321,7 +323,7 @@ StyledPopup {
                                 sourceComponent: MaterialSymbol {
                                     text: Icons.getBluetoothDeviceMaterialSymbol(modelData.icon || "")
                                     iconSize: 36
-                                    color: Appearance.colors.colOnPrimary
+                                    color: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colOnPrimary
                                 }
                             }
                         }
@@ -354,7 +356,7 @@ StyledPopup {
                                 font.pixelSize: Appearance.font.pixelSize.large
                                 font.weight: Font.Bold
                                 font.family: Appearance.font.family.title
-                                color: Appearance.colors.colOnSurface
+                                color: BarPopupTheme.colTextPrimary
                                 horizontalAlignment: Text.AlignRight
                                 Layout.alignment: Qt.AlignRight
                                 Layout.fillWidth: true
@@ -366,7 +368,7 @@ StyledPopup {
                                 text: Translation.tr("Connected")
                                 font.pixelSize: Appearance.font.pixelSize.small
                                 font.family: Appearance.font.family.main
-                                color: Appearance.colors.colOnSurfaceVariant
+                                color: BarPopupTheme.colTextSecondary
                                 horizontalAlignment: Text.AlignRight
                                 Layout.alignment: Qt.AlignRight
                                 Layout.fillWidth: true
@@ -403,10 +405,10 @@ StyledPopup {
                                     value: modelData.battery ?? 0
                                     highlightColor: {
                                         if (modelData.battery <= 0.15)
-                                            return Appearance.m3colors.m3error;
-                                        return Appearance.colors.colPrimary;
+                                            return BarPopupTheme.colError;
+                                        return BarPopupTheme.colAccent;
                                     }
-                                    trackColor: ColorUtils.transparentize(Appearance.colors.colOnPrimary, 0.7)
+                                    trackColor: BarPopupTheme.colTrack
                                 }
 
                                 StyledText {
@@ -415,8 +417,8 @@ StyledPopup {
                                     font.weight: Font.Bold
                                     color: {
                                         if (modelData.battery <= 0.15)
-                                            return Appearance.m3colors.m3error;
-                                        return Appearance.colors.colOnSurface;
+                                            return BarPopupTheme.colError;
+                                        return BarPopupTheme.colAccent;
                                     }
                                 }
                             }

@@ -101,7 +101,7 @@ Rectangle {
             Layout.fillWidth: true
             value: root.value
             highlightColor: root.usageColor(root.value)
-            trackColor: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundLow : (Appearance?.m3colors.m3secondaryContainer ?? "#F1D3F9")
+            trackColor: BarPopupTheme.colTrack
             valueBarHeight: 6 
 
         }

@@ -34,6 +34,11 @@ StyledPopup {
 
     // Hero card glow color logic:
     readonly property color heroGlowColor: {
+        if (BarPopupTheme.isWuWa) {
+            if (Battery.percentage <= 0.15 && !Battery.isPluggedIn)
+                return BarPopupTheme.colError;
+            return BarPopupTheme.colAccent;
+        }
         if (Battery.percentage <= 0.15 && !Battery.isPluggedIn)
             return Appearance.m3colors.m3error;
         if (Battery.isCharging || Battery.chargeLimitReached)
@@ -44,7 +49,7 @@ StyledPopup {
     component AxisLabel: StyledText {
         font.pixelSize: Appearance.font.pixelSize.small
         font.family: "Monospace"
-        color: Appearance.colors.colOnSurfaceVariant
+        color: BarPopupTheme.colTextTertiary
     }
 
     ColumnLayout {
@@ -260,8 +265,10 @@ StyledPopup {
             id: batteryHero
             Layout.preferredWidth: 380
             Layout.preferredHeight: 220
-            radius: Appearance.rounding.normal
-            color: Appearance.colors.colSurfaceContainerHigh
+            radius: BarPopupTheme.radiusCard
+            color: BarPopupTheme.colCardBackground
+            border.width: BarPopupTheme.cardBorderWidth
+            border.color: BarPopupTheme.colCardBorder
 
             opacity: 0.0
             scale: 0.85
@@ -303,7 +310,7 @@ StyledPopup {
                         font.pixelSize: Appearance.font.pixelSize.large
                         font.family: Appearance.font.family.title
                         font.weight: Font.Medium
-                        color: Appearance.colors.colOnSurfaceVariant
+                        color: BarPopupTheme.colTextSecondary
 
                         opacity: 0.0
                         transform: Translate {
@@ -342,13 +349,13 @@ StyledPopup {
                         font.pixelSize: Appearance.font.pixelSize.huge
                         font.family: Appearance.font.family.title
                         font.weight: Font.Bold
-                        color: Appearance.colors.colOnSurface
+                        color: BarPopupTheme.colAccent
                     }
 
                     StyledText {
                         text: "•"
                         font.pixelSize: Appearance.font.pixelSize.huge
-                        color: Appearance.colors.colOnSurface
+                        color: BarPopupTheme.colTextTertiary
                         visible: root.hasTimeData
                     }
 
@@ -367,7 +374,7 @@ StyledPopup {
                         }
                         font.pixelSize: Appearance.font.pixelSize.large
                         font.weight: Font.Medium
-                        color: Appearance.colors.colOnSurface
+                        color: BarPopupTheme.colTextPrimary
                         visible: root.hasTimeData
                     }
                 }
@@ -435,15 +442,17 @@ StyledPopup {
                     Rectangle {
                         id: batteryTrack
                         anchors.fill: parent
-                        radius: 16
-                        color: ColorUtils.transparentize(Appearance.colors.colOnSurface, 0.9)
+                        radius: BarPopupTheme.radiusCard
+                        color: BarPopupTheme.colTrack
+                        border.width: BarPopupTheme.isWuWa ? 1 : 0
+                        border.color: BarPopupTheme.colTrackBorder
                     }
 
                     Rectangle {
                         id: batteryFill
                         width: parent.width * Battery.percentage * batteryHero.animProgress
                         height: parent.height
-                        radius: 16
+                        radius: BarPopupTheme.radiusCard
                         color: root.heroGlowColor
 
                         SequentialAnimation {
@@ -459,7 +468,7 @@ StyledPopup {
                         height: parent.height / 3
                         anchors.centerIn: parent
                         radius: 1
-                        color: ColorUtils.transparentize(Appearance.colors.colOnSurfaceVariant, 0.9)
+                        color: BarPopupTheme.isWuWa ? BarPopupTheme.colDivider : ColorUtils.transparentize(Appearance.colors.colOnSurfaceVariant, 0.9)
                         z: 1  // to stay above the fill
                     }
 
@@ -472,7 +481,7 @@ StyledPopup {
                             implicitWidth: 2
                             implicitHeight: batteryBarContainer.height / 3
                             radius: 1
-                            color: ColorUtils.transparentize(Appearance.colors.colOnSurfaceVariant, 0.9)
+                            color: BarPopupTheme.isWuWa ? BarPopupTheme.colDivider : ColorUtils.transparentize(Appearance.colors.colOnSurfaceVariant, 0.9)
                         }
                     }
                 }
@@ -482,9 +491,9 @@ StyledPopup {
         Rectangle {
             id: divider
             Layout.fillWidth: true
-            height: 2
+            height: 1
             radius: 1
-            color: Appearance.colors.colSurfaceContainerHighest
+            color: BarPopupTheme.colDivider
 
             opacity: 0.0
             
@@ -506,8 +515,10 @@ StyledPopup {
                 id: cellHealth
                 Layout.fillWidth: true
                 Layout.preferredHeight: 70
-                radius: Appearance.rounding.normal
-                color: Appearance.colors.colSurfaceContainerHigh
+                radius: BarPopupTheme.radiusCard
+                color: BarPopupTheme.colCardBackground
+                border.width: BarPopupTheme.cardBorderWidth
+                border.color: BarPopupTheme.colCardBorder
 
                 opacity: 0.0
                 scale: 0.85
@@ -535,8 +546,8 @@ StyledPopup {
                         id: cellHealthShape
                         shapeString: "Slanted"
                         implicitSize: 36
-                        color: Appearance.colors.colPositiveContainer
-                               ?? Appearance.colors.colPrimaryContainer
+                        color: BarPopupTheme.isWuWa ? BarPopupTheme.colIconContainer : (Appearance.colors.colPositiveContainer
+                               ?? Appearance.colors.colPrimaryContainer)
                         scale: 0.8
                         rotation: -10
 
@@ -553,8 +564,8 @@ StyledPopup {
                             anchors.centerIn: parent
                             text: "health_metrics"
                             iconSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colOnPositiveContainer
-                                   ?? Appearance.colors.colOnPrimaryContainer
+                            color: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : (Appearance.colors.colOnPositiveContainer
+                                   ?? Appearance.colors.colOnPrimaryContainer)
                         }
                     }
 
@@ -566,7 +577,7 @@ StyledPopup {
                             text: Translation.tr("Health")
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             font.weight: Font.DemiBold
-                            color: Appearance.colors.colOnSurfaceVariant
+                            color: BarPopupTheme.colTextSecondary
                             opacity: 0.0
 
                             SequentialAnimation {
@@ -581,7 +592,7 @@ StyledPopup {
                             text: `${Battery.health.toFixed(0)}%`
                             font.pixelSize: Appearance.font.pixelSize.normal
                             font.weight: Font.Bold
-                            color: Appearance.colors.colOnSurface
+                            color: BarPopupTheme.colTextPrimary
                             opacity: 0.0
                             scale: 0.9
 
@@ -604,8 +615,10 @@ StyledPopup {
                 id: cellWattage
                 Layout.fillWidth: true
                 Layout.preferredHeight: 70
-                radius: Appearance.rounding.normal
-                color: Appearance.colors.colSurfaceContainerHigh
+                radius: BarPopupTheme.radiusCard
+                color: BarPopupTheme.colCardBackground
+                border.width: BarPopupTheme.cardBorderWidth
+                border.color: BarPopupTheme.colCardBorder
 
                 opacity: 0.0
                 scale: 0.85
@@ -633,7 +646,7 @@ StyledPopup {
                         id: cellWattageShape
                         shapeString: "Slanted"
                         implicitSize: 36
-                        color: Appearance.colors.colSecondaryContainer
+                        color: BarPopupTheme.isWuWa ? BarPopupTheme.colIconContainer : Appearance.colors.colSecondaryContainer
                         scale: 0.8
                         rotation: -10
 
@@ -650,7 +663,7 @@ StyledPopup {
                             anchors.centerIn: parent
                             text: Battery.isCharging ? "electric_bolt" : "power"
                             iconSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colOnSecondaryContainer
+                            color: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colOnSecondaryContainer
                         }
                     }
 
@@ -664,7 +677,7 @@ StyledPopup {
                                   : Translation.tr("Draw")
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             font.weight: Font.DemiBold
-                            color: Appearance.colors.colOnSurfaceVariant
+                            color: BarPopupTheme.colTextSecondary
                             opacity: 0.0
 
                             SequentialAnimation {
@@ -679,7 +692,7 @@ StyledPopup {
                             text: `${Math.abs(Battery.energyRate).toFixed(1)}W`
                             font.pixelSize: Appearance.font.pixelSize.normal
                             font.weight: Font.Bold
-                            color: Appearance.colors.colOnSurface
+                            color: BarPopupTheme.colTextPrimary
                             opacity: 0.0
                             scale: 0.9
 
@@ -702,8 +715,10 @@ StyledPopup {
                 id: cellCycles
                 Layout.fillWidth: true
                 Layout.preferredHeight: 70
-                radius: Appearance.rounding.normal
-                color: Appearance.colors.colSurfaceContainerHigh
+                radius: BarPopupTheme.radiusCard
+                color: BarPopupTheme.colCardBackground
+                border.width: BarPopupTheme.cardBorderWidth
+                border.color: BarPopupTheme.colCardBorder
 
                 opacity: 0.0
                 scale: 0.85
@@ -731,7 +746,7 @@ StyledPopup {
                         id: cellCyclesShape
                         shapeString: "Slanted"
                         implicitSize: 36
-                        color: Appearance.colors.colTertiaryContainer
+                        color: BarPopupTheme.isWuWa ? BarPopupTheme.colIconContainer : Appearance.colors.colTertiaryContainer
                         scale: 0.8
                         rotation: -10
 
@@ -748,7 +763,7 @@ StyledPopup {
                             anchors.centerIn: parent
                             text: "autorenew"
                             iconSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colOnTertiaryContainer
+                            color: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colOnTertiaryContainer
                         }
                     }
 
@@ -760,7 +775,7 @@ StyledPopup {
                             text: Translation.tr("Cycles")
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             font.weight: Font.DemiBold
-                            color: Appearance.colors.colOnSurfaceVariant
+                            color: BarPopupTheme.colTextSecondary
                             opacity: 0.0
 
                             SequentialAnimation {
@@ -782,7 +797,7 @@ StyledPopup {
                             }
                             font.pixelSize: Appearance.font.pixelSize.normal
                             font.weight: Font.Bold
-                            color: Appearance.colors.colOnSurface
+                            color: BarPopupTheme.colTextPrimary
                             opacity: 0.0
                             scale: 0.9
 
@@ -805,8 +820,10 @@ StyledPopup {
                 id: cellStatus
                 Layout.fillWidth: true
                 Layout.preferredHeight: 70
-                radius: Appearance.rounding.normal
-                color: Appearance.colors.colSurfaceContainerHigh
+                radius: BarPopupTheme.radiusCard
+                color: BarPopupTheme.colCardBackground
+                border.width: BarPopupTheme.cardBorderWidth
+                border.color: BarPopupTheme.colCardBorder
 
                 opacity: 0.0
                 scale: 0.85
@@ -834,7 +851,7 @@ StyledPopup {
                         id: cellStatusShape
                         shapeString: "Slanted"
                         implicitSize: 36
-                        color: Appearance.colors.colErrorContainer
+                        color: BarPopupTheme.isWuWa ? ((Battery.percentage <= 0.15 && !Battery.isPluggedIn) ? BarPopupTheme.colCardBackgroundHover : BarPopupTheme.colIconContainer) : Appearance.colors.colErrorContainer
                         scale: 0.8
                         rotation: -10
 
@@ -851,7 +868,7 @@ StyledPopup {
                             anchors.centerIn: parent
                             text: "info"
                             iconSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colOnErrorContainer
+                            color: BarPopupTheme.isWuWa ? ((Battery.percentage <= 0.15 && !Battery.isPluggedIn) ? BarPopupTheme.colError : BarPopupTheme.colAccent) : Appearance.colors.colOnErrorContainer
                         }
                     }
 
@@ -863,7 +880,7 @@ StyledPopup {
                             text: Translation.tr("Status")
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             font.weight: Font.DemiBold
-                            color: Appearance.colors.colOnSurfaceVariant
+                            color: BarPopupTheme.colTextSecondary
                             opacity: 0.0
 
                             SequentialAnimation {
@@ -890,7 +907,7 @@ StyledPopup {
                             }
                             font.pixelSize: Appearance.font.pixelSize.normal
                             font.weight: Font.Bold
-                            color: Appearance.colors.colOnSurface
+                            color: BarPopupTheme.colTextPrimary
                             opacity: 0.0
                             scale: 0.9
 

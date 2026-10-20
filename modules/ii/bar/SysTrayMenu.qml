@@ -59,6 +59,7 @@ PopupWindow {
         StyledRectangularShadow {
             target: popupBackground
             opacity: popupBackground.opacity
+            visible: BarPopupTheme.showShadow
         }
 
         Rectangle {
@@ -73,10 +74,10 @@ PopupWindow {
                 margins: root.padding
             }
 
-            color: Appearance.colors.colLayer0
-            radius: Appearance.rounding.windowRounding
-            border.width: 1
-            border.color: Appearance.colors.colLayer0Border
+            color: BarPopupTheme.colBackground
+            radius: BarPopupTheme.radiusCard
+            border.width: BarPopupTheme.borderWidth
+            border.color: BarPopupTheme.colBorder
             clip: true
 
             opacity: 0
@@ -168,10 +169,12 @@ PopupWindow {
                     spacing: 8
                     MaterialSymbol {
                         iconSize: 20
+                        color: BarPopupTheme.colAccent
                         text: "chevron_left"
                     }
                     StyledText {
                         Layout.fillWidth: true
+                        color: BarPopupTheme.colTextPrimary
                         text: Translation.tr("Back")
                     }
                 }
@@ -202,11 +205,13 @@ PopupWindow {
 
                 MaterialSymbol {
                     iconSize: 18
+                    color: BarPopupTheme.colAccent
                     text: "push_pin"
                 }
 
                 StyledText {
                     Layout.fillWidth: true
+                    color: BarPopupTheme.colTextPrimary
                     text: TrayService.isPinned(root.trayItem ?? root.trayItemId) ? Translation.tr("Unpin") : Translation.tr("Pin")
                 }
             }
@@ -215,7 +220,7 @@ PopupWindow {
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: 1
-            color: Appearance.colors.colSubtext
+            color: BarPopupTheme.colDivider
             Layout.topMargin: 4
             Layout.bottomMargin: 4
         }

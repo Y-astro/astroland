@@ -24,11 +24,11 @@ StyledPopup {
     readonly property bool hasDevices: BluetoothStatus.connectedDevices.length > 0
 
     // Design Variables
-    readonly property color colCard: Appearance.colors.colSurfaceContainerHigh
-    readonly property color colName: Appearance.colors.colOnSurface
-    readonly property color colBattery: Appearance.colors.colOnSecondaryContainer
-    readonly property color colIconPrimary: Appearance.colors.colOnSecondaryContainer
-    readonly property color colIconSecondary: Appearance.colors.colSecondary
+    readonly property color colCard: BarPopupTheme.colCardBackground
+    readonly property color colName: BarPopupTheme.colTextPrimary
+    readonly property color colBattery: BarPopupTheme.colAccent
+    readonly property color colIconPrimary: BarPopupTheme.colAccent
+    readonly property color colIconSecondary: BarPopupTheme.colTextSecondary
     readonly property real cardHeight: 180
     readonly property int nameSize: Appearance.font.pixelSize.normal
     readonly property int batterySize: 42
@@ -106,13 +106,13 @@ StyledPopup {
                     Layout.alignment: Qt.AlignHCenter
                     shapeString: "Cookie6Sided"
                     implicitSize: 64
-                    color: Appearance.colors.colSurfaceContainerHighest
+                    color: BarPopupTheme.isWuWa ? BarPopupTheme.colIconContainer : Appearance.colors.colSurfaceContainerHighest
 
                     MaterialSymbol {
                         anchors.centerIn: parent
                         text: "bluetooth_disabled"
                         iconSize: Appearance.font.pixelSize.hugeass
-                        color: Appearance.colors.colOnSurfaceVariant
+                        color: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colOnSurfaceVariant
                     }
                 }
 
@@ -122,7 +122,7 @@ StyledPopup {
                     font.pixelSize: Appearance.font.pixelSize.large
                     font.family: Appearance.font.family.title
                     font.weight: Font.Bold
-                    color: Appearance.colors.colOnSurfaceVariant
+                    color: BarPopupTheme.colTextPrimary
                 }
             }
         }
@@ -158,6 +158,8 @@ StyledPopup {
                     implicitHeight: (deviceCard.hasNoise && !deviceCard.isPhone) ? 220 : root.cardHeight
                     radius: Appearance.rounding.large
                     color: root.colCard
+                    border.width: BarPopupTheme.cardBorderWidth
+                    border.color: BarPopupTheme.colCardBorder
                     clip: true
 
                     readonly property var devBattery: EarbudsControlService.batteryInfo(modelData)

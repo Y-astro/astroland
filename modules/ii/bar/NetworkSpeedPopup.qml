@@ -136,7 +136,7 @@ StyledPopup {
                 text: Network.materialSymbol
                 iconSize: Appearance.font.pixelSize.large
                 implicitSize: 36
-                color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : Appearance.colors.colPrimaryContainer
+                color: BarPopupTheme.colIconContainer
                 colSymbol: BarPopupTheme.colAccent
             }
 

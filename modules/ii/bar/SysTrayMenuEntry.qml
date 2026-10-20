@@ -20,7 +20,9 @@ RippleButton {
     signal dismiss()
     signal openSubmenu(handle: QsMenuHandle)
 
-    colBackground: menuEntry.isSeparator ? Appearance.m3colors.m3outlineVariant : ColorUtils.transparentize(Appearance.colors.colLayer0)
+    colBackground: menuEntry.isSeparator ? BarPopupTheme.colDivider : (BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackground : ColorUtils.transparentize(Appearance.colors.colLayer0))
+    colBackgroundHover: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundHover : Appearance.colors.colLayer1Hover
+    colBackgroundActive: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : Appearance.colors.colLayer1Active
     enabled: !menuEntry.isSeparator
     opacity: 1
 
@@ -85,6 +87,7 @@ RippleButton {
                 sourceComponent: MaterialSymbol {
                     text: root.menuEntry.checkState === Qt.PartiallyChecked ? "check_indeterminate_small" : "check"
                     iconSize: 20
+                    color: BarPopupTheme.colAccent
                 }
             }
         }
@@ -111,6 +114,7 @@ RippleButton {
             id: label
             text: root.menuEntry.text
             font.pixelSize: Appearance.font.pixelSize.smallie
+            color: BarPopupTheme.colTextPrimary
             Layout.fillWidth: true
         }
 
@@ -120,6 +124,7 @@ RippleButton {
             sourceComponent: MaterialSymbol {
                 text: "chevron_right"
                 iconSize: 20
+                color: BarPopupTheme.colAccent
             }
         }
     }

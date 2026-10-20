@@ -36,13 +36,15 @@ StyledPopup {
             visible: BluetoothStatus.connectedDevices.length === 0
             implicitWidth: 280
             implicitHeight: visible ? emptyText.implicitHeight + 24 : 0
-            radius: Appearance.rounding.normal
-            color: Appearance.colors.colLayer1Base
+            radius: BarPopupTheme.radiusCard
+            color: BarPopupTheme.colCardBackground
+            border.width: BarPopupTheme.cardBorderWidth
+            border.color: BarPopupTheme.colCardBorder
 
             StyledText {
                 id: emptyText
                 anchors.centerIn: parent
-                color: Appearance.colors.colOnSurfaceVariant
+                color: BarPopupTheme.colTextSecondary
                 text: BluetoothStatus.enabled
                     ? Translation.tr("No connected devices")
                     : Translation.tr("Bluetooth is off")
@@ -56,8 +58,10 @@ StyledPopup {
                 required property var modelData
                 implicitWidth: 280
                 implicitHeight: cardContent.implicitHeight + 24
-                radius: Appearance.rounding.normal
-                color: Appearance.colors.colSurfaceContainerLow
+                radius: BarPopupTheme.radiusCard
+                color: BarPopupTheme.colCardBackground
+                border.width: BarPopupTheme.cardBorderWidth
+                border.color: BarPopupTheme.colCardBorder
 
                 ColumnLayout {
                     id: cardContent
@@ -74,7 +78,7 @@ StyledPopup {
                         text: modelData?.name || Translation.tr("Unknown device")
                         font.pixelSize: Appearance.font.pixelSize.normal
                         font.weight: Font.Medium
-                        color: Appearance.colors.colOnSurface
+                        color: BarPopupTheme.colTextPrimary
                         elide: Text.ElideRight
                     }
 
@@ -82,8 +86,8 @@ StyledPopup {
                         Layout.fillWidth: true
                         text: `${root.deviceType(modelData)} · ${Translation.tr("Connected")}`
                         font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colOnSurfaceVariant
-                        opacity: 0.7
+                        color: BarPopupTheme.colTextSecondary
+                        opacity: 0.8
                         elide: Text.ElideRight
                     }
 
@@ -97,8 +101,8 @@ StyledPopup {
                             text: Icons.getBluetoothDeviceMaterialSymbol(modelData?.icon || "")
                             iconSize: Appearance.font.pixelSize.large
                             implicitSize: Appearance.font.pixelSize.hugeass * 2
-                            color: Appearance.colors.colPrimaryContainer
-                            colSymbol: Appearance.colors.colPrimary
+                            color: BarPopupTheme.colIconContainer
+                            colSymbol: BarPopupTheme.colAccent
                         }
 
                         Item { Layout.fillWidth: true }
@@ -110,7 +114,7 @@ StyledPopup {
                             font.pixelSize: Appearance.font.pixelSize.hugeass * 2
                             font.weight: Font.DemiBold
                             font.features: { "tnum": 1 }
-                            color: Appearance.colors.colPrimary
+                            color: BarPopupTheme.colAccent
                         }
                     }
                 }

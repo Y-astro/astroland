@@ -88,16 +88,16 @@ Item {
             background.implicitWidth: 24
             background.implicitHeight: 24
             background.anchors.centerIn: this
-            colBackgroundToggled: Appearance.colors.colSecondaryContainer
-            colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
-            colRippleToggled: Appearance.colors.colSecondaryContainerActive
+            colBackgroundToggled: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : Appearance.colors.colSecondaryContainer
+            colBackgroundToggledHover: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundHover : Appearance.colors.colSecondaryContainerHover
+            colRippleToggled: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : Appearance.colors.colSecondaryContainerActive
 
             contentItem: MaterialSymbol {
                 anchors.centerIn: parent
                 iconSize: Appearance.font.pixelSize.larger
                 text: Config.options.bar.bottom ? "keyboard_control_key" : "expand_more"
                 horizontalAlignment: Text.AlignHCenter
-                color: root.trayOverflowOpen ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer2
+                color: root.trayOverflowOpen ? (BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colOnSecondaryContainer) : (BarPopupTheme.isWuWa ? BarPopupTheme.colTextSecondary : Appearance.colors.colOnLayer2)
                 rotation: (root.trayOverflowOpen ? 180 : 0) - (90 * root.vertical) + (180 * root.invertSide)
                 Behavior on rotation {
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
