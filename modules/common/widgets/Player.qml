@@ -105,6 +105,12 @@ Item {
             }
         }
 
+        // Solid dark teal base to prevent background text bleed-through
+        Rectangle {
+            anchors.fill: parent
+            color: BarPopupTheme.isWuWa ? ResonanceTheme.bgGlassPopup : ColorUtils.applyAlpha(root.blendedColors.colLayer0, 1)
+        }
+
         Image {
             id: blurredArt
             anchors.fill: parent
@@ -115,6 +121,7 @@ Item {
             cache: false
             antialiasing: true
             asynchronous: true
+            opacity: BarPopupTheme.isWuWa ? 0.22 : 1.0
 
             layer.enabled: true
             layer.effect: StyledBlurEffect {
@@ -123,8 +130,22 @@ Item {
 
             Rectangle {
                 anchors.fill: parent
-                color: BarPopupTheme.isWuWa ? ColorUtils.transparentize(ResonanceTheme.colTealBase, 0.45) : ColorUtils.transparentize(blendedColors.colLayer0, 0.3)
+                color: BarPopupTheme.isWuWa
+                    ? ColorUtils.applyAlpha(ResonanceTheme.colTealBase, 0.75)
+                    : ColorUtils.transparentize(blendedColors.colLayer0, 0.3)
                 radius: root.radius
+            }
+        }
+
+        // Horizontal gradient vignette: ambient art on left, deep dark teal for text on right
+        Rectangle {
+            anchors.fill: parent
+            visible: BarPopupTheme.isWuWa
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0.0; color: ColorUtils.applyAlpha(ResonanceTheme.colTealBase, 0.40) }
+                GradientStop { position: 0.35; color: ColorUtils.applyAlpha(ResonanceTheme.colTealBase, 0.82) }
+                GradientStop { position: 1.0; color: ColorUtils.applyAlpha(ResonanceTheme.colTealBase, 0.95) }
             }
         }
 
@@ -136,6 +157,16 @@ Item {
             maxVisualizerValue: root.maxVisualizerValue
             smoothing: root.visualizerSmoothing
             color: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : blendedColors.colPrimary
+        }
+
+        // Hairline antique gold border on top of art/vignette layers
+        Rectangle {
+            anchors.fill: parent
+            color: "transparent"
+            border.width: BarPopupTheme.borderWidth
+            border.color: BarPopupTheme.colBorder
+            radius: background.radius
+            z: 2
         }
 
         Loader {

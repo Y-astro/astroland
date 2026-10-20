@@ -141,6 +141,7 @@ Item {
                 id: trackTitle
                 Layout.fillWidth: true
                 font.pixelSize: Appearance.font.pixelSize.large
+                font.weight: Font.DemiBold
                 color: BarPopupTheme.isWuWa ? BarPopupTheme.colTextPrimary : root.blendedColors.colOnLayer0
                 elide: Text.ElideRight
                 text: StringUtils.cleanMusicTitle(root.player?.trackTitle) || "Untitled"
