@@ -121,7 +121,9 @@ MouseArea { // Notification group area
         id: background
         anchors.left: parent.left
         width: parent.width
-        color: popup ? Appearance.colors.colBackgroundSurfaceContainer : Appearance.colors.colLayer2
+        color: popup ? Appearance.colors.colBackgroundSurfaceContainer : (ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItem : Appearance.colors.colLayer2)
+        border.width: (ResonanceTheme.enabled && !popup) ? 1 : 0
+        border.color: ResonanceTheme.enabled ? ResonanceTheme.borderSidebarItem : "transparent"
         radius: Appearance.rounding.normal
         anchors.leftMargin: root.xOffset
 
@@ -197,8 +199,8 @@ MouseArea { // Notification group area
                                 topRow.fontSize :
                                 Appearance.font.pixelSize.small
                             color: topRow.showAppName ?
-                                Appearance.colors.colSubtext :
-                                Appearance.colors.colOnLayer2
+                                (ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colSubtext) :
+                                (ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer2)
                         }
                         StyledText {
                             id: timeText
@@ -207,7 +209,7 @@ MouseArea { // Notification group area
                             horizontalAlignment: Text.AlignLeft
                             text: NotificationUtils.getFriendlyNotifTimeString(notificationGroup?.time)
                             font.pixelSize: topRow.fontSize
-                            color: Appearance.colors.colSubtext
+                            color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colSubtext
                         }
                     }
                     NotificationGroupExpandButton {

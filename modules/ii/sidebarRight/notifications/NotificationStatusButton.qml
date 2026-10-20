@@ -14,10 +14,17 @@ GroupButton {
 
     buttonRadius: baseHeight / 2
     buttonRadiusPressed: Appearance.rounding.small
-    colBackground: Appearance.colors.colLayer2
-    colBackgroundHover: Appearance.colors.colLayer2Hover
-    colBackgroundActive: Appearance.colors.colLayer2Active
-    property color colText: toggled ? Appearance.m3colors.m3onPrimary : Appearance.colors.colOnLayer1
+    colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItem : Appearance.colors.colLayer2
+    colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItemHover : Appearance.colors.colLayer2Hover
+    colBackgroundActive: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItemActive : Appearance.colors.colLayer2Active
+    colBackgroundToggled: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
+    colBackgroundToggledHover: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimaryHover
+    colBackgroundToggledActive: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimaryActive
+    borderWidth: ResonanceTheme.enabled ? 1 : 0
+    borderColor: ResonanceTheme.enabled ? (toggled ? ResonanceTheme.borderAccent : ResonanceTheme.borderSidebarItem) : Appearance.colors.colSecondary
+    property color colText: ResonanceTheme.enabled
+        ? (toggled ? ResonanceTheme.colTealInkDark : (button.isHovered ? ResonanceTheme.textPrimary : ResonanceTheme.textSecondary))
+        : (toggled ? Appearance.m3colors.m3onPrimary : Appearance.colors.colOnLayer1)
 
     contentItem: Item {
         id: content

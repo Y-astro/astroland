@@ -18,15 +18,17 @@ RippleButton {
 
     background.anchors.fill: button
     buttonRadius: Appearance.rounding.full
-    colBackground: Appearance.colors.colLayer2
-    colBackgroundHover: Appearance.colors.colLayer2Hover
-    colRipple: Appearance.colors.colLayer2Active
+    colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItem : Appearance.colors.colLayer2
+    colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItemHover : Appearance.colors.colLayer2Hover
+    colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItemActive : Appearance.colors.colLayer2Active
+    borderWidth: ResonanceTheme.enabled ? 1 : 0
+    borderColor: ResonanceTheme.enabled ? (button.hovered ? ResonanceTheme.borderAccent : ResonanceTheme.borderSidebarItem) : (Appearance.colors.colOutline ?? "transparent")
 
     contentItem: StyledText {
         text: buttonText
         horizontalAlignment: Text.AlignHCenter
         font.pixelSize: Appearance.font.pixelSize.larger
-        color: Appearance.colors.colOnLayer1
+        color: ResonanceTheme.enabled ? (button.hovered ? ResonanceTheme.accentGold : ResonanceTheme.textPrimary) : Appearance.colors.colOnLayer1
     }
 
     StyledToolTip {

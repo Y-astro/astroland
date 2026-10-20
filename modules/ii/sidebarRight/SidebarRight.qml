@@ -192,6 +192,10 @@ Scope {
             function open(): void {
                 GlobalStates.sidebarRightOpen = true;
             }
+
+            function reload(): void {
+                Quickshell.reload(true);
+            }
         }
 
         CompositorGlobalShortcut {

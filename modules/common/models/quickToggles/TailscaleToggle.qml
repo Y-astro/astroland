@@ -8,6 +8,7 @@ QuickToggleModel {
 
     available: (Config.options?.tailscale?.enabled ?? true) && TailscaleService.available
     toggled: (Config.options?.tailscale?.enabled ?? true) && TailscaleService.active
+    statusText: TailscaleService.statusText
     tooltipText: (Config.options?.tailscale?.enabled ?? true)
         ? Translation.tr("Tailscale Mesh: %1 | Right-click for network peers & exit nodes").arg(statusText)
         : Translation.tr("Tailscale is disabled in Privacy settings")

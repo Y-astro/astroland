@@ -55,14 +55,48 @@ GroupButton {
     horizontalPadding: padding
     verticalPadding: padding
 
-    colBackground: Appearance.colors.colLayer2
-    colBackgroundToggled: (altAction && expandedSize) ? Appearance.colors.colLayer2 : Appearance.colors.colPrimary
-    colBackgroundToggledHover: (altAction && expandedSize) ? Appearance.colors.colLayer2Hover : Appearance.colors.colPrimaryHover
-    colBackgroundToggledActive: (altAction && expandedSize) ? Appearance.colors.colLayer2Active : Appearance.colors.colPrimaryActive
+    colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItem : Appearance.colors.colLayer2
+    colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItemHover : Appearance.colors.colLayer2Hover
+    colBackgroundActive: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItemActive : Appearance.colors.colLayer2Active
+
+    colBackgroundToggled: (altAction && expandedSize)
+        ? (ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItem : Appearance.colors.colLayer2)
+        : (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary)
+    colBackgroundToggledHover: (altAction && expandedSize)
+        ? (ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItemHover : Appearance.colors.colLayer2Hover)
+        : (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimaryHover)
+    colBackgroundToggledActive: (altAction && expandedSize)
+        ? (ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItemActive : Appearance.colors.colLayer2Active)
+        : (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimaryActive)
+
+    borderWidth: ResonanceTheme.enabled ? 1 : 0
+    borderColor: ResonanceTheme.enabled
+        ? (toggled && !(altAction && expandedSize) ? ResonanceTheme.borderAccent : ResonanceTheme.borderSidebarItem)
+        : Appearance.colors.colSecondary
+
     buttonRadius: toggled ? Appearance.rounding.large : height / 2
     buttonRadiusPressed: Appearance.rounding.normal
-    property color colText: (toggled && !(altAction && expandedSize) && enabled) ? Appearance.colors.colOnPrimary : ColorUtils.transparentize(Appearance.colors.colOnLayer2, enabled ? 0 : 0.7)
-    property color colIcon: expandedSize ? ((root.toggled) ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer3) : colText
+
+    readonly property color colTitleText: ResonanceTheme.enabled
+        ? (toggled && !(altAction && expandedSize) && enabled
+            ? ResonanceTheme.colTealInkDark
+            : (enabled ? ResonanceTheme.textPrimary : ResonanceTheme.alpha(ResonanceTheme.textSecondary, 0.40)))
+        : ((toggled && !(altAction && expandedSize) && enabled)
+            ? Appearance.colors.colOnPrimary
+            : ColorUtils.transparentize(Appearance.colors.colOnLayer2, enabled ? 0 : 0.7))
+
+    readonly property color colStatusText: ResonanceTheme.enabled
+        ? (toggled && !(altAction && expandedSize) && enabled
+            ? ResonanceTheme.colTealInkDark
+            : (enabled ? ResonanceTheme.textSecondary : ResonanceTheme.alpha(ResonanceTheme.textSecondary, 0.35)))
+        : root.colText
+
+    property color colText: colTitleText
+    property color colIcon: expandedSize
+        ? ((root.toggled)
+            ? (ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colOnPrimary)
+            : (ResonanceTheme.enabled ? (enabled ? ResonanceTheme.textSecondary : ResonanceTheme.alpha(ResonanceTheme.textSecondary, 0.40)) : Appearance.colors.colOnLayer3))
+        : colTitleText
 
     onClicked: {
         if (root.expandedSize && root.altAction) root.altAction();
@@ -97,10 +131,16 @@ GroupButton {
                 implicitWidth: height
                 radius: root.radius - root.verticalPadding
                 color: {
-                    const baseColor = root.toggled ? Appearance.colors.colPrimary : Appearance.colors.colLayer3
+                    const baseColor = root.toggled
+                        ? (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary)
+                        : (ResonanceTheme.enabled ? ResonanceTheme.alpha(ResonanceTheme.colTealInkDark, 0.70) : Appearance.colors.colLayer3)
                     const transparentizeAmount = (root.altAction && root.expandedSize) ? 0 : 1
                     return ColorUtils.transparentize(baseColor, transparentizeAmount)
                 }
+                border.width: (ResonanceTheme.enabled && root.altAction && root.expandedSize) ? 1 : 0
+                border.color: ResonanceTheme.enabled
+                    ? (root.toggled ? ResonanceTheme.borderAccent : ResonanceTheme.borderSidebarItem)
+                    : "transparent"
                 Behavior on radius { animation: Appearance.animation.elementMove.numberAnimation.createObject(this) }
                 Behavior on color { animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this) }
 
@@ -135,7 +175,7 @@ GroupButton {
                     anchors { left: parent.left; right: parent.right }
                     font.pixelSize: Appearance.font.pixelSize.smallie
                     font.weight: 600
-                    color: root.colText
+                    color: root.colTitleText
                     elide: Text.ElideRight
                     text: root.name
                 }
@@ -143,7 +183,7 @@ GroupButton {
                     visible: root.statusText
                     anchors { left: parent.left; right: parent.right }
                     font { pixelSize: Appearance.font.pixelSize.smaller; weight: 100 }
-                    color: root.colText
+                    color: root.colStatusText
                     elide: Text.ElideRight
                     text: root.statusText
                 }

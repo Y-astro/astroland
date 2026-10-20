@@ -250,7 +250,11 @@ Item {
         Behavior on bottomLeftRadius { NumberAnimation { duration: dragManager.dragging ? 50 : 250; easing.type: Easing.OutCubic } }
         Behavior on bottomRightRadius { NumberAnimation { duration: dragManager.dragging ? 50 : 250; easing.type: Easing.OutCubic } }
 
-        color: "transparent"
+        color: (root.expanded && !root.onlyNotification)
+            ? (ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colLayer3)
+            : "transparent"
+        border.width: (ResonanceTheme.enabled && root.expanded && !root.onlyNotification) ? 1 : 0
+        border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
 
         // Subtle hover/press feedback; suppressed during drag.
         scale: dragManager.dragging ? 1.0 : (dragManager.pressed ? 0.992 : 1.0)
@@ -323,8 +327,8 @@ Item {
                     Layout.fillWidth: true
                     visible: !root.onlyNotification
                     font.pixelSize: root.fontSize
-                    color: root.expanded
-                           ? Appearance.colors.colOnLayer3
+                    color: ResonanceTheme.enabled
+                           ? ResonanceTheme.textPrimary
                            : Appearance.colors.colOnLayer3
                     elide: Text.ElideRight
                     text: root.modelData?.summary || root.modelData?.appName || Translation.tr("Notification")
@@ -342,7 +346,7 @@ Item {
                         }
                     }
                     font.pixelSize: root.fontSize
-                    color: ColorUtils.transparentize(Appearance.colors.colOnLayer3, 0.35)
+                    color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : ColorUtils.transparentize(Appearance.colors.colOnLayer3, 0.35)
                     elide: Text.ElideRight
                     wrapMode: root.expanded ? Text.Wrap : Text.NoWrap
                     maximumLineCount: 1
@@ -417,7 +421,7 @@ Item {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignTop
                         font.pixelSize: root.fontSize
-                        color: ColorUtils.transparentize(Appearance.colors.colOnLayer3, 0.35)
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : ColorUtils.transparentize(Appearance.colors.colOnLayer3, 0.35)
                         wrapMode: Text.Wrap
                         elide: Text.ElideRight
                         textFormat: Text.RichText
@@ -519,13 +523,15 @@ Item {
                                         leftPadding: 15
                                         rightPadding: 15
                                         buttonRadius: Appearance.rounding.small
-                                        colBackground: Appearance.colors.colLayer2
-                                        colBackgroundHover: Appearance.colors.colLayer2Hover
+                                        colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colLayer2
+                                        colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer2Hover
+                                        borderWidth: ResonanceTheme.enabled ? 1 : 0
+                                        borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                                         buttonText: _label
                                         contentItem: StyledText {
                                             text: notifAction._label
                                             font.pixelSize: Appearance.font.pixelSize.small
-                                            color: Appearance.colors.colOnLayer3
+                                            color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
                                         }
                                         onClicked: {
                                             KdeConnectService.sendAction(KdeConnectService.activeDeviceId, root.publicId, modelData.key);
@@ -544,9 +550,11 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 36
                                     radius: Appearance.rounding.full
-                                    color: Appearance.colors.colPrimaryContainerHover
+                                    color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colPrimaryContainerHover
                                     border.width: replyField.activeFocus ? 2 : 1
-                                    border.color: replyField.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colOutlineVariant
+                                    border.color: ResonanceTheme.enabled
+                                        ? (replyField.activeFocus ? ResonanceTheme.accentGold : ResonanceTheme.borderHairline)
+                                        : (replyField.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colOutlineVariant)
 
                                     Behavior on border.color {
                                         animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
@@ -566,7 +574,7 @@ Item {
                                         anchors.rightMargin: 14
                                         verticalAlignment: Text.AlignVCenter
                                         text: root.replyDraft
-                                        color: Appearance.colors.colOnPrimaryContainer
+                                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnPrimaryContainer
                                         onTextEdited: root.replyDraft = text
                                         Keys.onPressed: event => {
                                             if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
@@ -583,7 +591,7 @@ Item {
                                         visible: !replyField.activeFocus && root.replyDraft.length === 0
                                         verticalAlignment: Text.AlignVCenter
                                         text: root.modelData?.replyPlaceholder || Translation.tr("Send reply…")
-                                        color: ColorUtils.transparentize(Appearance.colors.colOnPrimaryContainer, 0.35)
+                                        color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : ColorUtils.transparentize(Appearance.colors.colOnPrimaryContainer, 0.35)
                                         font.pixelSize: Appearance.font.pixelSize.small
                                     }
                                 }
@@ -593,13 +601,15 @@ Item {
                                     Layout.preferredWidth: implicitHeight
                                     Layout.preferredHeight: 36
                                     buttonRadius: Appearance.rounding.full
-                                    colBackground: Appearance.colors.colPrimaryContainer
-                                    colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+                                    colBackground: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimaryContainer
+                                    colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.borderAccent : Appearance.colors.colPrimaryContainerHover
+                                    borderWidth: ResonanceTheme.enabled ? 1 : 0
+                                    borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderAccent : "transparent"
                                     enabled: root.replyDraft.length > 0
                                     opacity: enabled ? 1.0 : 0.5
                                     contentItem: MaterialSymbol {
                                         iconSize: Appearance.font.pixelSize.normal
-                                        color: Appearance.colors.colOnPrimaryContainer
+                                        color: ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colOnPrimaryContainer
                                         text: root.replyJustSent ? "check" : "send"
                                         animateChange: true
                                     }
@@ -633,15 +643,17 @@ Item {
                                     Behavior on opacity {
                                         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                                     }
-                                    colBackground: Appearance.colors.colPrimaryContainerHover
-                                    colBackgroundHover: Appearance.colors.colPrimaryContainerActive
-                                    colRipple: Appearance.colors.colPrimaryContainerActive
+                                    colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colPrimaryContainerHover
+                                    colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colPrimaryContainerActive
+                                    colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colPrimaryContainerActive
+                                    borderWidth: ResonanceTheme.enabled ? 1 : 0
+                                    borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : Appearance.colors.colOutline
                                     buttonText: Translation.tr("Reply")
                                     onClicked: replyField.forceActiveFocus()
                                     contentItem: MaterialSymbol {
                                         iconSize: Appearance.font.pixelSize.larger
                                         horizontalAlignment: Text.AlignHCenter
-                                        color: Appearance.colors.colOnPrimaryContainer
+                                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnPrimaryContainer
                                         text: "reply"
                                     }
                                     StyledToolTip {
@@ -653,13 +665,15 @@ Item {
                                     buttonText: Translation.tr("Close")
                                     Layout.fillWidth: true
                                     onClicked: root.destroyWithAnimation()
-                                    colBackground: Appearance.colors.colPrimaryContainerHover
-                                    colBackgroundHover: Appearance.colors.colPrimaryContainerActive
-                                    colRipple: Appearance.colors.colPrimaryContainerActive
+                                    colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colPrimaryContainerHover
+                                    colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colPrimaryContainerActive
+                                    colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colPrimaryContainerActive
+                                    borderWidth: ResonanceTheme.enabled ? 1 : 0
+                                    borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : Appearance.colors.colOutline
                                     contentItem: MaterialSymbol {
                                         iconSize: Appearance.font.pixelSize.larger
                                         horizontalAlignment: Text.AlignHCenter
-                                        color: Appearance.colors.colOnPrimaryContainer
+                                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnPrimaryContainer
                                         text: "close"
                                     }
                                     StyledToolTip {
@@ -670,9 +684,11 @@ Item {
                                 NotificationActionButton {
                                     buttonText: Translation.tr("Copy")
                                     Layout.fillWidth: true
-                                    colBackground: Appearance.colors.colPrimaryContainerHover
-                                    colBackgroundHover: Appearance.colors.colPrimaryContainerActive
-                                    colRipple: Appearance.colors.colPrimaryContainerActive
+                                    colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colPrimaryContainerHover
+                                    colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colPrimaryContainerActive
+                                    colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colPrimaryContainerActive
+                                    borderWidth: ResonanceTheme.enabled ? 1 : 0
+                                    borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : Appearance.colors.colOutline
                                     onClicked: {
                                         Quickshell.clipboardText = root.modelData?.body || "";
                                         copyIcon.text = "inventory";
@@ -688,7 +704,7 @@ Item {
                                         id: copyIcon
                                         iconSize: Appearance.font.pixelSize.larger
                                         horizontalAlignment: Text.AlignHCenter
-                                        color: Appearance.colors.colOnPrimaryContainer
+                                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnPrimaryContainer
                                         text: "content_copy"
                                     }
                                     StyledToolTip {
@@ -707,9 +723,11 @@ Item {
                                     Behavior on opacity {
                                         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                                     }
-                                    colBackground: Appearance.colors.colPrimaryContainerHover
-                                    colBackgroundHover: Appearance.colors.colPrimaryContainerActive
-                                    colRipple: Appearance.colors.colPrimaryContainerActive
+                                    colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colPrimaryContainerHover
+                                    colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colPrimaryContainerActive
+                                    colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colPrimaryContainerActive
+                                    borderWidth: ResonanceTheme.enabled ? 1 : 0
+                                    borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : Appearance.colors.colOutline
                                     buttonText: Translation.tr("Open on phone")
                                     onClicked: {
                                         KdeConnectService.openNotificationIntent(root.publicId);
@@ -717,7 +735,7 @@ Item {
                                     contentItem: MaterialSymbol {
                                         iconSize: Appearance.font.pixelSize.larger
                                         horizontalAlignment: Text.AlignHCenter
-                                        color: Appearance.colors.colOnPrimaryContainer
+                                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnPrimaryContainer
                                         text: "open_in_phone"
                                     }
                                     StyledToolTip {

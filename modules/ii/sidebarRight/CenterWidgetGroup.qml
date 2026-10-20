@@ -10,7 +10,9 @@ import QtQuick.Layouts
 Rectangle {
     id: root
     radius: Appearance.rounding.normal
-    color: Appearance.colors.colLayer1
+    color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarCard : Appearance.colors.colLayer1
+    border.width: ResonanceTheme.enabled ? 1 : 0
+    border.color: ResonanceTheme.enabled ? ResonanceTheme.borderSidebarCard : "transparent"
 
     NotificationList {
         anchors.fill: parent

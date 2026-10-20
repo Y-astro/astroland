@@ -20,6 +20,7 @@ import qs.modules.ii.sidebarRight.nightLight
 import qs.modules.ii.sidebarRight.volumeMixer
 import qs.modules.ii.sidebarRight.wifiNetworks
 import qs.modules.ii.sidebarRight.iconPicker
+import qs.modules.common.quickToggleDialogs.tailscale
 
 Item {
     id: root
@@ -30,8 +31,28 @@ Item {
     property bool showBluetoothDialog: false
     property bool showNightLightDialog: false
     property bool showWifiDialog: false
+    property bool showTailscaleDialog: false
     property bool editMode: false
     property bool showIconPickerDialog: false
+
+    // WuWa Theming Integration (Dense WuWa Frost)
+    readonly property bool isWuWa: ResonanceTheme.enabled
+
+    readonly property color sidebarBgColor: isWuWa
+        ? ResonanceTheme.bgGlassSidebar
+        : Appearance.colors.colLayer0
+
+    readonly property color sidebarBorderColor: isWuWa
+        ? ResonanceTheme.borderHairline
+        : Appearance.colors.colLayer0Border
+
+    readonly property color sidebarTextPrimary: isWuWa
+        ? ResonanceTheme.textPrimary
+        : Appearance.colors.colOnLayer0
+
+    readonly property color sidebarTextSecondary: isWuWa
+        ? ResonanceTheme.textSecondary
+        : Appearance.colors.colOnLayer1
 
     readonly property bool animatedEntrance: WM.compositor !== "hyprland"
     readonly property bool sidebarOpen: GlobalStates.sidebarRightOpen
@@ -93,6 +114,7 @@ Item {
                 root.showBluetoothDialog = false;
                 root.showAudioOutputDialog = false;
                 root.showAudioInputDialog = false;
+                root.showTailscaleDialog = false;
             }
         }
     }
@@ -120,6 +142,7 @@ Item {
 
     StyledRectangularShadow {
         target: sidebarRightBackground
+        visible: !root.isWuWa
     }
     Rectangle {
         id: sidebarRightBackground
@@ -127,9 +150,9 @@ Item {
         anchors.fill: parent
         implicitHeight: parent.height - Appearance.sizes.hyprlandGapsOut * 2
         implicitWidth: sidebarWidth - Appearance.sizes.hyprlandGapsOut * 2
-        color: Appearance.colors.colLayer0
+        color: root.sidebarBgColor
         border.width: 1
-        border.color: Appearance.colors.colLayer0Border
+        border.color: root.sidebarBorderColor
         radius: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 5
 
         ColumnLayout {
@@ -152,8 +175,10 @@ Item {
                         Rectangle {
                             id: sysRect
                             anchors.fill: parent
-                            radius: Config.options.hyprland.decoration.rounding - 2
-                            color: Appearance.colors.colLayer1
+                            radius: Appearance.rounding.normal
+                            color: root.isWuWa ? ResonanceTheme.bgGlassSidebarCard : Appearance.colors.colLayer1
+                            border.width: root.isWuWa ? 1 : 0
+                            border.color: root.isWuWa ? ResonanceTheme.borderSidebarCard : "transparent"
 
                             Rectangle {
                                 id: wallpaperRect
@@ -215,7 +240,9 @@ Item {
                                 Rectangle {
                                     id: avatarRect
                                     width: 48; height: 48; radius: width / 2
-                                    color: Appearance.colors.colPrimaryContainer
+                                    color: root.isWuWa ? ResonanceTheme.alpha(ResonanceTheme.colTealInkDark, 0.85) : Appearance.colors.colPrimaryContainer
+                                    border.width: root.isWuWa ? 1.5 : 0
+                                    border.color: root.isWuWa ? ResonanceTheme.borderAccent : "transparent"
 
                                     Image {
                                         id: avatarImage
@@ -252,14 +279,14 @@ Item {
                                     text: (Config.options.profile.displayName === "" ? SystemInfo.username : Config.options.profile.displayName) + "@" + SystemInfo.hostname
                                     font.pixelSize: Appearance.font.pixelSize.small
                                     font.weight: Font.DemiBold
-                                    color: Appearance.colors.colOnLayer1
+                                    color: root.isWuWa ? root.sidebarTextPrimary : Appearance.colors.colOnLayer1
                                 }
 
                                 StyledText {
                                     text: Translation.tr("Up • %1").arg(DateTime.uptime)
                                     font.pixelSize: Appearance.font.pixelSize.smaller
-                                    color: Appearance.colors.colOnLayer1
-                                    opacity: 0.6
+                                    color: root.isWuWa ? root.sidebarTextSecondary : Appearance.colors.colOnLayer1
+                                    opacity: root.isWuWa ? 0.9 : 0.6
                                 }
                             }
 
@@ -267,10 +294,14 @@ Item {
                                 anchors {
                                     right: parent.right
                                     bottom: parent.bottom
-                                    margins: 4
+                                    margins: 6
                                 }
-                                color: "transparent"
-                                padding: 4
+                                color: root.isWuWa ? ResonanceTheme.bgGlassSidebarItem : "transparent"
+                                border.width: root.isWuWa ? 1 : 0
+                                border.color: root.isWuWa ? ResonanceTheme.borderSidebarItem : "transparent"
+                                radius: Appearance.rounding.full
+                                padding: root.isWuWa ? 2 : 4
+                                spacing: root.isWuWa ? 2 : 5
 
                                 QuickToggleButton {
                                     toggled: root.editMode
@@ -428,6 +459,11 @@ Item {
         dialog: IconPickerDialog {}
     }
 
+    ToggleDialog {
+        shownPropertyString: "showTailscaleDialog"
+        dialog: TailscaleDialog {}
+    }
+
     component ToggleDialog: Loader {
         id: toggleDialogLoader
         required property string shownPropertyString
@@ -470,6 +506,7 @@ Item {
             function onOpenBluetoothDialog() { root.showBluetoothDialog = true; }
             function onOpenNightLightDialog() { root.showNightLightDialog = true; }
             function onOpenWifiDialog() { root.showWifiDialog = true; }
+            function onOpenTailscaleDialog() { root.showTailscaleDialog = true; }
         }
     }
 
@@ -502,7 +539,7 @@ Item {
                         anchors.fill: parent
                         source: Config.options.custom.distroIcon || SystemInfo.distroIcon
                         colorize: Config.options.custom.colorizeIcon
-                        color: Appearance.colors.colOnLayer0
+                        color: root.isWuWa ? root.sidebarTextPrimary : Appearance.colors.colOnLayer0
                     }
 
                     MouseArea {
@@ -514,7 +551,7 @@ Item {
                 StyledText {
                     anchors.verticalCenter: parent.verticalCenter
                     font.pixelSize: Appearance.font.pixelSize.normal
-                    color: Appearance.colors.colOnLayer0
+                    color: root.isWuWa ? root.sidebarTextPrimary : Appearance.colors.colOnLayer0
                     text: Translation.tr("Up • %1").arg(DateTime.uptime)
                     textFormat: Text.MarkdownText
                 }

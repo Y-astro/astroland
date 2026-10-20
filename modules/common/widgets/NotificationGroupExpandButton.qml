@@ -16,9 +16,11 @@ RippleButton { // Expand button
     Layout.fillHeight: false
 
     buttonRadius: Appearance.rounding.full
-    colBackground: ColorUtils.mix(Appearance?.colors.colLayer2, Appearance?.colors.colLayer2Hover, 0.5)
-    colBackgroundHover: Appearance?.colors.colLayer2Hover ?? "#E5DFED"
-    colRipple: Appearance?.colors.colLayer2Active ?? "#D6CEE2"
+    colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItem : ColorUtils.mix(Appearance?.colors.colLayer2, Appearance?.colors.colLayer2Hover, 0.5)
+    colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItemHover : (Appearance?.colors.colLayer2Hover ?? "#E5DFED")
+    colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItemActive : (Appearance?.colors.colLayer2Active ?? "#D6CEE2")
+    borderWidth: ResonanceTheme.enabled ? 1 : 0
+    borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderSidebarItem : "transparent"
 
     contentItem: Item {
         anchors.centerIn: parent
@@ -32,11 +34,12 @@ RippleButton { // Expand button
                 visible: root.count > 1
                 text: root.count
                 font.pixelSize: root.fontSize
+                color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colOnLayer2
             }
             MaterialSymbol {
                 text: "keyboard_arrow_down"
                 iconSize: root.iconSize
-                color: Appearance.colors.colOnLayer2
+                color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colOnLayer2
                 rotation: expanded ? 180 : 0
                 Behavior on rotation {
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)

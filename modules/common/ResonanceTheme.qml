@@ -80,6 +80,17 @@ Singleton {
     readonly property color bgGlassPill: ColorUtils.applyAlpha(colTealInk, Math.min(0.94, 0.76 + 0.08 * root.intensity))
     readonly property color bgGlassSubtle: ColorUtils.applyAlpha(colTealInk, 0.40 * root.intensity)
 
+    // Sidebar Surfaces (Dense WuWa Frost - Calibrated Dark Depth)
+    readonly property color colTealInkDark: "#0c1b1a"
+    readonly property color bgGlassSidebar: ColorUtils.applyAlpha(colTealInkDark, Math.min(0.95, 0.86 + 0.06 * root.intensity))
+    readonly property color bgGlassSidebarInner: ColorUtils.applyAlpha(colTealInkDark, 0.50 * root.intensity)
+    readonly property color bgGlassSidebarCard: ColorUtils.applyAlpha(colTealInkDark, 0.48 * root.intensity)
+    readonly property color bgGlassSidebarItem: ColorUtils.applyAlpha("#142826", 0.42 * root.intensity)
+    readonly property color bgGlassSidebarItemHover: ColorUtils.applyAlpha(colAntiqueGold, 0.14 * root.intensity)
+    readonly property color bgGlassSidebarItemActive: ColorUtils.applyAlpha(colAntiqueGold, 0.24 * root.intensity)
+    readonly property color borderSidebarCard: ColorUtils.applyAlpha(colAntiqueGold, 0.22 * root.intensity)
+    readonly property color borderSidebarItem: ColorUtils.applyAlpha(colMistySage, 0.16 * root.intensity)
+
     // Popups & Flyout Panels
     readonly property color bgGlassPopup: ColorUtils.applyAlpha(colTealInk, Math.min(0.80, 0.62 + 0.08 * root.intensity))
     readonly property color bgGlassPopupCard: ColorUtils.applyAlpha(colTealInk, Math.min(0.55, 0.35 + 0.08 * root.intensity))

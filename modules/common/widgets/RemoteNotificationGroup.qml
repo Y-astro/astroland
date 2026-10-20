@@ -207,9 +207,11 @@ Item {
         id: background
         anchors.left: parent.left
         width: parent.width
-        color: hoverHandler.hovered && !dragManager.dragging
-               ? Appearance.colors.colLayer3Hover
-               : Appearance.colors.colLayer3
+        color: ResonanceTheme.enabled
+               ? (hoverHandler.hovered && !dragManager.dragging ? ResonanceTheme.bgGlassPopupCardHover : ResonanceTheme.bgGlassPopupCard)
+               : (hoverHandler.hovered && !dragManager.dragging ? Appearance.colors.colLayer3Hover : Appearance.colors.colLayer3)
+        border.width: ResonanceTheme.enabled ? 1 : 0
+        border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
         
         readonly property real activeDragDistance: dragIndexDiff === 0 ? parentDragDistance : (parentDragIndex >= 0 ? parentDragDistance * 0.4 : 0)
         readonly property real dragRatio: Math.min(1.0, Math.abs(activeDragDistance) / Math.max(1, root.dragConfirmThreshold))
@@ -372,7 +374,7 @@ Item {
                             text: root.notificationGroup?.appName || ""
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             font.weight: Font.Bold
-                            color: Appearance.colors.colOnLayer3
+                            color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
                             elide: Text.ElideRight
                         }
 
@@ -384,7 +386,7 @@ Item {
                                     root.notificationGroup?.time ?? 0)
                             }
                             font.pixelSize: Appearance.font.pixelSize.smaller
-                            color: ColorUtils.transparentize(Appearance.colors.colOnLayer3, 0.35)
+                            color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : ColorUtils.transparentize(Appearance.colors.colOnLayer3, 0.35)
                         }
 
                         NotificationGroupExpandButton {
@@ -392,9 +394,11 @@ Item {
                             count: root.notificationCount
                             expanded: root.expanded
                             fontSize: Appearance.font.pixelSize.smaller
-                            colBackground: Appearance.colors.colLayer2
-                            colBackgroundHover: Appearance.colors.colLayer2Hover
-                            colRipple: Appearance.colors.colLayer2Active
+                            colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colLayer2
+                            colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer2Hover
+                            colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colLayer2Active
+                            borderWidth: ResonanceTheme.enabled ? 1 : 0
+                            borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                             onClicked: root.toggleExpanded()
                             altAction: () => root.toggleExpanded()
                             contentItem: Item {
@@ -408,12 +412,12 @@ Item {
                                         Layout.leftMargin: 4
                                         text: root.notificationCount
                                         font.pixelSize: Appearance.font.pixelSize.smaller
-                                        color: Appearance.colors.colOnLayer3
+                                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
                                     }
                                     MaterialSymbol {
                                         text: "keyboard_arrow_down"
                                         iconSize: 16
-                                        color: Appearance.colors.colOnLayer3
+                                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
                                         rotation: root.expanded ? 180 : 0
                                         Behavior on rotation {
                                             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
@@ -449,8 +453,8 @@ Item {
                                 ? topRow.fontSize
                                 : Appearance.font.pixelSize.small
                             color: root.multipleNotifications
-                                 ? ColorUtils.transparentize(Appearance.colors.colOnLayer3, 0.35)
-                                 : Appearance.colors.colOnLayer3
+                                 ? (ResonanceTheme.enabled ? ResonanceTheme.textSecondary : ColorUtils.transparentize(Appearance.colors.colOnLayer3, 0.35))
+                                 : (ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3)
                         }
 
                         StyledText {
@@ -467,7 +471,7 @@ Item {
                                     root.notificationGroup?.time ?? 0)
                             }
                             font.pixelSize: topRow.fontSize
-                            color: ColorUtils.transparentize(Appearance.colors.colOnLayer3, 0.35)
+                            color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : ColorUtils.transparentize(Appearance.colors.colOnLayer3, 0.35)
                         }
                     }
 
@@ -478,9 +482,11 @@ Item {
                         count: root.notificationCount
                         expanded: root.expanded
                         fontSize: topRow.fontSize
-                        colBackground: Appearance.colors.colLayer2
-                        colBackgroundHover: Appearance.colors.colLayer2Hover
-                        colRipple: Appearance.colors.colLayer2Active
+                        colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colLayer2
+                        colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer2Hover
+                        colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colLayer2Active
+                        borderWidth: ResonanceTheme.enabled ? 1 : 0
+                        borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                         onClicked: root.toggleExpanded()
                         altAction: () => root.toggleExpanded()
                         contentItem: Item {
@@ -495,12 +501,12 @@ Item {
                                     visible: expandButton.count > 1
                                     text: expandButton.count
                                     font.pixelSize: expandButton.fontSize
-                                    color: Appearance.colors.colOnLayer3
+                                    color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
                                 }
                                 MaterialSymbol {
                                     text: "keyboard_arrow_down"
                                     iconSize: expandButton.iconSize
-                                    color: Appearance.colors.colOnLayer3
+                                    color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
                                     rotation: expanded ? 180 : 0
                                     Behavior on rotation {
                                         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
@@ -558,7 +564,7 @@ Item {
                                     width: parent.width
                                     height: 1
                                     visible: childWrapperExp.index > 0
-                                    color: ColorUtils.transparentize(Appearance.colors.colOnSecondaryContainer, 0.88)
+                                    color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : ColorUtils.transparentize(Appearance.colors.colOnSecondaryContainer, 0.88)
                                 }
 
                                 RemoteNotificationItem {

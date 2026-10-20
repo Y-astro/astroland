@@ -11,7 +11,9 @@ import QtQuick.Layouts
 Rectangle {
     id: root
     radius: Appearance.rounding.normal
-    color: Appearance.colors.colLayer1
+    color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarCard : Appearance.colors.colLayer1
+    border.width: ResonanceTheme.enabled ? 1 : 0
+    border.color: ResonanceTheme.enabled ? ResonanceTheme.borderSidebarCard : "transparent"
     clip: true
     implicitHeight: collapsed ? collapsedBottomWidgetGroupRow.implicitHeight : 350
     property int selectedTab: Persistent.states.sidebar.bottomGroup.tab
@@ -106,7 +108,7 @@ Rectangle {
                 text: "keyboard_arrow_up"
                 iconSize: Appearance.font.pixelSize.larger
                 horizontalAlignment: Text.AlignHCenter
-                color: Appearance.colors.colOnLayer1
+                color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer1
             }
         }
 
@@ -117,7 +119,7 @@ Rectangle {
             // text: `${DateTime.collapsedCalendarFormat}   •   ${remainingTasks} task${remainingTasks > 1 ? "s" : ""}`
             text: Translation.tr("%1   •   %2 tasks").arg(DateTime.collapsedCalendarFormat).arg(remainingTasks)
             font.pixelSize: Appearance.font.pixelSize.large
-            color: Appearance.colors.colOnLayer1
+            color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer1
         }
     }
 
@@ -155,6 +157,7 @@ Rectangle {
                 anchors.leftMargin: 5
                 currentIndex: root.selectedTab
                 expanded: false
+                colToggled: ResonanceTheme.enabled ? ResonanceTheme.alpha(ResonanceTheme.accentGold, 0.20) : Appearance.colors.colSecondaryContainer
                 Repeater {
                     model: root.tabs
                     NavigationRailButton {
@@ -164,6 +167,9 @@ Rectangle {
                         toggled: root.selectedTab == index
                         buttonText: modelData.name
                         buttonIcon: modelData.icon
+                        colText: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colOnLayer1
+                        colTextToggled: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.m3colors.m3onSecondaryContainer
+                        colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarItemHover : Appearance.colors.colLayer1Hover
                         onPressed: {
                             root.selectedTab = index;
                             Persistent.states.sidebar.bottomGroup.tab = index;
@@ -183,7 +189,7 @@ Rectangle {
                     text: "keyboard_arrow_down"
                     iconSize: Appearance.font.pixelSize.larger
                     horizontalAlignment: Text.AlignHCenter
-                    color: Appearance.colors.colOnLayer1
+                    color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colOnLayer1
                 }
             }
         }

@@ -292,7 +292,7 @@ Item {
                     pixelSize: Math.round(root.titlePixelSize * root.sizeScale)
                     variableAxes: Appearance.font.variableAxes.title
                 }
-                color: Appearance.m3colors.m3outline
+                color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.m3colors.m3outline
                 horizontalAlignment: Text.AlignHCenter
 
                 transform: Translate {
@@ -308,7 +308,7 @@ Item {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
             font.pixelSize: Math.round(root.descriptionPixelSize * root.sizeScale)
-            color: Appearance.m3colors.m3outline
+            color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.m3colors.m3outline
             horizontalAlignment: root.descriptionHorizontalAlignment ?? Text.AlignHCenter
             wrapMode: Text.Wrap
 

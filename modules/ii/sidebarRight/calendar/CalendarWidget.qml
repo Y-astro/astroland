@@ -58,6 +58,7 @@ Item {
                 Layout.fillHeight: false
             }
             CalendarHeaderButton {
+                id: prevMonthButton
                 forceCircle: true
                 downAction: () => {
                     monthShift--;
@@ -66,10 +67,11 @@ Item {
                     text: "chevron_left"
                     iconSize: Appearance.font.pixelSize.larger
                     horizontalAlignment: Text.AlignHCenter
-                    color: Appearance.colors.colOnLayer1
+                    color: ResonanceTheme.enabled ? (prevMonthButton.hovered ? ResonanceTheme.accentGold : ResonanceTheme.textPrimary) : Appearance.colors.colOnLayer1
                 }
             }
             CalendarHeaderButton {
+                id: nextMonthButton
                 forceCircle: true
                 downAction: () => {
                     monthShift++;
@@ -78,7 +80,7 @@ Item {
                     text: "chevron_right"
                     iconSize: Appearance.font.pixelSize.larger
                     horizontalAlignment: Text.AlignHCenter
-                    color: Appearance.colors.colOnLayer1
+                    color: ResonanceTheme.enabled ? (nextMonthButton.hovered ? ResonanceTheme.accentGold : ResonanceTheme.textPrimary) : Appearance.colors.colOnLayer1
                 }
             }
         }

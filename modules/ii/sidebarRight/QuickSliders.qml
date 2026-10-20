@@ -17,7 +17,9 @@ Rectangle {
     implicitWidth: contentItem.implicitWidth + root.horizontalPadding * 2
     implicitHeight: contentItem.implicitHeight + root.verticalPadding * 2
     radius: Appearance.rounding.normal
-    color: Appearance.colors.colLayer1
+    color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarCard : Appearance.colors.colLayer1
+    border.width: ResonanceTheme.enabled ? 1 : 0
+    border.color: ResonanceTheme.enabled ? ResonanceTheme.borderSidebarCard : "transparent"
     property real verticalPadding: 4
     property real horizontalPadding: 12
 
@@ -98,6 +100,14 @@ Rectangle {
         configuration: StyledSlider.Configuration.M
         stopIndicatorValues: []
         dividerValues: secondaryMaterialSymbol.length > 0 ? [secondaryIcon.iconLocation] : []
+
+        highlightColor: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
+        trackColor: ResonanceTheme.enabled ? ResonanceTheme.alpha(ResonanceTheme.colTealInkDark, 0.72) : Appearance.colors.colSecondaryContainer
+        handleColor: ResonanceTheme.enabled
+            ? (quickSlider.pressed ? ResonanceTheme.colWarmIvory : (quickSlider.hovered ? ResonanceTheme.crestHighlight : ResonanceTheme.colWarmIvory))
+            : Appearance.colors.colPrimary
+        handleDefaultWidth: ResonanceTheme.enabled ? 4 : 3
+        handlePressedWidth: ResonanceTheme.enabled ? 2.5 : 1.5
         
         MaterialSymbol {
             id: icon
@@ -108,7 +118,9 @@ Rectangle {
                 rightMargin: nearFull ? 14 : 8
             }
             iconSize: 20
-            color: nearFull ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+            color: nearFull
+                ? (ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colOnPrimary)
+                : (ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colOnSecondaryContainer)
             text: quickSlider.materialSymbol
 
             Behavior on color {
@@ -130,7 +142,9 @@ Rectangle {
                 rightMargin: nearIcon ? 14 : (1 - iconLocation) * quickSlider.effectiveDraggingWidth + quickSlider.rightPadding + 8
             }
             iconSize: 20
-            color: quickSlider.value >= iconLocation - 0.1 ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+            color: (quickSlider.value >= iconLocation - 0.1)
+                ? (ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colOnPrimary)
+                : (ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colOnSecondaryContainer)
             text: secondaryMaterialSymbol
 
             Behavior on color {

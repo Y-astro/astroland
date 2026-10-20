@@ -13,8 +13,8 @@ MaterialShape {
     property real padding: 8
     property var wrappedShape: MaterialShape.Shape.Clover4Leaf
 
-    color: Appearance.colors.colSecondaryContainer
-    colSymbol: Appearance.colors.colOnSecondaryContainer
+    color: ResonanceTheme.enabled ? ResonanceTheme.alpha(ResonanceTheme.colTealInkDark, 0.70) : Appearance.colors.colSecondaryContainer
+    colSymbol: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnSecondaryContainer
     shape: root.wrappedShape
     implicitSize: iconSize + padding * 2
 
