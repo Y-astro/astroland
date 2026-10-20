@@ -33,7 +33,9 @@ Rectangle {
 
     visible: Config.options.phone.showPeripheralCards
     radius: Appearance.rounding.normal
-    color: Appearance.colors.colLayer3
+    color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colLayer3
+    border.width: ResonanceTheme.enabled ? 1 : 0
+    border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
     clip: true
 
     // Grows with the selected panel (a running session adds its facts and
@@ -178,9 +180,11 @@ Rectangle {
             id: expandButton
             implicitHeight: 40
             forceCircle: true
-            colBackground: Appearance.colors.colLayer2
-            colBackgroundHover: Appearance.colors.colLayer2Hover
-            colRipple: Appearance.colors.colLayer2Active
+            colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSubtle : Appearance.colors.colLayer2
+            colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer2Hover
+            colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colLayer2Active
+            borderWidth: ResonanceTheme.enabled ? 1 : 0
+            borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
             tooltipText: Translation.tr("Expand")
             onClicked: root.setCollapsed(false)
             contentItem: MaterialSymbol {
@@ -188,7 +192,7 @@ Rectangle {
                 horizontalAlignment: Text.AlignHCenter
                 text: "keyboard_arrow_up"
                 iconSize: Appearance.font.pixelSize.larger
-                color: Appearance.colors.colOnLayer3
+                color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
             }
         }
 
@@ -233,9 +237,11 @@ Rectangle {
                 anchors.top: parent.top
                 anchors.horizontalCenter: parent.horizontalCenter
                 forceCircle: true
-                colBackground: Appearance.colors.colLayer2
-                colBackgroundHover: Appearance.colors.colLayer2Hover
-                colRipple: Appearance.colors.colLayer2Active
+                colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSubtle : Appearance.colors.colLayer2
+                colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer2Hover
+                colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colLayer2Active
+                borderWidth: ResonanceTheme.enabled ? 1 : 0
+                borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                 tooltipText: Translation.tr("Collapse")
                 onClicked: root.setCollapsed(true)
                 contentItem: MaterialSymbol {
@@ -243,7 +249,7 @@ Rectangle {
                     horizontalAlignment: Text.AlignHCenter
                     text: "keyboard_arrow_down"
                     iconSize: Appearance.font.pixelSize.larger
-                    color: Appearance.colors.colOnLayer3
+                    color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
                 }
             }
 
@@ -252,21 +258,20 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 currentIndex: root.selectedTab
+                colToggled: ResonanceTheme.enabled ? ResonanceTheme.alpha(ResonanceTheme.accentGold, 0.22) : Appearance.colors.colSecondaryContainer
                 Repeater {
                     model: root.tabs
                     NavigationRailButton {
                         required property int index
                         required property var modelData
-                        // The group sits on Layer3: an unselected hover takes
-                        // the next layer up, the selected tab is the secondary
-                        // container, as on the dashboard.
-                        showToggledHighlight: true
-                        colBackgroundHover: Appearance.colors.colLayer3Hover
-                        colBackgroundActive: Appearance.colors.colLayer3Active
-                        colBackgroundToggledActive: Appearance.colors.colSecondaryContainerActive
-                        colRipple: Appearance.colors.colLayer3Active
-                        colRippleToggled: Appearance.colors.colSecondaryContainerActive
-                        colText: Appearance.colors.colOnLayer3
+                        showToggledHighlight: false
+                        colBackground: "transparent"
+                        colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer3Hover
+                        colBackgroundActive: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colLayer3Active
+                        colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colLayer3Active
+                        colRippleToggled: ResonanceTheme.enabled ? ResonanceTheme.borderAccent : Appearance.colors.colSecondaryContainerActive
+                        colText: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colOnLayer3
+                        colTextToggled: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.m3colors.m3onSecondaryContainer
                         toggled: root.selectedTab === index
                         buttonText: modelData.name
                         buttonIcon: modelData.icon
@@ -549,9 +554,19 @@ Rectangle {
 
         implicitHeight: 40
         buttonRadius: pill.active ? Appearance.rounding.small : Appearance.rounding.full
-        colBackground: pill.active ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer2
-        colBackgroundHover: pill.active ? Appearance.colors.colPrimaryContainerHover : Appearance.colors.colLayer2Hover
-        colRipple: pill.active ? Appearance.colors.colPrimaryContainerActive : Appearance.colors.colLayer2Active
+        colBackground: ResonanceTheme.enabled
+            ? (pill.active ? ResonanceTheme.accentGold : ResonanceTheme.bgGlassPopupCard)
+            : (pill.active ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer2)
+        colBackgroundHover: ResonanceTheme.enabled
+            ? (pill.active ? ResonanceTheme.borderAccent : ResonanceTheme.bgGlassPopupCardHover)
+            : (pill.active ? Appearance.colors.colPrimaryContainerHover : Appearance.colors.colLayer2Hover)
+        colRipple: ResonanceTheme.enabled
+            ? (pill.active ? ResonanceTheme.borderAccent : ResonanceTheme.bgGlassPopupCardActive)
+            : (pill.active ? Appearance.colors.colPrimaryContainerActive : Appearance.colors.colLayer2Active)
+        borderWidth: ResonanceTheme.enabled ? 1 : 0
+        borderColor: ResonanceTheme.enabled
+            ? (pill.active ? ResonanceTheme.borderAccent : ResonanceTheme.borderHairline)
+            : "transparent"
         opacity: pill.dimmed ? 0.55 : 1
 
         contentItem: Item {
@@ -565,13 +580,17 @@ Rectangle {
                     text: pill.symbol
                     iconSize: Appearance.font.pixelSize.large
                     fill: pill.active ? 1 : 0
-                    color: pill.active ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer3
+                    color: ResonanceTheme.enabled
+                        ? (pill.active ? ResonanceTheme.colTealInkDark : ResonanceTheme.textPrimary)
+                        : (pill.active ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer3)
                 }
                 StyledText {
                     text: pill.label
                     font.pixelSize: Appearance.font.pixelSize.small
                     font.weight: Font.DemiBold
-                    color: pill.active ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer3
+                    color: ResonanceTheme.enabled
+                        ? (pill.active ? ResonanceTheme.colTealInkDark : ResonanceTheme.textPrimary)
+                        : (pill.active ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer3)
                 }
             }
         }
@@ -635,10 +654,12 @@ Rectangle {
                     padding: 9
                     fill: panel.active ? 1 : 0
                     shape: panel.shapeKind
-                    color: panel.active ? Appearance.colors.colPrimary
-                        : panel.dimmed ? Appearance.colors.colLayer2 : Appearance.colors.colPrimaryContainer
-                    colSymbol: panel.active ? Appearance.colors.colOnPrimary
-                        : panel.dimmed ? Appearance.colors.colSubtext : Appearance.colors.colOnPrimaryContainer
+                    color: ResonanceTheme.enabled
+                        ? (panel.active ? ResonanceTheme.accentGold : (panel.dimmed ? ResonanceTheme.bgGlassSubtle : ColorUtils.applyAlpha(ResonanceTheme.accentGold, 0.20)))
+                        : (panel.active ? Appearance.colors.colPrimary : (panel.dimmed ? Appearance.colors.colLayer2 : Appearance.colors.colPrimaryContainer))
+                    colSymbol: ResonanceTheme.enabled
+                        ? (panel.active ? ResonanceTheme.colTealInkDark : (panel.dimmed ? ResonanceTheme.textTertiary : ResonanceTheme.accentGold))
+                        : (panel.active ? Appearance.colors.colOnPrimary : (panel.dimmed ? Appearance.colors.colSubtext : Appearance.colors.colOnPrimaryContainer))
                     rotation: panel.active ? 30 : 0
                     Behavior on rotation {
                         enabled: !Appearance.reducedMotion
@@ -655,7 +676,7 @@ Rectangle {
                         font.family: Appearance.font.family.title
                         font.pixelSize: Appearance.font.pixelSize.normal
                         font.weight: Font.DemiBold
-                        color: Appearance.colors.colOnLayer3
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
                         elide: Text.ElideRight
                     }
                     StyledText {
@@ -663,8 +684,9 @@ Rectangle {
                         visible: text.length > 0
                         text: panel.subtitle
                         font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: panel.featureState === "offline" && panel.subtitle.length > 40
-                            ? Appearance.colors.colError : Appearance.colors.colSubtext
+                        color: ResonanceTheme.enabled
+                            ? (panel.featureState === "offline" && panel.subtitle.length > 40 ? ResonanceTheme.colThermalOrange : ResonanceTheme.textSecondary)
+                            : (panel.featureState === "offline" && panel.subtitle.length > 40 ? Appearance.colors.colError : Appearance.colors.colSubtext)
                         elide: Text.ElideRight
                     }
                 }
@@ -676,7 +698,7 @@ Rectangle {
                     implicitWidth: liveRow.implicitWidth + 16
                     implicitHeight: 24
                     radius: Appearance.rounding.full
-                    color: Appearance.colors.colPrimary
+                    color: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
                     RowLayout {
                         id: liveRow
                         anchors.centerIn: parent
@@ -685,13 +707,13 @@ Rectangle {
                             implicitWidth: 6
                             implicitHeight: 6
                             radius: 3
-                            color: Appearance.colors.colOnPrimary
+                            color: ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colOnPrimary
                         }
                         StyledText {
                             text: Translation.tr("Live")
                             font.pixelSize: Appearance.font.pixelSize.smallest
                             font.weight: Font.Bold
-                            color: Appearance.colors.colOnPrimary
+                            color: ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colOnPrimary
                         }
                     }
                 }
@@ -701,16 +723,18 @@ Rectangle {
                     implicitWidth: 34
                     implicitHeight: 34
                     buttonRadius: Appearance.rounding.full
-                    colBackground: "transparent"
-                    colBackgroundHover: Appearance.colors.colLayer3Hover
-                    colRipple: Appearance.colors.colLayer3Active
+                    colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSubtle : "transparent"
+                    colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer3Hover
+                    colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colLayer3Active
+                    borderWidth: ResonanceTheme.enabled ? 1 : 0
+                    borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                     onClicked: root.requestOpenSubPage(Qt.resolvedUrl(panel.settingsPage))
                     contentItem: MaterialSymbol {
                         anchors.centerIn: parent
                         horizontalAlignment: Text.AlignHCenter
                         text: "tune"
                         iconSize: Appearance.font.pixelSize.larger
-                        color: Appearance.colors.colOnSurfaceVariant
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colOnSurfaceVariant
                     }
                     StyledToolTip {
                         text: Translation.tr("More options")
@@ -724,7 +748,9 @@ Rectangle {
                 visible: panel.detail.length > 0
                 implicitHeight: detailRow.implicitHeight + 14
                 radius: Appearance.rounding.small
-                color: ColorUtils.applyAlpha(Appearance.colors.colOnLayer3, 0.06)
+                color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : ColorUtils.applyAlpha(Appearance.colors.colOnLayer3, 0.06)
+                border.width: ResonanceTheme.enabled ? 1 : 0
+                border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                 RowLayout {
                     id: detailRow
                     anchors.fill: parent
@@ -734,13 +760,13 @@ Rectangle {
                     MaterialSymbol {
                         text: "info"
                         iconSize: Appearance.font.pixelSize.normal
-                        color: Appearance.colors.colSubtext
+                        color: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colSubtext
                     }
                     StyledText {
                         Layout.fillWidth: true
                         text: panel.detail
                         font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colOnLayer3
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
                         wrapMode: Text.Wrap
                         maximumLineCount: 2
                         elide: Text.ElideRight
@@ -754,7 +780,9 @@ Rectangle {
                 visible: panel.error.length > 0
                 implicitHeight: errorRow.implicitHeight + 14
                 radius: Appearance.rounding.small
-                color: Appearance.colors.colErrorContainer
+                color: ResonanceTheme.enabled ? ColorUtils.applyAlpha(ResonanceTheme.colThermalOrange, 0.20) : Appearance.colors.colErrorContainer
+                border.width: ResonanceTheme.enabled ? 1 : 0
+                border.color: ResonanceTheme.enabled ? ResonanceTheme.colThermalOrange : "transparent"
                 RowLayout {
                     id: errorRow
                     anchors.fill: parent
@@ -765,13 +793,13 @@ Rectangle {
                         text: "error"
                         iconSize: Appearance.font.pixelSize.normal
                         fill: 1
-                        color: Appearance.colors.colOnErrorContainer
+                        color: ResonanceTheme.enabled ? ResonanceTheme.colThermalOrange : Appearance.colors.colOnErrorContainer
                     }
                     StyledText {
                         Layout.fillWidth: true
                         text: panel.error
                         font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colOnErrorContainer
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnErrorContainer
                         wrapMode: Text.Wrap
                         maximumLineCount: 2
                         elide: Text.ElideRight
@@ -793,9 +821,19 @@ Rectangle {
                     // While connecting the main action cancels the launch.
                     readonly property bool isStop: panel.busy || panel.mainSymbol === "stop"
                     buttonRadius: mainButton.isStop ? Appearance.rounding.small : Appearance.rounding.full
-                    colBackground: mainButton.isStop ? Appearance.colors.colErrorContainer : Appearance.colors.colPrimary
-                    colBackgroundHover: mainButton.isStop ? Appearance.colors.colErrorContainerHover : Appearance.colors.colPrimaryHover
-                    colRipple: mainButton.isStop ? Appearance.colors.colErrorContainerActive : Appearance.colors.colPrimaryActive
+                    colBackground: ResonanceTheme.enabled
+                        ? (mainButton.isStop ? ColorUtils.applyAlpha(ResonanceTheme.colThermalOrange, 0.25) : ResonanceTheme.accentGold)
+                        : (mainButton.isStop ? Appearance.colors.colErrorContainer : Appearance.colors.colPrimary)
+                    colBackgroundHover: ResonanceTheme.enabled
+                        ? (mainButton.isStop ? ColorUtils.applyAlpha(ResonanceTheme.colThermalOrange, 0.35) : ResonanceTheme.borderAccent)
+                        : (mainButton.isStop ? Appearance.colors.colErrorContainerHover : Appearance.colors.colPrimaryHover)
+                    colRipple: ResonanceTheme.enabled
+                        ? (mainButton.isStop ? ResonanceTheme.colThermalOrange : ResonanceTheme.borderAccent)
+                        : (mainButton.isStop ? Appearance.colors.colErrorContainerActive : Appearance.colors.colPrimaryActive)
+                    borderWidth: ResonanceTheme.enabled ? 1 : 0
+                    borderColor: ResonanceTheme.enabled
+                        ? (mainButton.isStop ? ResonanceTheme.colThermalOrange : ResonanceTheme.borderAccent)
+                        : "transparent"
                     onClicked: panel.busy ? panel.stopClicked() : panel.mainClicked()
 
                     contentItem: Item {
@@ -809,13 +847,17 @@ Rectangle {
                                 text: panel.busy ? "close" : panel.mainSymbol
                                 iconSize: Appearance.font.pixelSize.larger
                                 fill: 1
-                                color: mainButton.isStop ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnPrimary
+                                color: ResonanceTheme.enabled
+                                    ? (mainButton.isStop ? ResonanceTheme.colThermalOrange : ResonanceTheme.colTealInkDark)
+                                    : (mainButton.isStop ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnPrimary)
                             }
                             StyledText {
                                 text: panel.busy ? Translation.tr("Cancel") : panel.mainLabel
                                 font.pixelSize: Appearance.font.pixelSize.small
                                 font.weight: Font.Bold
-                                color: mainButton.isStop ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnPrimary
+                                color: ResonanceTheme.enabled
+                                    ? (mainButton.isStop ? ResonanceTheme.colThermalOrange : ResonanceTheme.colTealInkDark)
+                                    : (mainButton.isStop ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnPrimary)
                             }
                         }
                     }
@@ -826,9 +868,11 @@ Rectangle {
                     implicitWidth: 44
                     implicitHeight: 44
                     buttonRadius: Appearance.rounding.small
-                    colBackground: Appearance.colors.colErrorContainer
-                    colBackgroundHover: Appearance.colors.colErrorContainerHover
-                    colRipple: Appearance.colors.colErrorContainerActive
+                    colBackground: ResonanceTheme.enabled ? ColorUtils.applyAlpha(ResonanceTheme.colThermalOrange, 0.25) : Appearance.colors.colErrorContainer
+                    colBackgroundHover: ResonanceTheme.enabled ? ColorUtils.applyAlpha(ResonanceTheme.colThermalOrange, 0.35) : Appearance.colors.colErrorContainerHover
+                    colRipple: ResonanceTheme.enabled ? ResonanceTheme.colThermalOrange : Appearance.colors.colErrorContainerActive
+                    borderWidth: ResonanceTheme.enabled ? 1 : 0
+                    borderColor: ResonanceTheme.enabled ? ResonanceTheme.colThermalOrange : "transparent"
                     onClicked: panel.stopClicked()
                     contentItem: MaterialSymbol {
                         anchors.centerIn: parent
@@ -836,7 +880,7 @@ Rectangle {
                         text: "stop"
                         fill: 1
                         iconSize: Appearance.font.pixelSize.larger
-                        color: Appearance.colors.colOnErrorContainer
+                        color: ResonanceTheme.enabled ? ResonanceTheme.colThermalOrange : Appearance.colors.colOnErrorContainer
                     }
                     StyledToolTip {
                         text: Translation.tr("Stop")
@@ -875,16 +919,18 @@ Rectangle {
                         Layout.preferredWidth: 1
                         implicitHeight: 36
                         buttonRadius: actionButton.hovered ? Appearance.rounding.small : Appearance.rounding.full
-                        colBackground: ColorUtils.applyAlpha(Appearance.colors.colOnLayer3, 0.08)
-                        colBackgroundHover: ColorUtils.applyAlpha(Appearance.colors.colOnLayer3, 0.16)
-                        colRipple: ColorUtils.applyAlpha(Appearance.colors.colOnLayer3, 0.24)
+                        colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : ColorUtils.applyAlpha(Appearance.colors.colOnLayer3, 0.08)
+                        colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : ColorUtils.applyAlpha(Appearance.colors.colOnLayer3, 0.16)
+                        colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : ColorUtils.applyAlpha(Appearance.colors.colOnLayer3, 0.24)
+                        borderWidth: ResonanceTheme.enabled ? 1 : 0
+                        borderColor: ResonanceTheme.enabled ? (actionButton.hovered ? ResonanceTheme.borderSubtle : ResonanceTheme.borderHairline) : "transparent"
                         onClicked: actionButton.modelData.run()
                         contentItem: MaterialSymbol {
                             anchors.centerIn: parent
                             horizontalAlignment: Text.AlignHCenter
                             text: actionButton.modelData.icon
                             iconSize: Appearance.font.pixelSize.larger
-                            color: Appearance.colors.colOnLayer3
+                            color: ResonanceTheme.enabled ? (actionButton.hovered ? ResonanceTheme.accentGold : ResonanceTheme.textPrimary) : Appearance.colors.colOnLayer3
                         }
                         StyledToolTip {
                             text: actionButton.modelData.label
@@ -906,8 +952,15 @@ Rectangle {
         implicitWidth: chipRow.implicitWidth + 22
         implicitHeight: 32
         radius: Appearance.rounding.full
-        color: chip.selected ? Appearance.colors.colSecondaryContainer
-            : chipPointer.containsMouse ? ColorUtils.applyAlpha(Appearance.colors.colPrimary, 0.08) : "transparent"
+        color: ResonanceTheme.enabled
+            ? (chip.selected ? ColorUtils.applyAlpha(ResonanceTheme.accentGold, 0.20)
+                : (chipPointer.containsMouse ? ResonanceTheme.bgGlassPopupCardHover : ResonanceTheme.bgGlassPopupCard))
+            : (chip.selected ? Appearance.colors.colSecondaryContainer
+                : (chipPointer.containsMouse ? ColorUtils.applyAlpha(Appearance.colors.colPrimary, 0.08) : "transparent"))
+        border.width: ResonanceTheme.enabled ? 1 : 0
+        border.color: ResonanceTheme.enabled
+            ? (chip.selected ? ResonanceTheme.accentGold : "transparent")
+            : "transparent"
         Behavior on color {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
         }
@@ -915,7 +968,7 @@ Rectangle {
         DashedBorder {
             anchors.fill: parent
             visible: !chip.selected
-            color: ColorUtils.applyAlpha(Appearance.colors.colOutline, 0.8)
+            color: ResonanceTheme.enabled ? ResonanceTheme.borderSubtle : ColorUtils.applyAlpha(Appearance.colors.colOutline, 0.8)
             borderWidth: 1
             dashLength: 4
             gapLength: 3
@@ -930,13 +983,17 @@ Rectangle {
                 text: chip.symbol
                 iconSize: Appearance.font.pixelSize.normal
                 fill: chip.selected ? 1 : 0
-                color: chip.selected ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnSurfaceVariant
+                color: ResonanceTheme.enabled
+                    ? (chip.selected ? ResonanceTheme.accentGold : ResonanceTheme.textSecondary)
+                    : (chip.selected ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnSurfaceVariant)
             }
             StyledText {
                 text: chip.label
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 font.weight: Font.Bold
-                color: chip.selected ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnSurfaceVariant
+                color: ResonanceTheme.enabled
+                    ? (chip.selected ? ResonanceTheme.accentGold : ResonanceTheme.textSecondary)
+                    : (chip.selected ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnSurfaceVariant)
             }
         }
 

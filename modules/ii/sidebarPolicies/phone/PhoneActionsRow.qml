@@ -212,11 +212,21 @@ Item {
         Layout.preferredWidth: 1
         implicitHeight: 48
         useDynamicRadius: true
-        colBackground: btn.feedbackFlash ? Appearance.colors.colPrimary : Appearance.colors.colSecondaryContainer
-        colBackgroundHover: btn.feedbackFlash ? Appearance.colors.colPrimaryHover : Appearance.colors.colSecondaryContainerHover
-        colRipple: btn.feedbackFlash ? Appearance.colors.colPrimaryActive : Appearance.colors.colSecondaryContainerActive
+        colBackground: ResonanceTheme.enabled
+            ? (btn.feedbackFlash ? ResonanceTheme.accentGold : ResonanceTheme.bgGlassPopupCard)
+            : (btn.feedbackFlash ? Appearance.colors.colPrimary : Appearance.colors.colSecondaryContainer)
+        colBackgroundHover: ResonanceTheme.enabled
+            ? (btn.feedbackFlash ? ResonanceTheme.accentGold : ResonanceTheme.bgGlassPopupCardHover)
+            : (btn.feedbackFlash ? Appearance.colors.colPrimaryHover : Appearance.colors.colSecondaryContainerHover)
+        colRipple: ResonanceTheme.enabled
+            ? (btn.feedbackFlash ? ResonanceTheme.accentGold : ResonanceTheme.bgGlassPopupCardActive)
+            : (btn.feedbackFlash ? Appearance.colors.colPrimaryActive : Appearance.colors.colSecondaryContainerActive)
+        borderWidth: ResonanceTheme.enabled ? 1 : 0
+        borderColor: ResonanceTheme.enabled
+            ? (btn.feedbackFlash ? ResonanceTheme.borderAccent : (btn.hovered ? ResonanceTheme.borderSubtle : ResonanceTheme.borderHairline))
+            : (Appearance.colors.colOutline ?? "transparent")
 
-        opacity: enabled ? 1.0 : 0.4
+        opacity: enabled ? 1.0 : (ResonanceTheme.enabled ? 0.35 : 0.4)
         scale: 1.0
 
         contentItem: MaterialSymbol {
@@ -225,7 +235,13 @@ Item {
             verticalAlignment: Text.AlignVCenter
             text: btn.iconName
             iconSize: 22
-            color: btn.feedbackFlash ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+            color: ResonanceTheme.enabled
+                ? (btn.feedbackFlash
+                    ? ResonanceTheme.colTealInkDark
+                    : (btn.hovered ? ResonanceTheme.accentGold : ResonanceTheme.textPrimary))
+                : (btn.feedbackFlash
+                    ? Appearance.colors.colOnPrimary
+                    : Appearance.colors.colOnSecondaryContainer)
             // Animate the icon fill (0 -> 1) — Material Symbols supports this
             // natively without needing a `Behavior on text` swap that would
             // leak intermediate non-existent glyph strings during animation.

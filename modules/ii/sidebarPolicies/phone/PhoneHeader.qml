@@ -102,8 +102,11 @@ Item {
             enabled: KdeConnectService.hasDevices && pairedDevices.length > 0
             opacity: enabled ? 1.0 : 0.5
             buttonRadius: Appearance.rounding.full
-            colBackground: Appearance.colors.colLayer3
-            colBackgroundHover: Appearance.colors.colLayer3Hover
+            colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colLayer3
+            colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer3Hover
+            colBackgroundActive: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : (Appearance.colors.colLayer3Active ?? Appearance.colors.colLayer3Hover)
+            borderWidth: ResonanceTheme.enabled ? 1 : 0
+            borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
 
             transform: Translate {
                 id: deviceChipTransform
@@ -128,7 +131,7 @@ Item {
                     text: root._deviceIconName
                     iconSize: Appearance.font.pixelSize.normal
                     fill: 1
-                    color: Appearance.colors.colOnLayer3
+                    color: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnLayer3
                     animateChange: true
                 }
                 StyledText {
@@ -140,14 +143,14 @@ Item {
                           : Translation.tr("No device")
                     font.pixelSize: Appearance.font.pixelSize.small
                     font.weight: Font.DemiBold
-                    color: Appearance.colors.colOnLayer3
+                    color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
                 }
                 MaterialSymbol {
                     Layout.alignment: Qt.AlignVCenter
                     text: "expand_more"
                     iconSize: Appearance.font.pixelSize.normal
                     fill: 1
-                    color: Appearance.colors.colSubtext
+                    color: ResonanceTheme.enabled ? ResonanceTheme.textTertiary : Appearance.colors.colSubtext
                     animateChange: true
                 }
             }
@@ -166,7 +169,9 @@ Item {
             Layout.preferredHeight: 38
             Layout.preferredWidth: batRow.implicitWidth + 28
             radius: Appearance.rounding.full
-            color: Appearance.colors.colLayer3
+            color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colLayer3
+            border.width: ResonanceTheme.enabled ? 1 : 0
+            border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
             opacity: root._battery >= 0 ? 1.0 : 0.4
             scale: 1.0
             Behavior on scale {
@@ -189,9 +194,11 @@ Item {
                     height: 18
                     batteryLevel: root._battery >= 0 ? root._battery : 0
                     isCharging: root._charging
-                    colorFillNormal: Appearance.colors.colOnLayer3
-                    colorTextEmpty: Appearance.colors.colOnLayer3
-                    colorTextFilled: Appearance.colors.colLayer3
+                    colorFillNormal: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnLayer3
+                    colorFillWarning: ResonanceTheme.enabled ? ResonanceTheme.colThermalOrange : "#ea4335"
+                    colorTextEmpty: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
+                    colorTextFilled: ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colLayer3
+                    colorEmptyTrack: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : Qt.rgba(colorFillNormal.r, colorFillNormal.g, colorFillNormal.b, 0.3)
                 }
             }
 
@@ -210,16 +217,18 @@ Item {
             implicitWidth: 38
             implicitHeight: 38
             buttonRadius: settingsButton.hovered ? Appearance.rounding.small : Appearance.rounding.full
-            colBackground: Appearance.colors.colLayer3
-            colBackgroundHover: Appearance.colors.colLayer3Hover
-            colRipple: Appearance.colors.colLayer3Active
+            colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colLayer3
+            colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer3Hover
+            colRipple: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colLayer3Active
+            borderWidth: ResonanceTheme.enabled ? 1 : 0
+            borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
 
             contentItem: MaterialSymbol {
                 anchors.centerIn: parent
                 horizontalAlignment: Text.AlignHCenter
                 text: "settings"
                 iconSize: Appearance.font.pixelSize.larger
-                color: Appearance.colors.colOnLayer3
+                color: ResonanceTheme.enabled ? (settingsButton.hovered ? ResonanceTheme.accentGold : ResonanceTheme.textPrimary) : Appearance.colors.colOnLayer3
                 rotation: settingsButton.hovered ? 60 : 0
                 Behavior on rotation {
                     enabled: !Appearance.reducedMotion

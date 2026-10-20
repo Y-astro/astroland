@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 import qs.services
 
 Item {
@@ -29,9 +30,11 @@ Item {
             Layout.minimumWidth: 0
             Layout.preferredHeight: 58
             buttonRadius: Appearance.rounding.normal
-            colBackground: Appearance.colors.colLayer3
-            colBackgroundHover: Appearance.colors.colLayer3Hover
-            colBackgroundActive: Appearance.colors.colLayer3Active ?? Appearance.colors.colLayer3Hover
+            colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colLayer3
+            colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer3Hover
+            colBackgroundActive: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : (Appearance.colors.colLayer3Active ?? Appearance.colors.colLayer3Hover)
+            borderWidth: ResonanceTheme.enabled ? 1 : 0
+            borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
 
             contentItem: RowLayout {
                 anchors.fill: parent
@@ -45,8 +48,12 @@ Item {
                     iconSize: 20
                     padding: 8
                     fill: 1.0
-                    color: Appearance.colors.colPrimaryContainer
-                    colSymbol: Appearance.colors.colOnPrimaryContainer
+                    color: ResonanceTheme.enabled
+                        ? ColorUtils.applyAlpha(ResonanceTheme.colAntiqueGold, 0.16)
+                        : Appearance.colors.colPrimaryContainer
+                    colSymbol: ResonanceTheme.enabled
+                        ? ResonanceTheme.colAntiqueGold
+                        : Appearance.colors.colOnPrimaryContainer
                     shape: MaterialShape.Shape.Cookie9Sided
                 }
 
@@ -60,7 +67,7 @@ Item {
                         text: Translation.tr("Contacts")
                         font.pixelSize: Appearance.font.pixelSize.small
                         font.weight: Font.DemiBold
-                        color: Appearance.colors.colOnLayer3
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
                         elide: Text.ElideRight
                     }
 
@@ -72,8 +79,8 @@ Item {
                                  : Translation.tr("%1 contacts").arg(String(PhoneContactsService.count)))
                               : Translation.tr("Syncing…")
                         font.pixelSize: Appearance.font.pixelSize.smallest
-                        color: Appearance.colors.colSubtext
-                        opacity: 0.8
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colSubtext
+                        opacity: ResonanceTheme.enabled ? 0.9 : 0.8
                         elide: Text.ElideRight
                     }
                 }
@@ -82,7 +89,7 @@ Item {
                     Layout.alignment: Qt.AlignVCenter
                     text: "chevron_right"
                     iconSize: Appearance.font.pixelSize.normal
-                    color: Appearance.colors.colSubtext
+                    color: ResonanceTheme.enabled ? ResonanceTheme.textTertiary : Appearance.colors.colSubtext
                 }
             }
 
@@ -99,9 +106,11 @@ Item {
             Layout.minimumWidth: 0
             Layout.preferredHeight: 58
             buttonRadius: Appearance.rounding.normal
-            colBackground: Appearance.colors.colLayer3
-            colBackgroundHover: Appearance.colors.colLayer3Hover
-            colBackgroundActive: Appearance.colors.colLayer3Active ?? Appearance.colors.colLayer3Hover
+            colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colLayer3
+            colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer3Hover
+            colBackgroundActive: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : (Appearance.colors.colLayer3Active ?? Appearance.colors.colLayer3Hover)
+            borderWidth: ResonanceTheme.enabled ? 1 : 0
+            borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
 
             contentItem: RowLayout {
                 anchors.fill: parent
@@ -115,8 +124,12 @@ Item {
                     iconSize: 20
                     padding: 8
                     fill: 1.0
-                    color: Appearance.colors.colSecondaryContainer
-                    colSymbol: Appearance.colors.colOnSecondaryContainer
+                    color: ResonanceTheme.enabled
+                        ? ColorUtils.applyAlpha(ResonanceTheme.colMistySage, 0.16)
+                        : Appearance.colors.colSecondaryContainer
+                    colSymbol: ResonanceTheme.enabled
+                        ? ResonanceTheme.colMistySage
+                        : Appearance.colors.colOnSecondaryContainer
                     shape: MaterialShape.Shape.Cookie9Sided
                 }
 
@@ -130,7 +143,7 @@ Item {
                         text: Translation.tr("Android Apps")
                         font.pixelSize: Appearance.font.pixelSize.small
                         font.weight: Font.DemiBold
-                        color: Appearance.colors.colOnLayer3
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer3
                         elide: Text.ElideRight
                     }
 
@@ -138,8 +151,8 @@ Item {
                         Layout.fillWidth: true
                         text: Translation.tr("scrcpy 4.0 App Mode")
                         font.pixelSize: Appearance.font.pixelSize.smallest
-                        color: Appearance.colors.colSubtext
-                        opacity: 0.8
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colSubtext
+                        opacity: ResonanceTheme.enabled ? 0.9 : 0.8
                         elide: Text.ElideRight
                     }
                 }
@@ -148,7 +161,7 @@ Item {
                     Layout.alignment: Qt.AlignVCenter
                     text: "chevron_right"
                     iconSize: Appearance.font.pixelSize.normal
-                    color: Appearance.colors.colSubtext
+                    color: ResonanceTheme.enabled ? ResonanceTheme.textTertiary : Appearance.colors.colSubtext
                 }
             }
 

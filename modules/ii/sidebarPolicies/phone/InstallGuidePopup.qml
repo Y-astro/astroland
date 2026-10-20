@@ -94,7 +94,9 @@ Item {
             anchors.centerIn: parent
             width: Math.min(parent.width - 16, 420)
             height: Math.min(parent.height - 16, popupColumn.implicitHeight + 64)
-            color: Appearance.colors.colLayer2Base
+            color: ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colLayer2Base
+            border.width: ResonanceTheme.enabled ? 1 : 0
+            border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
             radius: Appearance.rounding.large
             z: 1
 
@@ -125,7 +127,7 @@ Item {
                     MaterialSymbol {
                         text: "build"
                         iconSize: 22
-                        color: Appearance.colors.colPrimary
+                        color: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
                         fill: 1.0
                     }
 
@@ -134,20 +136,22 @@ Item {
                         text: root.headerTitle
                         font.pixelSize: Appearance.font.pixelSize.normal
                         font.weight: Font.DemiBold
-                        color: Appearance.colors.colOnSurface
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnSurface
                     }
 
                     RippleButton {
                         Layout.preferredWidth: 32
                         Layout.preferredHeight: 32
                         buttonRadius: Appearance.rounding.full
-                        colBackground: Appearance.colors.colSurfaceContainerHigh
-                        colBackgroundHover: Appearance.colors.colSurfaceContainerHighest
+                        colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colSurfaceContainerHigh
+                        colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colSurfaceContainerHighest
+                        borderWidth: ResonanceTheme.enabled ? 1 : 0
+                        borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                         contentItem: MaterialSymbol {
                             anchors.centerIn: parent
                             text: "close"
                             iconSize: 18
-                            color: Appearance.colors.colOnSurfaceVariant
+                            color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnSurfaceVariant
                         }
                         onClicked: root.closeRequested()
                     }
@@ -168,12 +172,16 @@ Item {
                             required property var modelData
                             Layout.preferredHeight: 30
                             buttonRadius: Appearance.rounding.full
-                            colBackground: root._selectedDistro === modelData.key
-                                ? Appearance.colors.colPrimaryContainer
-                                : Appearance.colors.colSurfaceContainerHigh
-                            colBackgroundHover: root._selectedDistro === modelData.key
-                                ? Appearance.colors.colPrimaryContainerHover
-                                : Appearance.colors.colSurfaceContainerHighest
+                            colBackground: ResonanceTheme.enabled
+                                ? (root._selectedDistro === modelData.key ? ResonanceTheme.accentGold : ResonanceTheme.bgGlassPopupCard)
+                                : (root._selectedDistro === modelData.key ? Appearance.colors.colPrimaryContainer : Appearance.colors.colSurfaceContainerHigh)
+                            colBackgroundHover: ResonanceTheme.enabled
+                                ? (root._selectedDistro === modelData.key ? ResonanceTheme.borderAccent : ResonanceTheme.bgGlassPopupCardHover)
+                                : (root._selectedDistro === modelData.key ? Appearance.colors.colPrimaryContainerHover : Appearance.colors.colSurfaceContainerHighest)
+                            borderWidth: ResonanceTheme.enabled ? 1 : 0
+                            borderColor: ResonanceTheme.enabled
+                                ? (root._selectedDistro === modelData.key ? ResonanceTheme.borderAccent : ResonanceTheme.borderHairline)
+                                : "transparent"
                             scale: down ? 0.96 : 1.0
                             Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutQuad } }
                             contentItem: StyledText {
@@ -182,9 +190,9 @@ Item {
                                 text: modelData.label
                                 font.pixelSize: Appearance.font.pixelSize.smaller
                                 font.weight: root._selectedDistro === modelData.key ? Font.DemiBold : Font.Normal
-                                color: root._selectedDistro === modelData.key
-                                    ? Appearance.colors.colOnPrimaryContainer
-                                    : Appearance.colors.colOnSurfaceVariant
+                                color: ResonanceTheme.enabled
+                                    ? (root._selectedDistro === modelData.key ? ResonanceTheme.colTealInkDark : ResonanceTheme.textSecondary)
+                                    : (root._selectedDistro === modelData.key ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSurfaceVariant)
                             }
                             leftPadding: 14
                             rightPadding: 14
@@ -200,7 +208,7 @@ Item {
                             ? Translation.tr("Detected: %1").arg(root.detectedDistro)
                             : ""
                         font.pixelSize: Appearance.font.pixelSize.smallest
-                        color: Appearance.colors.colSubtext
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colSubtext
                         opacity: 0.7
                         visible: text.length > 0
                     }
@@ -215,7 +223,9 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: depColumn.implicitHeight + 18
                         radius: Appearance.rounding.normal
-                        color: Appearance.colors.colSurfaceContainerLow
+                        color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colSurfaceContainerLow
+                        border.width: ResonanceTheme.enabled ? 1 : 0
+                        border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
 
                         ColumnLayout {
                             id: depColumn
@@ -234,7 +244,7 @@ Item {
                                 MaterialSymbol {
                                     text: "error"
                                     iconSize: 16
-                                    color: Appearance.colors.colError
+                                    color: ResonanceTheme.enabled ? ResonanceTheme.colThermalOrange : Appearance.colors.colError
                                     fill: 1.0
                                     Layout.alignment: Qt.AlignTop
                                 }
@@ -248,14 +258,14 @@ Item {
                                         text: modelData.name
                                         font.pixelSize: Appearance.font.pixelSize.small
                                         font.weight: Font.DemiBold
-                                        color: Appearance.colors.colOnSurface
+                                        color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnSurface
                                         wrapMode: Text.WordWrap
                                     }
                                     StyledText {
                                         Layout.fillWidth: true
                                         text: modelData.description
                                         font.pixelSize: Appearance.font.pixelSize.smallest
-                                        color: Appearance.colors.colOnSurfaceVariant
+                                        color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colOnSurfaceVariant
                                         opacity: 0.85
                                         wrapMode: Text.WordWrap
                                     }
@@ -267,7 +277,9 @@ Item {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: Math.max(34, cmdRow.implicitHeight + 10)
                                 radius: Appearance.rounding.small
-                                color: Appearance.colors.colSurfaceContainerHigh
+                                color: ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colSurfaceContainerHigh
+                                border.width: ResonanceTheme.enabled ? 1 : 0
+                                border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                                 visible: {
                                     const cmds = modelData.installCommands
                                     return cmds && cmds[root._selectedDistro]
@@ -292,7 +304,7 @@ Item {
                                         }
                                         font.pixelSize: Appearance.font.pixelSize.smallest
                                         font.family: Appearance.font.family.monospace || font.family
-                                        color: Appearance.colors.colOnSurface
+                                        color: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnSurface
                                         wrapMode: Text.WrapAnywhere
                                         elide: Text.ElideRight
                                         maximumLineCount: 2
@@ -302,17 +314,19 @@ Item {
                                         Layout.preferredWidth: 30
                                         Layout.preferredHeight: 30
                                         buttonRadius: Appearance.rounding.full
-                                        colBackground: Appearance.colors.colSurfaceContainerHighest
-                                        colBackgroundHover: Appearance.colors.colSurfaceContainerHighestHover
+                                        colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colSurfaceContainerHighest
+                                        colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colSurfaceContainerHighestHover
+                                        borderWidth: ResonanceTheme.enabled ? 1 : 0
+                                        borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                                         scale: down ? 0.92 : 1.0
                                         Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutQuad } }
                                         contentItem: MaterialSymbol {
                                             anchors.centerIn: parent
                                             text: copyLabel.showCheck ? "check" : "content_copy"
                                             iconSize: 15
-                                            color: copyLabel.showCheck
-                                                ? Appearance.colors.colPrimary
-                                                : Appearance.colors.colOnSurface
+                                            color: ResonanceTheme.enabled
+                                                ? (copyLabel.showCheck ? ResonanceTheme.accentGold : ResonanceTheme.textPrimary)
+                                                : (copyLabel.showCheck ? Appearance.colors.colPrimary : Appearance.colors.colOnSurface)
                                             fill: 1.0
                                         }
                                         property bool _copied: false
@@ -368,8 +382,10 @@ Item {
                     RippleButton {
                         Layout.preferredHeight: 30
                         buttonRadius: Appearance.rounding.full
-                        colBackground: Appearance.colors.colPrimaryContainer
-                        colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+                        colBackground: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimaryContainer
+                        colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.borderAccent : Appearance.colors.colPrimaryContainerHover
+                        borderWidth: ResonanceTheme.enabled ? 1 : 0
+                        borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderAccent : "transparent"
                         scale: down ? 0.96 : 1.0
                         Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutQuad } }
                         contentItem: RowLayout {
@@ -378,7 +394,7 @@ Item {
                                 Layout.alignment: Qt.AlignVCenter
                                 text: "refresh"
                                 iconSize: 14
-                                color: Appearance.colors.colOnPrimaryContainer
+                                color: ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colOnPrimaryContainer
                                 fill: 1.0
                             }
                             StyledText {
@@ -386,7 +402,7 @@ Item {
                                 text: Translation.tr("Re-check")
                                 font.pixelSize: Appearance.font.pixelSize.smallest
                                 font.weight: Font.DemiBold
-                                color: Appearance.colors.colOnPrimaryContainer
+                                color: ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colOnPrimaryContainer
                             }
                         }
                         leftPadding: 12

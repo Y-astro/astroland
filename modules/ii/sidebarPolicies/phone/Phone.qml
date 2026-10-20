@@ -79,6 +79,7 @@ Item {
     Component.onCompleted: {
         root.activeSubPage = ""
         root.consumeSubPageRequest()
+        KdeConnectService._probeAdb()
     }
 
     function openSubPage(url: url): void {
@@ -107,6 +108,8 @@ Item {
         function onSidebarLeftOpenChanged() {
             if (!GlobalStates.sidebarLeftOpen) {
                 root.activeSubPage = ""
+            } else {
+                KdeConnectService._probeAdb()
             }
         }
     }
@@ -121,7 +124,7 @@ Item {
         anchors.rightMargin: 4
         anchors.topMargin: -1
         anchors.bottomMargin: 4
-        color: Appearance.colors.colLayer2
+        color: ResonanceTheme.enabled ? "transparent" : Appearance.colors.colLayer2
         radius: Appearance.rounding.normal
 
         // ─── Floating Toast ─────────────────────────────────────────
@@ -351,7 +354,9 @@ Item {
                 // when contentTransparency > 0, which makes the popup see-through
                 // and the sidebar content bleeds through. Other opaque widgets
                 // (ConfigSlider, ContentSubsection, etc.) follow the same pattern.
-                color: Appearance.colors.colLayer4Base
+                color: ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colLayer4Base
+                border.width: ResonanceTheme.enabled ? 1 : 0
+                border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                 radius: Appearance.rounding.normal
                 width: Math.min(280, parent.width - 8)
                 height: deviceMenuColumn.implicitHeight + 16
@@ -396,7 +401,7 @@ Item {
                     offset: Qt.vector2d(0.0, 6.0)
                     spread: 1
                     cached: true
-                    visible: deviceMenu.opacity > 0.01
+                    visible: !ResonanceTheme.enabled && deviceMenu.opacity > 0.01
                 }
 
                 ColumnLayout {
@@ -417,7 +422,7 @@ Item {
                             text: Translation.tr("Recent")
                             font.pixelSize: Appearance.font.pixelSize.smallest
                             font.weight: Font.DemiBold
-                            color: Appearance.colors.colSubtext
+                            color: ResonanceTheme.enabled ? ResonanceTheme.textAccent : Appearance.colors.colSubtext
                             opacity: 0.8
                         }
 
@@ -431,8 +436,8 @@ Item {
                                 Layout.preferredHeight: 44
                                 buttonRadius: Appearance.rounding.small
                                 colBackground: "transparent"
-                                colBackgroundHover: Appearance.colors.colLayer4Hover
-                                colBackgroundActive: Appearance.colors.colLayer4Active ?? Appearance.colors.colLayer4Hover
+                                colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer4Hover
+                                colBackgroundActive: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : (Appearance.colors.colLayer4Active ?? Appearance.colors.colLayer4Hover)
                                 contentItem: Item {
                                     anchors.fill: parent
                                     RowLayout {
@@ -445,8 +450,8 @@ Item {
                                             text: "history"
                                             iconSize: Appearance.font.pixelSize.normal
                                             color: modelData?.reachable
-                                                ? Appearance.colors.colOnLayer4
-                                                : Appearance.colors.colSubtext
+                                                ? (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnLayer4)
+                                                : (ResonanceTheme.enabled ? ResonanceTheme.textTertiary : Appearance.colors.colSubtext)
                                         }
                                         ColumnLayout {
                                             Layout.fillWidth: true
@@ -458,8 +463,8 @@ Item {
                                                 font.pixelSize: Appearance.font.pixelSize.small
                                                 font.weight: Font.DemiBold
                                                 color: modelData?.reachable
-                                                    ? Appearance.colors.colOnLayer4
-                                                    : Appearance.colors.colSubtext
+                                                    ? (ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer4)
+                                                    : (ResonanceTheme.enabled ? ResonanceTheme.textTertiary : Appearance.colors.colSubtext)
                                                 elide: Text.ElideRight
                                             }
                                             StyledText {
@@ -468,7 +473,7 @@ Item {
                                                     ? Translation.tr("Tap to use")
                                                     : Translation.tr("Offline · paired")
                                                 font.pixelSize: Appearance.font.pixelSize.smaller
-                                                color: Appearance.colors.colSubtext
+                                                color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colSubtext
                                                 opacity: 0.85
                                                 elide: Text.ElideRight
                                             }
@@ -479,7 +484,7 @@ Item {
                                                 ? "radio_button_unchecked"
                                                 : "do_not_disturb_on"
                                             iconSize: Appearance.font.pixelSize.normal
-                                            color: Appearance.colors.colSubtext
+                                            color: ResonanceTheme.enabled ? ResonanceTheme.textTertiary : Appearance.colors.colSubtext
                                             animateChange: true
                                         }
                                     }
@@ -496,7 +501,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 1
-                        color: Appearance.colors.colOutlineVariant
+                        color: ResonanceTheme.enabled ? ResonanceTheme.borderSubtle : Appearance.colors.colOutlineVariant
                         opacity: 0.4
                         visible: recentRepeater.count > 0
                     }
@@ -508,7 +513,7 @@ Item {
                         text: Translation.tr("All paired devices")
                         font.pixelSize: Appearance.font.pixelSize.smallest
                         font.weight: Font.DemiBold
-                        color: Appearance.colors.colSubtext
+                        color: ResonanceTheme.enabled ? ResonanceTheme.textAccent : Appearance.colors.colSubtext
                         opacity: 0.8
                     }
 
@@ -521,14 +526,14 @@ Item {
                             Layout.preferredHeight: 44
                             buttonRadius: Appearance.rounding.small
                             colBackground: modelData?.id === KdeConnectService.activeDeviceId
-                                ? Appearance.colors.colPrimaryContainer
+                                ? (ResonanceTheme.enabled ? ColorUtils.applyAlpha(ResonanceTheme.colAntiqueGold, 0.20) : Appearance.colors.colPrimaryContainer)
                                 : "transparent"
                             colBackgroundHover: modelData?.id === KdeConnectService.activeDeviceId
-                                ? Appearance.colors.colPrimaryContainerHover
-                                : Appearance.colors.colLayer4Hover
+                                ? (ResonanceTheme.enabled ? ColorUtils.applyAlpha(ResonanceTheme.colAntiqueGold, 0.28) : Appearance.colors.colPrimaryContainerHover)
+                                : (ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer4Hover)
                             colBackgroundActive: modelData?.id === KdeConnectService.activeDeviceId
-                                ? (Appearance.colors.colPrimaryContainerActive ?? Appearance.colors.colPrimaryContainerHover)
-                                : (Appearance.colors.colLayer4Active ?? Appearance.colors.colLayer4Hover)
+                                ? (ResonanceTheme.enabled ? ColorUtils.applyAlpha(ResonanceTheme.colAntiqueGold, 0.35) : (Appearance.colors.colPrimaryContainerActive ?? Appearance.colors.colPrimaryContainerHover))
+                                : (ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : (Appearance.colors.colLayer4Active ?? Appearance.colors.colLayer4Hover))
                             contentItem: Item {
                                 anchors.fill: parent
                                 RowLayout {
@@ -542,10 +547,10 @@ Item {
                                         iconSize: Appearance.font.pixelSize.normal
                                         fill: modelData?.id === KdeConnectService.activeDeviceId ? 1 : 0
                                         color: modelData?.id === KdeConnectService.activeDeviceId
-                                            ? Appearance.colors.colOnPrimaryContainer
+                                            ? (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnPrimaryContainer)
                                             : (modelData?.reachable
-                                                ? Appearance.colors.colOnLayer4
-                                                : Appearance.colors.colSubtext)
+                                                ? (ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer4)
+                                                : (ResonanceTheme.enabled ? ResonanceTheme.textTertiary : Appearance.colors.colSubtext))
                                     }
                                     ColumnLayout {
                                         Layout.fillWidth: true
@@ -557,10 +562,10 @@ Item {
                                             font.pixelSize: Appearance.font.pixelSize.small
                                             font.weight: Font.DemiBold
                                             color: modelData?.id === KdeConnectService.activeDeviceId
-                                                ? Appearance.colors.colOnPrimaryContainer
+                                                ? (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnPrimaryContainer)
                                                 : (modelData?.reachable
-                                                    ? Appearance.colors.colOnLayer4
-                                                    : Appearance.colors.colSubtext)
+                                                    ? (ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer4)
+                                                    : (ResonanceTheme.enabled ? ResonanceTheme.textTertiary : Appearance.colors.colSubtext))
                                             elide: Text.ElideRight
                                         }
                                         StyledText {
@@ -570,8 +575,8 @@ Item {
                                                 : Translation.tr("Offline · paired")
                                             font.pixelSize: Appearance.font.pixelSize.smaller
                                             color: modelData?.id === KdeConnectService.activeDeviceId
-                                                ? Appearance.colors.colOnPrimaryContainer
-                                                : Appearance.colors.colSubtext
+                                                ? (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnPrimaryContainer)
+                                                : (ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colSubtext)
                                             opacity: 0.85
                                             elide: Text.ElideRight
                                         }
@@ -586,8 +591,8 @@ Item {
                                         iconSize: Appearance.font.pixelSize.normal
                                         fill: modelData?.id === KdeConnectService.activeDeviceId ? 1 : 0
                                         color: modelData?.id === KdeConnectService.activeDeviceId
-                                            ? Appearance.colors.colOnPrimaryContainer
-                                            : Appearance.colors.colSubtext
+                                            ? (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnPrimaryContainer)
+                                            : (ResonanceTheme.enabled ? ResonanceTheme.textTertiary : Appearance.colors.colSubtext)
                                         animateChange: true
                                     }
                                 }
@@ -603,7 +608,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 1
-                        color: Appearance.colors.colOutlineVariant
+                        color: ResonanceTheme.enabled ? ResonanceTheme.borderSubtle : Appearance.colors.colOutlineVariant
                         opacity: 0.4
                     }
 
@@ -612,22 +617,22 @@ Item {
                         Layout.preferredHeight: 36
                         buttonRadius: Appearance.rounding.small
                         colBackground: "transparent"
-                        colBackgroundHover: Appearance.colors.colLayer4Hover
-                        colBackgroundActive: Appearance.colors.colLayer4Active ?? Appearance.colors.colLayer4Hover
+                        colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer4Hover
+                        colBackgroundActive: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : (Appearance.colors.colLayer4Active ?? Appearance.colors.colLayer4Hover)
                         contentItem: RowLayout {
                             spacing: 8
                             MaterialSymbol {
                                 Layout.alignment: Qt.AlignVCenter
                                 text: "refresh"
                                 iconSize: Appearance.font.pixelSize.normal
-                                color: Appearance.colors.colOnLayer4
+                                color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer4
                             }
                             StyledText {
                                 Layout.fillWidth: true
                                 text: Translation.tr("Refresh devices")
                                 font.pixelSize: Appearance.font.pixelSize.small
                                 font.weight: Font.DemiBold
-                                color: Appearance.colors.colOnLayer4
+                                color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer4
                             }
                         }
                         onClicked: {
@@ -919,10 +924,12 @@ Item {
                         rippleEnabled: true
                         buttonRadius: 18
                         buttonRadiusPressed: 18
-                        colBackground: Appearance.colors.colSecondaryContainer
-                        colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-                        colBackgroundActive: Appearance.colors.colSecondaryContainerActive ?? Appearance.colors.colSecondaryContainerHover
-                        colText: Appearance.colors.colOnSecondaryContainer
+                        colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colSecondaryContainer
+                        colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colSecondaryContainerHover
+                        colBackgroundActive: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : (Appearance.colors.colSecondaryContainerActive ?? Appearance.colors.colSecondaryContainerHover)
+                        colText: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnSecondaryContainer
+                        borderWidth: ResonanceTheme.enabled ? 1 : 0
+                        borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                         enabled: KdeConnectService.activeReachable
                         opacity: 0
                         scale: 0.8
@@ -943,9 +950,9 @@ Item {
                         scale: 0.8
                         buttonRadius: 18
                         buttonRadiusPressed: 18
-                        colBackground: Appearance.colors.colSecondaryContainer
-                        colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-                        colText: Appearance.colors.colOnSecondaryContainer
+                        colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colSecondaryContainer
+                        colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colSecondaryContainerHover
+                        colText: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colOnSecondaryContainer
                         enabled: false
                         hoverEnabled: false
                         opacity: 0
@@ -965,6 +972,8 @@ Item {
                             anchors.fill: parent
                             radius: parent.buttonEffectiveRadius
                             color: parent.buttonColor
+                            border.width: ResonanceTheme.enabled ? 1 : 0
+                            border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                             Behavior on color {
                                 animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
                             }
@@ -977,10 +986,12 @@ Item {
                         rippleEnabled: true
                         buttonRadius: 18
                         buttonRadiusPressed: 18
-                        colBackground: Appearance.colors.colSecondaryContainer
-                        colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-                        colBackgroundActive: Appearance.colors.colSecondaryContainerActive ?? Appearance.colors.colSecondaryContainerHover
-                        colText: Appearance.colors.colOnSecondaryContainer
+                        colBackground: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colSecondaryContainer
+                        colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colSecondaryContainerHover
+                        colBackgroundActive: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCardActive : (Appearance.colors.colSecondaryContainerActive ?? Appearance.colors.colSecondaryContainerHover)
+                        colText: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnSecondaryContainer
+                        borderWidth: ResonanceTheme.enabled ? 1 : 0
+                        borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
                         enabled: KdeConnectService.available
                                    && KdeConnectService.activeReachable
                                    && KdeConnectService.hasDevices
@@ -1069,7 +1080,7 @@ Item {
                     text: emptyState.serviceOff ? "sync_disabled"
                           : KdeConnectService.available ? "phonelink_off" : "phonelink_erase"
                     iconSize: 64
-                    color: Appearance.colors.colSubtext
+                    color: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colSubtext
 
                     transform: Rotation {
                         id: emptyIconRotation
@@ -1088,7 +1099,7 @@ Item {
                           : Translation.tr("KDE Connect not installed")
                     font.pixelSize: Appearance.font.pixelSize.huge
                     font.weight: Font.Bold
-                    color: Appearance.colors.colOnLayer2
+                    color: ResonanceTheme.enabled ? ResonanceTheme.textPrimary : Appearance.colors.colOnLayer2
                     horizontalAlignment: Text.AlignHCenter
 
                     transform: Translate {
@@ -1106,7 +1117,7 @@ Item {
                           ? Translation.tr("Pair a device through KDE Connect on your phone — once it shows up here, sync notifications, share clipboard, dump files and launch scrcpy mirror.")
                           : Translation.tr("Install `kdeconnect-cli` and the KDE Connect Android app, then pair a device. After pairing it will mirror here automatically.")
                     font.pixelSize: Appearance.font.pixelSize.small
-                    color: Appearance.colors.colSubtext
+                    color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.colors.colSubtext
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
                     opacity: 0.7
@@ -1123,8 +1134,10 @@ Item {
                     Layout.preferredHeight: 36
                     Layout.preferredWidth: 220
                     buttonRadius: Appearance.rounding.full
-                    colBackground: Appearance.colors.colPrimaryContainer
-                    colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+                    colBackground: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colPrimaryContainer
+                    colBackgroundHover: ResonanceTheme.enabled ? ResonanceTheme.borderAccent : Appearance.colors.colPrimaryContainerHover
+                    borderWidth: ResonanceTheme.enabled ? 1 : 0
+                    borderColor: ResonanceTheme.enabled ? ResonanceTheme.borderAccent : "transparent"
                     visible: !KdeConnectService.available
                     contentItem: RowLayout {
                         spacing: 6
@@ -1132,13 +1145,13 @@ Item {
                             Layout.alignment: Qt.AlignVCenter
                             text: emptyState.serviceOff ? "power_settings_new" : "download"
                             iconSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colOnPrimaryContainer
+                            color: ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colOnPrimaryContainer
                         }
                         StyledText {
                             Layout.alignment: Qt.AlignVCenter
                             text: emptyState.serviceOff ? Translation.tr("Turn on KDE Connect")
                                 : Translation.tr("Install KDE Connect")
-                            color: Appearance.colors.colOnPrimaryContainer
+                            color: ResonanceTheme.enabled ? ResonanceTheme.colTealInkDark : Appearance.colors.colOnPrimaryContainer
                             font.pixelSize: Appearance.font.pixelSize.small
                             font.weight: Font.DemiBold
                         }
