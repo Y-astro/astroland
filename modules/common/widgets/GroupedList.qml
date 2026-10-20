@@ -9,6 +9,8 @@ Item {
     property real smallRadius: Appearance.rounding.unsharpenmore
     property color bgcolor: Appearance.colors.colLayer1
     property real itemVerticalPadding: 24
+    property real borderWidth: 0
+    property color borderColor: "transparent"
     Layout.fillWidth: true
     implicitHeight: col.implicitHeight
 
@@ -26,6 +28,8 @@ Item {
                 Layout.fillWidth: true
                 implicitHeight: (root.items[index]?.implicitHeight ?? 0) + root.itemVerticalPadding
                 color: root.bgcolor
+                border.width: root.borderWidth
+                border.color: root.borderColor
                 topLeftRadius:     isFirst ? root.bigRadius : root.smallRadius
                 topRightRadius:    isFirst ? root.bigRadius : root.smallRadius
                 bottomLeftRadius:  isLast  ? root.bigRadius : root.smallRadius

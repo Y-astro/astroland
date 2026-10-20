@@ -71,8 +71,10 @@ StyledPopup {
         Layout.fillWidth: true
         implicitWidth: 145
         implicitHeight: cardContent.implicitHeight + 20
-        radius: Appearance.rounding.small
-        color: Appearance.colors.colSurfaceContainerLow
+        radius: BarPopupTheme.radiusCard
+        color: BarPopupTheme.colCardBackground
+        border.width: BarPopupTheme.cardBorderWidth
+        border.color: BarPopupTheme.colCardBorder
 
         ColumnLayout {
             id: cardContent
@@ -94,7 +96,7 @@ StyledPopup {
 
                 StyledText {
                     text: card.label
-                    color: Appearance.colors.colOnSurfaceVariant
+                    color: BarPopupTheme.colTextSecondary
                     font.pixelSize: Appearance.font.pixelSize.smaller
                     font.weight: Font.Medium
                 }
@@ -104,7 +106,7 @@ StyledPopup {
 
             StyledText {
                 text: root.formatRate(card.speed)
-                color: Appearance.colors.colOnSurfaceVariant
+                color: BarPopupTheme.colTextPrimary
                 font.pixelSize: Appearance.font.pixelSize.large
                 font.weight: Font.DemiBold
                 font.features: { "tnum": 1 }
@@ -112,8 +114,8 @@ StyledPopup {
 
             StyledText {
                 text: `${root.formatTotal(card.total)} ${Translation.tr("this session")}`
-                color: Appearance.colors.colOnSurfaceVariant
-                opacity: 0.6
+                color: BarPopupTheme.colTextTertiary
+                opacity: 0.75
                 font.pixelSize: Appearance.font.pixelSize.smallest
             }
         }
@@ -121,7 +123,7 @@ StyledPopup {
 
     ColumnLayout {
         implicitWidth: 300
-        spacing: 6
+        spacing: BarPopupTheme.spacingHeader
 
         RowLayout {
             Layout.fillWidth: true
@@ -134,8 +136,8 @@ StyledPopup {
                 text: Network.materialSymbol
                 iconSize: Appearance.font.pixelSize.large
                 implicitSize: 36
-                color: Appearance.colors.colPrimaryContainer
-                colSymbol: Appearance.colors.colPrimary
+                color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : Appearance.colors.colPrimaryContainer
+                colSymbol: BarPopupTheme.colAccent
             }
 
             ColumnLayout {
@@ -146,7 +148,7 @@ StyledPopup {
                     text: root.connectionName
                     font.pixelSize: Appearance.font.pixelSize.normal
                     font.weight: Font.Medium
-                    color: Appearance.colors.colOnSurfaceVariant
+                    color: BarPopupTheme.colTextPrimary
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
@@ -154,8 +156,8 @@ StyledPopup {
                 StyledText {
                     text: root.connectionDetails
                     font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colOnSurfaceVariant
-                    opacity: 0.6
+                    color: BarPopupTheme.colTextSecondary
+                    opacity: 0.75
                 }
             }
         }
@@ -169,7 +171,7 @@ StyledPopup {
                 iconName: "arrow_upward"
                 speed: root.uploadSpeed
                 total: root.uploadedBytes
-                accentColor: Appearance.colors.colTertiary
+                accentColor: BarPopupTheme.isWuWa ? ResonanceTheme.colMistySage : Appearance.colors.colTertiary
             }
 
             SpeedCard {
@@ -177,7 +179,7 @@ StyledPopup {
                 iconName: "arrow_downward"
                 speed: root.downloadSpeed
                 total: root.downloadedBytes
-                accentColor: Appearance.colors.colPrimary
+                accentColor: BarPopupTheme.colAccent
             }
         }
 
@@ -189,7 +191,9 @@ StyledPopup {
                 || Network.macAddress !== ""
 
             Layout.fillWidth: true
-            bgcolor: Appearance.colors.colSurfaceContainerLow
+            bgcolor: BarPopupTheme.colCardBackground
+            borderWidth: BarPopupTheme.cardBorderWidth
+            borderColor: BarPopupTheme.colCardBorder
 
             StyledPopupValueRow {
                 Layout.fillWidth: true

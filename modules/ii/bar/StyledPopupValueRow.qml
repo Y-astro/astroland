@@ -12,18 +12,18 @@ RowLayout {
 
     MaterialSymbol {
         text: root.icon
-        color: Appearance.colors.colOnSurfaceVariant
+        color: BarPopupTheme.colAccent
         iconSize: Appearance.font.pixelSize.large
     }
     StyledText {
         text: root.label
-        color: Appearance.colors.colOnSurfaceVariant
+        color: BarPopupTheme.colTextSecondary
     }
     StyledText {
         Layout.fillWidth: true
         horizontalAlignment: Text.AlignRight
         visible: root.value !== ""
-        color: Appearance.colors.colOnSurfaceVariant
+        color: BarPopupTheme.colTextPrimary
         text: root.value
     }
 }

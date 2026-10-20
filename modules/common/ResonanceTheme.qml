@@ -80,6 +80,14 @@ Singleton {
     readonly property color bgGlassPill: ColorUtils.applyAlpha(colTealInk, Math.min(0.94, 0.76 + 0.08 * root.intensity))
     readonly property color bgGlassSubtle: ColorUtils.applyAlpha(colTealInk, 0.40 * root.intensity)
 
+    // Popups & Flyout Panels
+    readonly property color bgGlassPopup: ColorUtils.applyAlpha(colTealInk, Math.min(0.96, 0.86 + 0.06 * root.intensity))
+    readonly property color bgGlassPopupCard: ColorUtils.applyAlpha(colTealInk, Math.min(0.94, 0.68 + 0.08 * root.intensity))
+    readonly property color bgGlassPopupCardHover: ColorUtils.applyAlpha(colAntiqueGold, 0.12 * root.intensity)
+    readonly property color bgGlassPopupCardActive: ColorUtils.applyAlpha(colAntiqueGold, 0.22 * root.intensity)
+    readonly property color bgGlassPopupCardElevated: ColorUtils.applyAlpha(colTealInk, 0.88 * root.intensity)
+    readonly property color bgGlassPopupDivider: ColorUtils.applyAlpha(colMistySage, 0.15 * root.intensity)
+
     // Borders & Hairlines
     readonly property color borderHairline: ColorUtils.applyAlpha(colAntiqueGold, 0.35 * root.intensity)
     readonly property color borderAccent: ColorUtils.applyAlpha(colAntiqueGold, 0.65 * root.intensity)

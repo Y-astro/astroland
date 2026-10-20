@@ -40,8 +40,10 @@ Rectangle {
         }
     }
 
-    radius: Appearance.rounding.normal
-    color: Appearance.colors.colPrimaryContainer
+    radius: BarPopupTheme.radiusCard
+    color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackground : Appearance.colors.colPrimaryContainer
+    border.width: BarPopupTheme.cardBorderWidth
+    border.color: BarPopupTheme.colCardBorder
 
     property int margins: compactMode ? 16 : 24
     property int iconSize: compactMode ? 64 : 110
@@ -67,13 +69,13 @@ Rectangle {
     property string pillText: ""
     property string pillIcon: ""
 
-    property color pillColor: Appearance.colors.colOnPrimary
-    property color pillTextColor: Appearance.colors.colOnSecondaryContainer
-    property color pillIconColor: Appearance.colors.colOnSecondaryContainer
+    property color pillColor: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundElevated : Appearance.colors.colOnPrimary
+    property color pillTextColor: BarPopupTheme.isWuWa ? BarPopupTheme.colTextPrimary : Appearance.colors.colOnSecondaryContainer
+    property color pillIconColor: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colOnSecondaryContainer
 
-    property color shapeColor: Appearance.colors.colPrimary
-    property color symbolColor: Appearance.colors.colOnPrimary
-    property color textColor: Appearance.colors.colOnPrimaryContainer
+    property color shapeColor: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : Appearance.colors.colPrimary
+    property color symbolColor: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colOnPrimary
+    property color textColor: BarPopupTheme.isWuWa ? BarPopupTheme.colTextPrimary : Appearance.colors.colOnPrimaryContainer
 
     property alias shapeContent: shapeItem.data
     property alias shapeRotation: shapeItem.rotation
@@ -259,7 +261,7 @@ Rectangle {
                     family: Appearance.font.family.title
                     weight: Font.Black
                 }
-                color: heroCardRoot.textColor
+                color: BarPopupTheme.isWuWa ? BarPopupTheme.colTextSecondary : heroCardRoot.textColor
                 horizontalAlignment: Text.AlignRight
                 elide: Text.ElideRight
                 

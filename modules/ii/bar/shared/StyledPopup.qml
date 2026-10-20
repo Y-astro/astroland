@@ -44,7 +44,7 @@ LazyLoader {
         return scale;
     }
     property real popupBackgroundMargin: 0
-    property int popupRadius: Appearance.rounding.large
+    property int popupRadius: BarPopupTheme.radiusPopup
     property bool animate: true
     property bool animateHeight: true
     property bool stickyHover: false
@@ -547,7 +547,7 @@ LazyLoader {
             // and thin shapes on monitors with fractional scale.
             StyledRectangularShadow {
                 target: popupBackground
-                visible: !Config.options.appearance.transparency.popups
+                visible: BarPopupTheme.showShadow
             }
 
             Rectangle {
@@ -614,7 +614,7 @@ LazyLoader {
                     return (heroHeight + margin * 2) + (_commitHeight - (heroHeight + margin * 2)) * popupWindow.animProgress;
                 }
 
-                color: Config.options.appearance.transparency.popups ? Appearance.colors.colLayer0 : Appearance.m3colors.m3surfaceContainer
+                color: BarPopupTheme.colBackground
                 radius: root.popupRadius
                 // During close the surface shrinks before the content tree is destroyed.
                 // Clip that subtree to the same animated bounds so cards cannot spill out.
@@ -780,8 +780,8 @@ LazyLoader {
                     }
                 }
 
-                border.width: Config.options.appearance.transparency.popups ? 0 : 1
-                border.color: Appearance.colors.colLayer0Border
+                border.width: BarPopupTheme.borderWidth
+                border.color: BarPopupTheme.colBorder
             }
         }
     }

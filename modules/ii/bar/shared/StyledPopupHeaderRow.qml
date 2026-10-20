@@ -7,7 +7,7 @@ Row {
     id: root
     required property var icon
     required property var label
-    spacing: 5
+    spacing: BarPopupTheme.spacingHeader
 
     MaterialSymbol {
         anchors.verticalCenter: parent.verticalCenter
@@ -15,7 +15,7 @@ Row {
         font.weight: Font.DemiBold
         text: root.icon
         iconSize: Appearance.font.pixelSize.large
-        color: Appearance.colors.colOnSurfaceVariant
+        color: BarPopupTheme.colTextSecondary
     }
 
     StyledText {
@@ -25,6 +25,6 @@ Row {
             weight: Font.DemiBold
             pixelSize: Appearance.font.pixelSize.normal
         }
-        color: Appearance.colors.colOnSurfaceVariant
+        color: BarPopupTheme.colTextPrimary
     }
 }

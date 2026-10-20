@@ -11,8 +11,10 @@ Rectangle {
     implicitWidth: 320
     implicitHeight: sectionColumn.implicitHeight + margins * 2
 
-    radius: Appearance.rounding.normal
-    color: Appearance.colors.colSurfaceContainerHigh
+    radius: BarPopupTheme.radiusCard
+    color: BarPopupTheme.colCardBackground
+    border.width: BarPopupTheme.cardBorderWidth
+    border.color: BarPopupTheme.colCardBorder
 
     property int margins: 16
     property int spacing: 12
@@ -21,8 +23,8 @@ Rectangle {
     property alias icon: iconSymbol.text
     property alias title: titleText.text
     property alias subtitle: subtitleText.text
-    property color shapeColor: Appearance.colors.colTertiaryContainer
-    property color symbolColor: Appearance.colors.colOnTertiaryContainer
+    property color shapeColor: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundHover : Appearance.colors.colTertiaryContainer
+    property color symbolColor: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colOnTertiaryContainer
     property bool showDivider: true
     property string headerExtraText: ""
 
@@ -63,7 +65,7 @@ Rectangle {
                 font.family: Appearance.font.family.title
                 font.pixelSize: Appearance.font.pixelSize.large
                 font.weight: Font.Bold
-                color: Appearance.colors.colOnSurface
+                color: BarPopupTheme.colTextPrimary
             }
 
             RowLayout {
@@ -74,7 +76,7 @@ Rectangle {
                     visible: sectionCardRoot.headerExtraText !== ""
                     text: sectionCardRoot.headerExtraText
                     font.pixelSize: Appearance.font.pixelSize.small
-                    color: Appearance.colors.colOnSurfaceVariant
+                    color: BarPopupTheme.colTextSecondary
                 }
             }
         }
@@ -83,7 +85,7 @@ Rectangle {
             visible: sectionCardRoot.showDivider
             Layout.fillWidth: true
             height: 2
-            color: Appearance.colors.colSurfaceContainerHighest
+            color: BarPopupTheme.colDivider
             radius: 1
         }
 
@@ -99,7 +101,7 @@ Rectangle {
                 horizontalAlignment: Text.AlignLeft
                 wrapMode: Text.Wrap
                 font.pixelSize: Appearance.font.pixelSize.normal
-                color: Appearance.colors.colOnSurfaceVariant
+                color: BarPopupTheme.colTextSecondary
                 lineHeight: 1.4
             }
         }

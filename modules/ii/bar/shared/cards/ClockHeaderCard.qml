@@ -13,8 +13,10 @@ Rectangle {
     Layout.preferredHeight: 200
     implicitHeight: 200
 
-    radius: Appearance.rounding.large
-    color: Appearance.colors.colPrimaryContainer
+    radius: BarPopupTheme.radiusCard
+    color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackground : Appearance.colors.colPrimaryContainer
+    border.width: BarPopupTheme.cardBorderWidth
+    border.color: BarPopupTheme.colCardBorder
 
     // Internal animation control
     property bool startAnim: false
@@ -245,7 +247,7 @@ Rectangle {
             id: clockHand
             width: parent.width * 0.183
             height: 4
-            color: Appearance.colors.colTertiary
+            color: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colTertiary
             radius: 2
             z: 10 // Force rendering on top of everything
             opacity: 0.0
@@ -295,7 +297,7 @@ Rectangle {
                 font.variableAxes: ({
                         "wght": 800
                     }) // Maximum bold weight for variable font
-                color: Appearance.colors.colOnPrimaryContainer
+                color: BarPopupTheme.isWuWa ? BarPopupTheme.colTextPrimary : Appearance.colors.colOnPrimaryContainer
                 opacity: 0.0
                 scale: 0.9
                 
@@ -323,7 +325,7 @@ Rectangle {
                 font.variableAxes: ({
                         "wght": 400
                     }) // Thin weight for variable font
-                color: Appearance.colors.colOnPrimaryContainer
+                color: BarPopupTheme.isWuWa ? BarPopupTheme.colTextSecondary : Appearance.colors.colOnPrimaryContainer
                 Layout.alignment: Qt.AlignBottom
                 Layout.bottomMargin: Math.min(14, root.width * 0.033) // Align baseline to bottom of time digits
                 opacity: 0.0
@@ -360,7 +362,7 @@ Rectangle {
                 font.pixelSize: dateColumn.fontSize
                 font.family: Appearance.font.family.title
                 font.weight: Font.Normal
-                color: Appearance.colors.colOnPrimaryContainer
+                color: BarPopupTheme.isWuWa ? BarPopupTheme.colTextSecondary : Appearance.colors.colOnPrimaryContainer
                 opacity: 0.0
                 transform: Translate { x: dayText.translateX }
 
@@ -382,7 +384,7 @@ Rectangle {
                 font.pixelSize: dateColumn.fontSize
                 font.family: Appearance.font.family.title
                 font.weight: Font.Normal
-                color: Appearance.colors.colOnPrimaryContainer
+                color: BarPopupTheme.isWuWa ? BarPopupTheme.colTextSecondary : Appearance.colors.colOnPrimaryContainer
                 opacity: 0.0
                 transform: Translate { x: dateText.translateX }
 
