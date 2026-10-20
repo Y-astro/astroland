@@ -517,7 +517,7 @@ Singleton {
         interval: 100
         repeat: false
         onTriggered: {
-            if (!root.mediaHovered && !root.mediaDropdownHovered && !root.equalizerOpen && !Config.options?.bar?.media?.alwaysVisible) {
+            if (!root.mediaHovered && !root.mediaDropdownHovered && !Config.options?.bar?.media?.alwaysVisible) {
                 root.mediaControlsOpen = false;
             }
         }
@@ -751,5 +751,21 @@ Singleton {
         root.openBarPopups = ({});
         root.mediaControlsOpen = false;
         root.activeBarPopupMonitor = "";
+    }
+
+    IpcHandler {
+        target: "equalizer"
+
+        function open(): void {
+            root.equalizerOpen = true;
+        }
+
+        function close(): void {
+            root.equalizerOpen = false;
+        }
+
+        function toggle(): void {
+            root.equalizerOpen = !root.equalizerOpen;
+        }
     }
 }

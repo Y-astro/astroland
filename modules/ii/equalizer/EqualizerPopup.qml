@@ -157,6 +157,7 @@ Scope {
             implicitHeight: root.popupHeight
             color: "transparent"
             WlrLayershell.namespace: "quickshell:equalizer"
+            WlrLayershell.layer: WlrLayer.Overlay
             // Layer-shell surfaces don't get keyboard input by default (they're
             // built for click-through overlays). This popup now has a text
             // field (custom preset naming), which needs the surface to
@@ -210,6 +211,15 @@ Scope {
                 color: ColorUtils.applyAlpha(root.blendedColors.colLayer0, 1)
                 border.width: 2
                 border.color: Qt.rgba(0, 0, 0, 0.55)
+
+                HoverHandler {
+                    id: eqHover
+                    onHoveredChanged: {
+                        if (hovered && GlobalStates.mediaControlsOpen) {
+                            GlobalStates.mediaControlsOpen = false;
+                        }
+                    }
+                }
 
                 // root.blendedColors settles onto new album art in place (see
                 // EqualizerView's colorSignature fix for the same issue on the

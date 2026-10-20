@@ -105,10 +105,10 @@ Item {
             }
         }
 
-        // Solid dark teal base to prevent background text bleed-through
+        // Translucent dark teal glass base (fallback when art is loading)
         Rectangle {
             anchors.fill: parent
-            color: BarPopupTheme.isWuWa ? ResonanceTheme.bgGlassPopup : ColorUtils.applyAlpha(root.blendedColors.colLayer0, 1)
+            color: BarPopupTheme.isWuWa ? ColorUtils.applyAlpha(ResonanceTheme.colTealInk, 0.45) : ColorUtils.applyAlpha(root.blendedColors.colLayer0, 1)
         }
 
         Image {
@@ -121,7 +121,12 @@ Item {
             cache: false
             antialiasing: true
             asynchronous: true
-            opacity: BarPopupTheme.isWuWa ? 0.22 : 1.0
+            visible: root.displayedArtFilePath.length > 0
+            opacity: blurredArt.status === Image.Ready ? 1.0 : 0.0
+
+            Behavior on opacity {
+                NumberAnimation { duration: 300 }
+            }
 
             layer.enabled: true
             layer.effect: StyledBlurEffect {
@@ -130,22 +135,22 @@ Item {
 
             Rectangle {
                 anchors.fill: parent
-                color: BarPopupTheme.isWuWa
-                    ? ColorUtils.applyAlpha(ResonanceTheme.colTealBase, 0.75)
-                    : ColorUtils.transparentize(blendedColors.colLayer0, 0.3)
+                visible: !BarPopupTheme.isWuWa
+                color: ColorUtils.transparentize(blendedColors.colLayer0, 0.3)
                 radius: root.radius
             }
         }
 
-        // Horizontal gradient vignette: ambient art on left, deep dark teal for text on right
+        // Horizontal frosted glass gradient: lets the song's blurred cover art shine brilliantly on the left,
+        // with a soft smoky teal tint on the right to preserve crisp text legibility
         Rectangle {
             anchors.fill: parent
             visible: BarPopupTheme.isWuWa
             gradient: Gradient {
                 orientation: Gradient.Horizontal
-                GradientStop { position: 0.0; color: ColorUtils.applyAlpha(ResonanceTheme.colTealBase, 0.40) }
-                GradientStop { position: 0.35; color: ColorUtils.applyAlpha(ResonanceTheme.colTealBase, 0.82) }
-                GradientStop { position: 1.0; color: ColorUtils.applyAlpha(ResonanceTheme.colTealBase, 0.95) }
+                GradientStop { position: 0.0; color: "transparent" }
+                GradientStop { position: 0.35; color: ColorUtils.applyAlpha(ResonanceTheme.colTealInk, 0.20) }
+                GradientStop { position: 1.0; color: ColorUtils.applyAlpha(ResonanceTheme.colTealInk, 0.45) }
             }
         }
 
