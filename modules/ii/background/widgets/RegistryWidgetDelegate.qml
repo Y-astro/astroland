@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import qs
 import qs.modules.common
 import qs.modules.common.functions
@@ -33,7 +34,35 @@ Item {
         pinned: root.instance.pinned === true,
         placementStrategy: root.instance.placementStrategy ?? "free"
     })
-    readonly property bool onMonitor: !root.instance.monitorName || root.instance.monitorName === root.screen.name
+
+    readonly property bool targetMonitorConnected: {
+        const mon = String(root.instance?.monitorName ?? "");
+        if (!mon) return true;
+        for (let i = 0; i < Quickshell.screens.length; i++) {
+            if (Quickshell.screens[i].name === mon)
+                return true;
+        }
+        return false;
+    }
+
+    readonly property bool onMonitor: {
+        const targetMon = String(root.instance?.monitorName ?? "");
+        if (!targetMon)
+            return true;
+        if (targetMon === root.screen.name)
+            return true;
+        // If there is only one screen, always render on it
+        if (Quickshell.screens.length <= 1)
+            return true;
+        // Fallback for laptop internal panel renumbering (e.g. eDP-1 vs eDP-2 across reboots)
+        if (targetMon.startsWith("eDP") && root.screen.name.startsWith("eDP"))
+            return true;
+        // If the configured monitor is disconnected, fall back to the primary display
+        if (!root.targetMonitorConnected && (Quickshell.screens.length > 0 && Quickshell.screens[0] === root.screen))
+            return true;
+        return false;
+    }
+
     readonly property string sourceUrl: String(WidgetsRegistry.getQmlPath(root.instance.widgetId))
 
     Loader {
