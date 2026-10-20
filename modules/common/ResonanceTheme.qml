@@ -81,12 +81,12 @@ Singleton {
     readonly property color bgGlassSubtle: ColorUtils.applyAlpha(colTealInk, 0.40 * root.intensity)
 
     // Popups & Flyout Panels
-    readonly property color bgGlassPopup: ColorUtils.applyAlpha(colTealInk, Math.min(0.96, 0.86 + 0.06 * root.intensity))
-    readonly property color bgGlassPopupCard: ColorUtils.applyAlpha(colTealInk, Math.min(0.94, 0.68 + 0.08 * root.intensity))
-    readonly property color bgGlassPopupCardHover: ColorUtils.applyAlpha(colAntiqueGold, 0.12 * root.intensity)
-    readonly property color bgGlassPopupCardActive: ColorUtils.applyAlpha(colAntiqueGold, 0.22 * root.intensity)
-    readonly property color bgGlassPopupCardElevated: ColorUtils.applyAlpha(colTealInk, 0.88 * root.intensity)
-    readonly property color bgGlassPopupDivider: ColorUtils.applyAlpha(colMistySage, 0.15 * root.intensity)
+    readonly property color bgGlassPopup: ColorUtils.applyAlpha(colTealInk, Math.min(0.80, 0.62 + 0.08 * root.intensity))
+    readonly property color bgGlassPopupCard: ColorUtils.applyAlpha(colTealInk, Math.min(0.55, 0.35 + 0.08 * root.intensity))
+    readonly property color bgGlassPopupCardHover: ColorUtils.applyAlpha(colAntiqueGold, 0.15 * root.intensity)
+    readonly property color bgGlassPopupCardActive: ColorUtils.applyAlpha(colAntiqueGold, 0.25 * root.intensity)
+    readonly property color bgGlassPopupCardElevated: ColorUtils.applyAlpha(colTealInk, 0.65 * root.intensity)
+    readonly property color bgGlassPopupDivider: ColorUtils.applyAlpha(colMistySage, 0.18 * root.intensity)
 
     // Borders & Hairlines
     readonly property color borderHairline: ColorUtils.applyAlpha(colAntiqueGold, 0.35 * root.intensity)
@@ -121,8 +121,9 @@ Singleton {
     readonly property color crestHighlight: Qt.rgba(1.0, 0.95, 0.85, 0.90) // Gold-ivory crest
 
     // Meters & Tracks
-    readonly property color trackMuted: ColorUtils.applyAlpha(colTealInk, 0.50)
-    readonly property color trackBorder: ColorUtils.applyAlpha(colMistySage, 0.25)
+    readonly property color copperGreen: colMistySage
+    readonly property color trackMuted: ColorUtils.applyAlpha(colMistySage, 0.22 * root.intensity)
+    readonly property color trackBorder: ColorUtils.applyAlpha(colMistySage, 0.28 * root.intensity)
     readonly property color trackFill: colAntiqueGold
 
     // =========================================================================

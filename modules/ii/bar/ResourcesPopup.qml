@@ -33,9 +33,9 @@ StyledPopup {
                 sublabel: ResourceUsage.hasBoostControl
                     ? `${Math.round(ResourceUsage.cpuTemp)}°C • Boost ${ResourceUsage.cpuBoostEnabled ? "ON" : "OFF"}`
                     : `${Math.round(ResourceUsage.cpuTemp)}°C`
-                sublabelColor: ResourceUsage.cpuTemp > 80 ? Appearance.colors.colError
-                    : ResourceUsage.cpuTemp > 60 ? (BarPopupTheme.isWuWa ? ResonanceTheme.warningOrange : Appearance.m3colors.m3tertiary)
-                    : (ResourceUsage.hasBoostControl && ResourceUsage.cpuBoostEnabled ? BarPopupTheme.colAccent : BarPopupTheme.colTextSecondary)
+                sublabelColor: ResourceUsage.hasBoostControl
+                    ? (ResourceUsage.cpuBoostEnabled ? BarPopupTheme.colAccent : BarPopupTheme.colTextSecondary)
+                    : (ResourceUsage.cpuTemp > 80 ? Appearance.colors.colError : BarPopupTheme.colTextSecondary)
                 clickable: ResourceUsage.hasBoostControl
                 onClicked: ResourceUsage.toggleCpuBoost()
             }

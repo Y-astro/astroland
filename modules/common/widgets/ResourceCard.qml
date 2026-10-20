@@ -103,7 +103,14 @@ Rectangle {
             highlightColor: root.usageColor(root.value)
             trackColor: BarPopupTheme.colTrack
             valueBarHeight: 6 
-
+            valueBarGap: BarPopupTheme.isWuWa ? 0 : 4
+            background: Rectangle {
+                implicitHeight: 6
+                radius: height / 2
+                color: BarPopupTheme.colTrack
+                border.width: BarPopupTheme.isWuWa ? 1 : 0
+                border.color: BarPopupTheme.colTrackBorder
+            }
         }
     }
 }
