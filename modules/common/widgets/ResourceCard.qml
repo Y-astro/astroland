@@ -15,6 +15,8 @@ Rectangle {
     property int cardWidth: 150 
     signal clicked()
     property bool clickable: false
+    property bool warningEnabled: true
+    property real warningThreshold: 0.9
 
     width: cardWidth
     height: 96 
@@ -24,8 +26,9 @@ Rectangle {
         ? (root.clickable && cardMouseArea.containsMouse ? BarPopupTheme.colCardBackgroundHover : BarPopupTheme.colCardBackground)
         : (root.clickable && cardMouseArea.containsMouse ? Appearance.colors.colSurfaceContainerHigh : Appearance.colors.colSurfaceContainerLow)
 
-    border.width: root.value > 0.9 ? 1.5 : BarPopupTheme.cardBorderWidth
-    border.color: root.value > 0.9 ? Appearance.colors.colError : BarPopupTheme.colCardBorder
+    readonly property bool isWarning: root.warningEnabled && (root.value > root.warningThreshold)
+    border.width: isWarning ? 1.5 : BarPopupTheme.cardBorderWidth
+    border.color: isWarning ? (BarPopupTheme.isWuWa ? BarPopupTheme.colTextWarning : Appearance.colors.colError) : BarPopupTheme.colCardBorder
 
     MouseArea {
         id: cardMouseArea
@@ -37,8 +40,8 @@ Rectangle {
     }
 
     function usageColor(v) {
-        if (v > 0.9) return Appearance.colors.colError
-        if (v > 0.6) return BarPopupTheme.isWuWa ? ResonanceTheme.warningOrange : (Appearance.colors.colTertiary || Appearance.m3colors.m3tertiary)
+        if (root.warningEnabled && v > root.warningThreshold) return BarPopupTheme.isWuWa ? BarPopupTheme.colTextWarning : Appearance.colors.colError
+        if (root.warningEnabled && v > 0.6) return BarPopupTheme.isWuWa ? ResonanceTheme.warningOrange : (Appearance.colors.colTertiary || Appearance.m3colors.m3tertiary)
         return BarPopupTheme.colAccent
     }
 

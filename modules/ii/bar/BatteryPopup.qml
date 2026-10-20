@@ -82,6 +82,7 @@ StyledPopup {
                 iconText: "heart_check"
                 iconShape: MaterialShape.Shape.Clover4Leaf
                 value: Battery.health / 100
+                warningEnabled: false
                 sublabel: Battery.chargeCycles > 0
                     ? `${Battery.chargeCycles} ${Translation.tr("cycles")}`
                     : Translation.tr("N/A")
@@ -96,6 +97,7 @@ StyledPopup {
                 iconText: "bolt"
                 iconShape: MaterialShape.Shape.Pentagon
                 value: Math.min(Battery.energyRate / 60, 1.0)
+                warningEnabled: false
                 sublabel: Battery.chargeState == 4
                     ? Translation.tr("Full")
                     : `${Battery.energyRate.toFixed(2)}W`
