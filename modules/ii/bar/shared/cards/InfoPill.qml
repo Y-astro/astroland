@@ -12,6 +12,8 @@ Rectangle {
     radius: Appearance.rounding.full
 
     color: containerColor
+    border.width: BarPopupTheme.cardBorderWidth
+    border.color: BarPopupTheme.colCardBorder
 
     property string shapeString: "Circle"
     property int shapeSize: 40

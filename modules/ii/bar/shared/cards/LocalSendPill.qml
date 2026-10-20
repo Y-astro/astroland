@@ -8,7 +8,13 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: 64
     radius: Appearance.rounding.full
-    color: LocalSend.serverRunning ? Appearance.colors.colPrimaryContainer : Appearance.colors.colSurfaceContainerHighest
+    color: BarPopupTheme.isWuWa
+        ? (LocalSend.serverRunning ? BarPopupTheme.colCardBackgroundActive : BarPopupTheme.colCardBackground)
+        : (LocalSend.serverRunning ? Appearance.colors.colPrimaryContainer : Appearance.colors.colSurfaceContainerHighest)
+    border.width: BarPopupTheme.cardBorderWidth
+    border.color: BarPopupTheme.isWuWa
+        ? (LocalSend.serverRunning ? BarPopupTheme.colAccent : BarPopupTheme.colCardBorder)
+        : "transparent"
 
     // Internal animation control
     property bool startAnim: false
@@ -86,7 +92,7 @@ Rectangle {
             font.pixelSize: Appearance.font.pixelSize.large
             font.family: Appearance.font.family.title
             font.weight: Font.Bold
-            color: LocalSend.serverRunning ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSecondaryContainer
+            color: BarPopupTheme.isWuWa ? BarPopupTheme.colTextPrimary : (LocalSend.serverRunning ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSecondaryContainer)
             horizontalAlignment: Text.AlignHCenter
             opacity: 1.0
             

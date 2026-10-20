@@ -84,14 +84,17 @@ Item {
 
     StyledRectangularShadow {
         target: background
+        visible: BarPopupTheme.showShadow
     }
 
     Rectangle {
         id: background
         anchors.fill: parent
         anchors.margins: Appearance.sizes.elevationMargin
-        color: ColorUtils.applyAlpha(blendedColors.colLayer0, 1)
-        radius: root.radius
+        color: BarPopupTheme.isWuWa ? BarPopupTheme.colBackground : ColorUtils.applyAlpha(blendedColors.colLayer0, 1)
+        border.width: BarPopupTheme.borderWidth
+        border.color: BarPopupTheme.colBorder
+        radius: BarPopupTheme.isWuWa ? BarPopupTheme.radiusPopup : root.radius
 
         layer.enabled: true
         layer.effect: OpacityMask {
@@ -120,7 +123,7 @@ Item {
 
             Rectangle {
                 anchors.fill: parent
-                color: ColorUtils.transparentize(blendedColors.colLayer0, 0.3)
+                color: BarPopupTheme.isWuWa ? ColorUtils.transparentize(ResonanceTheme.colTealBase, 0.45) : ColorUtils.transparentize(blendedColors.colLayer0, 0.3)
                 radius: root.radius
             }
         }
@@ -132,7 +135,7 @@ Item {
             points: root.visualizerPoints
             maxVisualizerValue: root.maxVisualizerValue
             smoothing: root.visualizerSmoothing
-            color: blendedColors.colPrimary
+            color: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : blendedColors.colPrimary
         }
 
         Loader {

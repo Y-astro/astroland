@@ -12,7 +12,7 @@ import Qt5Compat.GraphicalEffects
 StyledPopup {
     id: root
     popupId: "media"
-    popupRadius: Appearance.rounding.large
+    popupRadius: BarPopupTheme.radiusPopup
     stickyHover: true
 
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
@@ -27,8 +27,8 @@ StyledPopup {
         anchors.centerIn: parent
         icon: "music_note"
 
-        title: activePlayer?.trackArtist || Translation.tr("Unknown Artist")
-        subtitle: activePlayer ? activePlayer.trackTitle : Translation.tr("No media")
+        title: activePlayer?.trackArtist || Translation.tr("Media")
+        subtitle: activePlayer ? (activePlayer.trackTitle || Translation.tr("No media")) : Translation.tr("No active player")
 
         pillText: activePlayer ? (activePlayer.playbackState == MprisPlaybackState.Playing ? Translation.tr("Playing") : Translation.tr("Paused")) : ""
         pillIcon: activePlayer ? (activePlayer.playbackState == MprisPlaybackState.Playing ? "play_arrow" : "pause") : ""

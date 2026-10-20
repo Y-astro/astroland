@@ -25,13 +25,13 @@ StyledPopup {
                 text: Qt.locale().toString(root.today, " MMMM")
                 font.pixelSize: Appearance.font.pixelSize.huge
                 font.weight: Font.Bold
-                color: Appearance.colors.colOnLayer1
+                color: BarPopupTheme.colTextPrimary
             }
 
             StyledText {
                 text: " " + Qt.locale().toString(root.today, "yyyy")
                 font.pixelSize: Appearance.font.pixelSize.huge
-                color: Appearance.colors.colOnSurfaceVariant
+                color: BarPopupTheme.colTextSecondary
             }
         }
 
@@ -60,10 +60,14 @@ StyledPopup {
 
                     Layout.fillWidth: true
                     height: 56
-                    radius: Appearance.rounding.normal
+                    radius: BarPopupTheme.radiusCard
                     color: isToday
-                        ? Appearance.colors.colPrimaryContainer
-                        : Appearance.colors.colSurfaceContainerHigh
+                        ? BarPopupTheme.colCardBackgroundActive
+                        : BarPopupTheme.colCardBackground
+                    border.width: BarPopupTheme.cardBorderWidth
+                    border.color: isToday
+                        ? BarPopupTheme.colAccent
+                        : BarPopupTheme.colCardBorder
 
                     ColumnLayout {
                         anchors.centerIn: parent
@@ -74,8 +78,8 @@ StyledPopup {
                             text: Qt.locale().toString(date, "ddd").slice(0, 2)
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             color: isToday
-                                ? Appearance.colors.colPrimary
-                                : Appearance.colors.colOnSurfaceVariant
+                                ? BarPopupTheme.colAccent
+                                : BarPopupTheme.colTextSecondary
                             font.weight: isToday ? Font.Bold : Font.Normal
                         }
 
@@ -87,8 +91,8 @@ StyledPopup {
                                 : Appearance.font.pixelSize.small
                             font.weight: isToday ? Font.Bold : Font.Normal
                             color: isToday
-                                ? Appearance.colors.colPrimary
-                                : Appearance.colors.colOnLayer1
+                                ? BarPopupTheme.colTextPrimary
+                                : BarPopupTheme.colTextPrimary
                         }
                     }
                 }
@@ -108,8 +112,8 @@ StyledPopup {
                     text: "checklist"
                     iconSize: Appearance.font.pixelSize.large
                     implicitSize: 36
-                    color: Appearance.colors.colPrimaryContainer
-                    colSymbol: Appearance.colors.colPrimary
+                    color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : Appearance.colors.colPrimaryContainer
+                    colSymbol: BarPopupTheme.colAccent
                 }
 
                 StyledText {
@@ -117,7 +121,7 @@ StyledPopup {
                     text: `${Todo.list.filter(t => !t.done).length}`
                     font.pixelSize: Appearance.font.pixelSize.huge
                     font.weight: Font.Bold
-                    color: Appearance.colors.colPrimary
+                    color: BarPopupTheme.colAccent
                 }
             }
 
@@ -136,7 +140,7 @@ StyledPopup {
                         readonly property int total: todoRepeater.count
                         readonly property bool isFirst: index === 0
                         readonly property bool isLast: index === total - 1
-                        readonly property real bigRadius: Appearance.rounding.normal
+                        readonly property real bigRadius: BarPopupTheme.radiusCard
                         readonly property real smallRadius: Appearance.rounding.unsharpenmore
 
                         width: parent.width
@@ -145,7 +149,9 @@ StyledPopup {
                         topRightRadius:    isFirst ? bigRadius : smallRadius
                         bottomLeftRadius:  isLast  ? bigRadius : smallRadius
                         bottomRightRadius: isLast  ? bigRadius : smallRadius
-                        color: Appearance.colors.colSurfaceContainerHigh
+                        color: BarPopupTheme.colCardBackground
+                        border.width: BarPopupTheme.cardBorderWidth
+                        border.color: BarPopupTheme.colCardBorder
 
                         StyledText {
                             anchors {
@@ -157,7 +163,7 @@ StyledPopup {
                             }
                             text: `    ${todo.content} `
                             font.pixelSize: Appearance.font.pixelSize.smaller
-                            color: Appearance.colors.colOnLayer1
+                            color: BarPopupTheme.colTextPrimary
                             elide: Text.ElideRight
                         }
                     }
@@ -167,14 +173,16 @@ StyledPopup {
                     width: parent.width
                     height: 64
                     visible: Todo.list.filter(t => !t.done).length === 0
-                    radius: Appearance.rounding.normal
-                    color: Appearance.colors.colSurfaceContainerHigh
+                    radius: BarPopupTheme.radiusCard
+                    color: BarPopupTheme.colCardBackground
+                    border.width: BarPopupTheme.cardBorderWidth
+                    border.color: BarPopupTheme.colCardBorder
 
                     StyledText {
                         anchors.centerIn: parent
                         text: Translation.tr("No pending tasks")
                         font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colOnLayer1
+                        color: BarPopupTheme.colTextSecondary
                     }
                 }
             }
@@ -192,25 +200,25 @@ StyledPopup {
                 MaterialSymbol {
                     text: "timelapse"
                     iconSize: Appearance.font.pixelSize.small
-                    color: Appearance.colors.colOnSurfaceVariant
+                    color: BarPopupTheme.colAccent
                 }
 
                 StyledText {
                     text: Translation.tr("System Uptime")
                     font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colOnSurfaceVariant
+                    color: BarPopupTheme.colTextSecondary
                 }
 
                 StyledText {
                     text: "•"
                     font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colOnSurfaceVariant
+                    color: BarPopupTheme.colTextSecondary
                 }
 
                 StyledText {
                     text: DateTime.uptime
                     font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colOnSurfaceVariant
+                    color: BarPopupTheme.colTextPrimary
                 }
             }
         }

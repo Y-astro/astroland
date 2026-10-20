@@ -10,8 +10,10 @@ Rectangle {
     Layout.fillWidth: true
     Layout.preferredHeight: implicitHeight
     implicitHeight: columnLayout.implicitHeight + 32
-    radius: Appearance.rounding.large
-    color: Appearance.colors.colSurfaceContainerHighest
+    radius: BarPopupTheme.radiusCard
+    color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackground : Appearance.colors.colSurfaceContainerHighest
+    border.width: BarPopupTheme.cardBorderWidth
+    border.color: BarPopupTheme.colCardBorder
     clip: true
 
     // Internal animation control
@@ -241,7 +243,7 @@ Rectangle {
                         text: Translation.tr("Alarms")
                         font.weight: Font.Bold
                         font.pixelSize: Appearance.font.pixelSize.normal
-                        color: Appearance.colors.colOnSurface
+                        color: BarPopupTheme.colTextPrimary
                         opacity: 1.0
                         
                         SequentialAnimation {
@@ -256,7 +258,7 @@ Rectangle {
                         text: AlarmService.alarms ? AlarmService.alarms.length + " " + Translation.tr("Alarms") : "0 " + Translation.tr("Alarms")
                         font.weight: Font.Light
                         font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colSubtext
+                        color: BarPopupTheme.colTextSecondary
                         opacity: 1.0
                         
                         SequentialAnimation {
@@ -360,8 +362,12 @@ Rectangle {
                     id: alarmCard
                     width: listView.count >= 2 ? (listView.width > 0 ? listView.width * 0.85 : 320) : (listView.width > 0 ? listView.width : 380)
                     height: 96
-                    radius: Appearance.rounding.large
-                    color: AlarmService.ringingAlarmIndex === index ? Appearance.colors.colErrorContainer : Appearance.colors.colSurfaceContainerLow
+                    radius: BarPopupTheme.radiusCard
+                    color: AlarmService.ringingAlarmIndex === index
+                        ? Appearance.colors.colErrorContainer
+                        : (BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundElevated : Appearance.colors.colSurfaceContainerLow)
+                    border.width: BarPopupTheme.cardBorderWidth
+                    border.color: BarPopupTheme.colCardBorder
                     clip: true
 
                     opacity: alarmCard.cardOpacity
@@ -426,7 +432,7 @@ Rectangle {
                                 return isDefault ? root.getRemainingTimeText(alarmCard.modelData, DateTime.clock.date) : label;
                             }
                             font.pixelSize: Appearance.font.pixelSize.small
-                            color: AlarmService.ringingAlarmIndex === index ? Appearance.colors.colOnErrorContainer : Appearance.colors.colSubtext
+                            color: AlarmService.ringingAlarmIndex === index ? Appearance.colors.colOnErrorContainer : BarPopupTheme.colTextSecondary
                         }
 
                         StyledText {
@@ -434,7 +440,7 @@ Rectangle {
                             font.pixelSize: Math.min(36, alarmCard.width * 0.1)
                             font.family: Appearance.font.family.title
                             font.weight: Font.Bold
-                            color: AlarmService.ringingAlarmIndex === index ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnSurface
+                            color: AlarmService.ringingAlarmIndex === index ? Appearance.colors.colOnErrorContainer : BarPopupTheme.colTextPrimary
                         }
                     }
 

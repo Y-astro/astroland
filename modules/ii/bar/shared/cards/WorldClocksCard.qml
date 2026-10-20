@@ -97,8 +97,10 @@ Item {
             id: card
             width: listView.count >= 2 ? (listView.width > 0 ? listView.width * 0.85 : 320) : (listView.width > 0 ? listView.width : 380)
             height: 96
-            radius: Appearance.rounding.large
-            color: Appearance.colors.colLayer2
+            radius: BarPopupTheme.radiusCard
+            color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundElevated : Appearance.colors.colLayer2
+            border.width: BarPopupTheme.cardBorderWidth
+            border.color: BarPopupTheme.colCardBorder
             clip: true
 
             layer.enabled: true
@@ -155,7 +157,7 @@ Item {
                 width: parent.height * 1.66
                 height: width
                 radius: width / 2
-                color: Appearance.colors.colLayer3
+                color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackground : Appearance.colors.colLayer3
                 anchors {
                     right: parent.right
                     rightMargin: -width * 0.2
@@ -188,7 +190,9 @@ Item {
                     }
                     iconSize: card.height * 0.58
                     fill: 1
-                    color: text === "light_mode" ? Appearance.colors.colPrimary : Appearance.colors.colSubtext
+                    color: text === "light_mode"
+                        ? (BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colPrimary)
+                        : BarPopupTheme.colTextSecondary
                     scale: card.iconScale
                     rotation: card.iconRotation
                 }
@@ -197,7 +201,7 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     text: "18°" // Mock placeholder temperature
                     font.pixelSize: Appearance.font.pixelSize.normal
-                    color: Appearance.colors.colOnSurface
+                    color: BarPopupTheme.colTextPrimary
                 }
             }
 
@@ -218,7 +222,9 @@ Item {
                         implicitWidth: offsetText.implicitWidth + 18
                         implicitHeight: 20
                         radius: Appearance.rounding.full
-                        color: Appearance.colors.colSurfaceContainerHighest
+                        color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : Appearance.colors.colSurfaceContainerHighest
+                        border.width: BarPopupTheme.cardBorderWidth
+                        border.color: BarPopupTheme.colCardBorder
                         opacity: card.offsetOpacity
                         transform: Translate { x: card.offsetTranslateX }
 
@@ -231,7 +237,7 @@ Item {
                             }
                             font.pixelSize: 14
                             font.weight: Font.Thin
-                            color: Appearance.colors.colOnSurface
+                            color: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colOnSurface
                         }
                     }
 
@@ -239,7 +245,7 @@ Item {
                         text: card.modelData.name || card.modelData.tz || Translation.tr("Unnamed")
                         font.pixelSize: Appearance.font.pixelSize.normal
                         font.weight: Font.DemiBold
-                        color: Appearance.colors.colOnSurface
+                        color: BarPopupTheme.colTextPrimary
                     }
                 }
 
@@ -248,7 +254,7 @@ Item {
                     font.pixelSize: Math.min(42, card.width * 0.11)
                     font.family: Appearance.font.family.title
                     font.weight: 1000
-                    color: Appearance.colors.colOnSurface
+                    color: BarPopupTheme.colTextPrimary
                     opacity: card.timeOpacity
                     scale: card.timeScale
                 }

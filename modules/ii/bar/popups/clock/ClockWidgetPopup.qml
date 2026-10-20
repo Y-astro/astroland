@@ -266,11 +266,19 @@ BarShared.StyledPopup {
                     sourceComponent: TimerService.pomodoroRunning ? pomodoroText : (TimerService.stopwatchTime > 0 ? stopwatchText : timerOffText)
                 }
                 
-                containerColor: TimerService.pomodoroBreak ? Appearance.colors.colTertiaryContainer : (infoPill.isTimerActive ? Appearance.colors.colPrimaryContainer : Appearance.colors.colSurfaceContainerHighest)
+                containerColor: BarPopupTheme.isWuWa
+                    ? (infoPill.isTimerActive ? BarPopupTheme.colCardBackgroundActive : BarPopupTheme.colCardBackground)
+                    : (TimerService.pomodoroBreak ? Appearance.colors.colTertiaryContainer : (infoPill.isTimerActive ? Appearance.colors.colPrimaryContainer : Appearance.colors.colSurfaceContainerHighest))
                 color: containerColor
-                shapeColor: TimerService.pomodoroBreak ? Appearance.colors.colTertiary : (infoPill.isTimerActive ? Appearance.colors.colPrimary : Appearance.colors.colSecondary)
-                symbolColor: TimerService.pomodoroBreak ? Appearance.colors.colOnTertiary : (infoPill.isTimerActive ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondary)
-                textColor: TimerService.pomodoroBreak ? Appearance.colors.colOnTertiaryContainer : (infoPill.isTimerActive ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSecondaryContainer)
+                shapeColor: BarPopupTheme.isWuWa
+                    ? (infoPill.isTimerActive ? BarPopupTheme.colAccent : BarPopupTheme.colCardBackgroundElevated)
+                    : (TimerService.pomodoroBreak ? Appearance.colors.colTertiary : (infoPill.isTimerActive ? Appearance.colors.colPrimary : Appearance.colors.colSecondary))
+                symbolColor: BarPopupTheme.isWuWa
+                    ? (infoPill.isTimerActive ? BarPopupTheme.colTextOnAccent : BarPopupTheme.colAccent)
+                    : (TimerService.pomodoroBreak ? Appearance.colors.colOnTertiary : (infoPill.isTimerActive ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondary))
+                textColor: BarPopupTheme.isWuWa
+                    ? BarPopupTheme.colTextPrimary
+                    : (TimerService.pomodoroBreak ? Appearance.colors.colOnTertiaryContainer : (infoPill.isTimerActive ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSecondaryContainer))
                 
                 leftInteractive: true
                 icon: {
@@ -382,6 +390,7 @@ BarShared.StyledPopup {
                 font.pixelSize: Appearance.font.pixelSize.large
                 font.family: Appearance.font.family.title
                 font.weight: Font.Bold
+                color: BarPopupTheme.colTextPrimary
             }
         }
 
@@ -393,6 +402,7 @@ BarShared.StyledPopup {
                 font.pixelSize: Appearance.font.pixelSize.large
                 font.family: Appearance.font.family.title
                 font.weight: Font.Bold
+                color: BarPopupTheme.colTextPrimary
             }
         }
 
@@ -421,7 +431,7 @@ BarShared.StyledPopup {
                 }
 
                 StyledText {
-                    color: Appearance.m3colors.m3onSurface
+                    color: BarPopupTheme.colTextPrimary
                     font.pixelSize: Appearance.font.pixelSize.large
                     font.family: Appearance.font.family.title
                     font.weight: Font.Bold

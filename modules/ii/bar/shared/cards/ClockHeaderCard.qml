@@ -106,7 +106,7 @@ Rectangle {
                 height: clockCircle.height
                 anchors.centerIn: parent
                 radius: width / 2
-                color: Appearance.colors.colPrimary
+                color: BarPopupTheme.isWuWa ? ResonanceTheme.bgGlassPopupCardElevated : Appearance.colors.colPrimary
             }
 
             // Native Scene Graph ticks centered inside padding

@@ -228,13 +228,16 @@ Scope {
 
                     StyledRectangularShadow {
                         target: placeholderBackground
+                        visible: BarPopupTheme.showShadow
                     }
 
                     Rectangle {
                         id: placeholderBackground
                         anchors.centerIn: parent
-                        color: Appearance.colors.colLayer0
-                        radius: root.popupRounding
+                        color: BarPopupTheme.colBackground
+                        border.width: BarPopupTheme.borderWidth
+                        border.color: BarPopupTheme.colBorder
+                        radius: BarPopupTheme.isWuWa ? BarPopupTheme.radiusPopup : root.popupRounding
                         property real padding: 20
                         implicitWidth: placeholderLayout.implicitWidth + padding * 2
                         implicitHeight: placeholderLayout.implicitHeight + padding * 2
@@ -242,13 +245,30 @@ Scope {
                         ColumnLayout {
                             id: placeholderLayout
                             anchors.centerIn: parent
+                            spacing: 8
+
+                            RowLayout {
+                                Layout.alignment: Qt.AlignHCenter
+                                spacing: 8
+
+                                MaterialSymbol {
+                                    text: "music_off"
+                                    iconSize: Appearance.font.pixelSize.large
+                                    color: BarPopupTheme.colAccent
+                                }
+
+                                StyledText {
+                                    text: Translation.tr("No active player")
+                                    font.pixelSize: Appearance.font.pixelSize.large
+                                    font.weight: Font.DemiBold
+                                    color: BarPopupTheme.colTextPrimary
+                                }
+                            }
 
                             StyledText {
-                                text: Translation.tr("No active player")
-                                font.pixelSize: Appearance.font.pixelSize.large
-                            }
-                            StyledText {
-                                color: Appearance.colors.colSubtext
+                                Layout.alignment: Qt.AlignHCenter
+                                horizontalAlignment: Text.AlignHCenter
+                                color: BarPopupTheme.colTextSecondary
                                 text: Translation.tr("Make sure your player has MPRIS support\nor try turning off duplicate player filtering")
                                 font.pixelSize: Appearance.font.pixelSize.small
                             }

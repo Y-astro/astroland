@@ -75,6 +75,15 @@ Singleton {
     readonly property color colTextOnAccent: isWuWa ? ResonanceTheme.colTealInk : Appearance.colors.colOnPrimary
 
     // =========================================================================
+    // METERS, SLIDERS & SEMANTIC STATES
+    // =========================================================================
+    readonly property color colTrack: isWuWa ? ResonanceTheme.trackMuted : (Appearance.m3colors.m3secondaryContainer ?? Appearance.colors.colSurfaceContainerHigh)
+    readonly property color colTrackBorder: isWuWa ? ResonanceTheme.trackBorder : "transparent"
+    readonly property color colWarning: isWuWa ? ResonanceTheme.warningOrange : (Appearance.colors.colTertiary || Appearance.m3colors.m3tertiary)
+    readonly property color colError: isWuWa ? ResonanceTheme.warningOrange : Appearance.colors.colError
+    readonly property color colIconContainer: isWuWa ? colCardBackgroundActive : Appearance.colors.colPrimaryContainer
+
+    // =========================================================================
     // METRICS & SPACING CONVENTIONS
     // =========================================================================
     readonly property real marginOuter: 10

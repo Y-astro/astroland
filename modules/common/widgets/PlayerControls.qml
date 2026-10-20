@@ -26,13 +26,13 @@ Item {
         implicitHeight: 24
         property var iconName
         colBackground: ColorUtils.transparentize(root.blendedColors.colSecondaryContainer, 1)
-        colBackgroundHover: root.blendedColors.colSecondaryContainerHover
-        colRipple: root.blendedColors.colSecondaryContainerActive
+        colBackgroundHover: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundHover : root.blendedColors.colSecondaryContainerHover
+        colRipple: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : root.blendedColors.colSecondaryContainerActive
         contentItem: MaterialSymbol {
             iconSize: Appearance.font.pixelSize.huge
             fill: 1
             horizontalAlignment: Text.AlignHCenter
-            color: root.blendedColors.colOnSecondaryContainer
+            color: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : root.blendedColors.colOnSecondaryContainer
             text: iconName
             Behavior on color {
                 animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
@@ -141,7 +141,7 @@ Item {
                 id: trackTitle
                 Layout.fillWidth: true
                 font.pixelSize: Appearance.font.pixelSize.large
-                color: root.blendedColors.colOnLayer0
+                color: BarPopupTheme.isWuWa ? BarPopupTheme.colTextPrimary : root.blendedColors.colOnLayer0
                 elide: Text.ElideRight
                 text: StringUtils.cleanMusicTitle(root.player?.trackTitle) || "Untitled"
                 animateChange: true
@@ -153,7 +153,7 @@ Item {
                 id: trackArtist
                 Layout.fillWidth: true
                 font.pixelSize: Appearance.font.pixelSize.smaller
-                color: root.blendedColors.colSubtext
+                color: BarPopupTheme.isWuWa ? BarPopupTheme.colTextSecondary : root.blendedColors.colSubtext
                 elide: Text.ElideRight
                 text: root.player?.trackArtist
                 animateChange: true
@@ -173,7 +173,7 @@ Item {
                     anchors.bottomMargin: 5
                     anchors.left: parent.left
                     font.pixelSize: Appearance.font.pixelSize.small
-                    color: root.blendedColors.colSubtext
+                    color: BarPopupTheme.isWuWa ? BarPopupTheme.colTextSecondary : root.blendedColors.colSubtext
                     elide: Text.ElideRight
                     font.features: { "tnum": 1 }
                     text: `${StringUtils.friendlyTimeForSeconds(root.player?.position)} / ${StringUtils.friendlyTimeForSeconds(root.player?.length)}`
@@ -203,9 +203,9 @@ Item {
                             active: root.player?.canSeek ?? false
                             sourceComponent: StyledSlider {
                                 configuration: StyledSlider.Configuration.Wavy
-                                highlightColor: root.blendedColors.colPrimary
-                                trackColor: root.blendedColors.colSecondaryContainer
-                                handleColor: root.blendedColors.colPrimary
+                                highlightColor: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : root.blendedColors.colPrimary
+                                trackColor: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundElevated : root.blendedColors.colSecondaryContainer
+                                handleColor: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : root.blendedColors.colPrimary
                                 value: root.player?.position / root.player?.length
                                 onMoved: root.player.position = value * root.player.length
                             }
@@ -221,8 +221,8 @@ Item {
                             active: !(root.player?.canSeek ?? false)
                             sourceComponent: StyledProgressBar {
                                 wavy: root.player?.isPlaying
-                                highlightColor: root.blendedColors.colPrimary
-                                trackColor: root.blendedColors.colSecondaryContainer
+                                highlightColor: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : root.blendedColors.colPrimary
+                                trackColor: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundElevated : root.blendedColors.colSecondaryContainer
                                 value: root.player?.position / root.player?.length
                             }
                         }
@@ -256,15 +256,23 @@ Item {
                     downAction: () => root.player.togglePlaying()
 
                     buttonRadius: root.player?.isPlaying ? Appearance?.rounding.normal : size / 2
-                    colBackground: root.player?.isPlaying ? root.blendedColors.colPrimary : root.blendedColors.colSecondaryContainer
-                    colBackgroundHover: root.player?.isPlaying ? root.blendedColors.colPrimaryHover : root.blendedColors.colSecondaryContainerHover
-                    colRipple: root.player?.isPlaying ? root.blendedColors.colPrimaryActive : root.blendedColors.colSecondaryContainerActive
+                    colBackground: BarPopupTheme.isWuWa
+                        ? (root.player?.isPlaying ? BarPopupTheme.colAccent : BarPopupTheme.colCardBackgroundElevated)
+                        : (root.player?.isPlaying ? root.blendedColors.colPrimary : root.blendedColors.colSecondaryContainer)
+                    colBackgroundHover: BarPopupTheme.isWuWa
+                        ? (root.player?.isPlaying ? Qt.lighter(BarPopupTheme.colAccent, 1.1) : BarPopupTheme.colCardBackgroundHover)
+                        : (root.player?.isPlaying ? root.blendedColors.colPrimaryHover : root.blendedColors.colSecondaryContainerHover)
+                    colRipple: BarPopupTheme.isWuWa
+                        ? BarPopupTheme.colCardBackgroundActive
+                        : (root.player?.isPlaying ? root.blendedColors.colPrimaryActive : root.blendedColors.colSecondaryContainerActive)
 
                     contentItem: MaterialSymbol {
                         iconSize: Appearance.font.pixelSize.huge
                         fill: 1
                         horizontalAlignment: Text.AlignHCenter
-                        color: root.player?.isPlaying ? root.blendedColors.colOnPrimary : root.blendedColors.colOnSecondaryContainer
+                        color: BarPopupTheme.isWuWa
+                            ? (root.player?.isPlaying ? BarPopupTheme.colTextOnAccent : BarPopupTheme.colAccent)
+                            : (root.player?.isPlaying ? root.blendedColors.colOnPrimary : root.blendedColors.colOnSecondaryContainer)
                         text: root.player?.isPlaying ? "pause" : "play_arrow"
                         Behavior on color {
                             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
