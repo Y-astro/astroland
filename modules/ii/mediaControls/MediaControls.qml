@@ -122,18 +122,9 @@ Scope {
         }
     }
 
-    Connections {
-        target: GlobalStates
-        function onEqualizerOpenChanged() {
-            if (GlobalStates.equalizerOpen) {
-                GlobalStates.mediaControlsOpen = false;
-            }
-        }
-    }
-
     Loader {
         id: mediaControlsLoader
-        active: GlobalStates.mediaControlsOpen && !GlobalStates.equalizerOpen
+        active: GlobalStates.mediaControlsOpen
         onActiveChanged: {
             if (!mediaControlsLoader.active && root.realPlayers.length === 0) {
                 GlobalStates.mediaControlsOpen = false;

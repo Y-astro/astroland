@@ -212,15 +212,6 @@ Scope {
                 border.width: 2
                 border.color: Qt.rgba(0, 0, 0, 0.55)
 
-                HoverHandler {
-                    id: eqHover
-                    onHoveredChanged: {
-                        if (hovered && GlobalStates.mediaControlsOpen) {
-                            GlobalStates.mediaControlsOpen = false;
-                        }
-                    }
-                }
-
                 // root.blendedColors settles onto new album art in place (see
                 // EqualizerView's colorSignature fix for the same issue on the
                 // curve graph) - without this, the whole card would hard-snap
