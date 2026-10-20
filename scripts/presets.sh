@@ -271,6 +271,7 @@ case "$action" in
               ($pre | del(._presetMeta)) as $cleanPre |
               ($cfg * $cleanPre) |
               .appearance.wuwaTheme //= {enabled: false, intensity: 0.85, motionMode: "normal", paletteMode: "fixed"} |
+              .settings //= {borderColor: "layer0Border", borderSize: 1, style: "default"} |
               .background.widgets.concentric_clock.skin //= "classic" |
               .background.widgets.resources.style //= "classic" |
               if ($cleanPre | has("background")) and ($cleanPre.background | has("activeWidgets")) then .background.activeWidgets = $cleanPre.background.activeWidgets else . end

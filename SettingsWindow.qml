@@ -680,10 +680,10 @@ PanelWindow {
         anchors.centerIn: parent
         width: Math.min(parent.width - 64, 1100)
         height: Math.min(parent.height - 64, 750)
-        color: Appearance.colors.colLayer0
+        color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopup : Appearance.colors.colLayer0
         radius: Appearance.windowRounding
         border.width: 1
-        border.color: Appearance.colors.colLayer0Border
+        border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : Appearance.colors.colLayer0Border
 
         opacity: GlobalStates.settingsOpen ? 1 : 0
         scale: GlobalStates.settingsOpen ? 1 : 0.96
@@ -1061,7 +1061,7 @@ PanelWindow {
                     z: 2
                     visible: contentViewport.opaqueBackground
                     radius: Appearance.windowRounding
-                    color: Appearance.colors.colLayer0
+                    color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopup : Appearance.colors.colLayer0
                 }
             } // closes Item (Content container)
         } // closes RowLayout (Window content)

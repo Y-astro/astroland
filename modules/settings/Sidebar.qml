@@ -67,7 +67,7 @@ Item {
             id: sidebarContainer
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: Appearance.colors.colLayer0
+            color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colLayer0
             radius: Appearance.rounding.windowRounding
             // Scrolled buttons are rounded off by painted corners over the
             // opaque background (see CornerCutouts); a mask layer is only
@@ -279,7 +279,7 @@ Item {
                 anchors.fill: parent
                 visible: sidebarContainer.opaqueBackground
                 radius: sidebarContainer.radius
-                color: Appearance.colors.colLayer0
+                color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colLayer0
             }
         }
     }
