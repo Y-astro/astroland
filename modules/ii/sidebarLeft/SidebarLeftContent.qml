@@ -98,7 +98,7 @@ Item {
             bottomLeftRadius: Appearance.rounding.normal
             topRightRadius: 0
             bottomRightRadius: Appearance.rounding.normal
-            color: Appearance.colors.colLayer1
+            color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebarInner : Appearance.colors.colLayer1
 
             SwipeView { // Content pages
                 id: swipeView

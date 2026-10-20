@@ -218,6 +218,7 @@ Scope { // Scope
             StyledRectangularShadow {
                 target: sidebarLeftBackground
                 radius: sidebarLeftBackground.radius
+                visible: !ResonanceTheme.enabled
             }
             Rectangle {
                 id: sidebarLeftBackground
@@ -225,9 +226,9 @@ Scope { // Scope
                 anchors.topMargin: Appearance.sizes.hyprlandGapsOut
                 width: panelWindow.sidebarWidth - Appearance.sizes.hyprlandGapsOut - Appearance.sizes.elevationMargin
                 height: parent.height - Appearance.sizes.hyprlandGapsOut * 2
-                color: Appearance.colors.colLayer0
+                color: ResonanceTheme.enabled ? ResonanceTheme.bgGlassSidebar : Appearance.colors.colLayer0
                 border.width: 1
-                border.color: Appearance.colors.colLayer0Border
+                border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : Appearance.colors.colLayer0Border
                 radius: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
 
                 readonly property bool animatedEntrance: panelWindow.animatedEntrance
