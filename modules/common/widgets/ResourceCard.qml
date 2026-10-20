@@ -11,16 +11,21 @@ Rectangle {
     required property var iconShape
     required property real value
     required property string sublabel
-    property color sublabelColor: Appearance.colors.colOnSurfaceVariant
+    property color sublabelColor: BarPopupTheme.colTextSecondary
     property int cardWidth: 150 
     signal clicked()
     property bool clickable: false
 
     width: cardWidth
     height: 96 
-    radius: 16 
+    radius: BarPopupTheme.radiusCard
     
-    color: root.clickable && cardMouseArea.containsMouse ? Appearance.colors.colSurfaceContainerHigh : Appearance.colors.colSurfaceContainerLow
+    color: BarPopupTheme.isWuWa
+        ? (root.clickable && cardMouseArea.containsMouse ? BarPopupTheme.colCardBackgroundHover : BarPopupTheme.colCardBackground)
+        : (root.clickable && cardMouseArea.containsMouse ? Appearance.colors.colSurfaceContainerHigh : Appearance.colors.colSurfaceContainerLow)
+
+    border.width: root.value > 0.9 ? 1.5 : BarPopupTheme.cardBorderWidth
+    border.color: root.value > 0.9 ? Appearance.colors.colError : BarPopupTheme.colCardBorder
 
     MouseArea {
         id: cardMouseArea
@@ -33,8 +38,8 @@ Rectangle {
 
     function usageColor(v) {
         if (v > 0.9) return Appearance.colors.colError
-        if (v > 0.6) return Appearance.colors.colTertiary || Appearance.m3colors.m3tertiary
-        return Appearance.colors.colPrimary
+        if (v > 0.6) return BarPopupTheme.isWuWa ? ResonanceTheme.warningOrange : (Appearance.colors.colTertiary || Appearance.m3colors.m3tertiary)
+        return BarPopupTheme.colAccent
     }
 
     ColumnLayout {
@@ -52,7 +57,7 @@ Rectangle {
                 text: root.iconText
                 iconSize: Appearance.font.pixelSize.huge
                 implicitSize: 28
-                color: "transparent" // I know that you are going to give me color one day =P
+                color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundLow : "transparent"
                 colSymbol: root.usageColor(root.value)
                 Layout.alignment: Qt.AlignVCenter
             }
@@ -64,7 +69,7 @@ Rectangle {
                 font.pixelSize: Appearance.font.pixelSize.large || 18
                 font.weight: Font.Bold
                 font.features: { "tnum": 1 }
-                color: Appearance.colors.colOnSurface
+                color: BarPopupTheme.colTextPrimary
                 Layout.alignment: Qt.AlignVCenter
             }
         }
@@ -77,7 +82,7 @@ Rectangle {
                 text: root.label
                 font.pixelSize: Appearance.font.pixelSize.small
                 font.weight: Font.Medium
-                color: Appearance.colors.colOnSurface
+                color: BarPopupTheme.colTextSecondary
                 Layout.fillWidth: true
                 elide: Text.ElideRight
             }
@@ -96,11 +101,9 @@ Rectangle {
             Layout.fillWidth: true
             value: root.value
             highlightColor: root.usageColor(root.value)
+            trackColor: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundLow : (Appearance?.m3colors.m3secondaryContainer ?? "#F1D3F9")
             valueBarHeight: 6 
 
         }
     }
-
-    border.width: root.value > 0.9 ? 1.5 : 0
-    border.color: root.value > 0.9 ? Appearance.colors.colError : "transparent"
 }

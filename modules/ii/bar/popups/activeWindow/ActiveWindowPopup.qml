@@ -50,8 +50,10 @@ StyledPopup {
         id: mainCard
         implicitWidth: Math.max(popupRoot.popupWidth, Math.min(popupRoot.maxPopupWidth, popupText.implicitWidth + 32))
         implicitHeight: contentCol.implicitHeight + 32
-        radius: Appearance.rounding.normal
-        color: Appearance.colors.colSurfaceContainerHigh
+        radius: BarPopupTheme.radiusCard
+        color: BarPopupTheme.colCardBackground
+        border.width: BarPopupTheme.cardBorderWidth
+        border.color: BarPopupTheme.colCardBorder
 
         opacity: 0.0
         scale: 0.85
@@ -107,8 +109,10 @@ StyledPopup {
 
                 Rectangle {
                     id: appNameContainer
-                    color: Appearance.colors.colPrimaryContainer
-                    radius: Appearance.rounding.verysmall
+                    color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : Appearance.colors.colPrimaryContainer
+                    radius: BarPopupTheme.radiusSmall
+                    border.width: BarPopupTheme.cardBorderWidth
+                    border.color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBorder : "transparent"
                     implicitWidth: appNameText.implicitWidth + 16
                     implicitHeight: appNameText.implicitHeight + 8
 
@@ -133,7 +137,7 @@ StyledPopup {
                         text: popupRoot.appClassText
                         font.weight: Font.Bold
                         font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colOnPrimaryContainer
+                        color: BarPopupTheme.isWuWa ? BarPopupTheme.colAccent : Appearance.colors.colOnPrimaryContainer
                     }
                 }
 
@@ -144,7 +148,7 @@ StyledPopup {
                     text: popupRoot.activeWindowAddress
                     font.pixelSize: Appearance.font.pixelSize.smaller
                     font.family: Appearance.font.family.numbers
-                    color: Appearance.colors.colSubtext
+                    color: BarPopupTheme.colTextTertiary
                     visible: popupRoot.activeWindowAddress !== "0xundefined"
                 }
             }
@@ -155,7 +159,7 @@ StyledPopup {
                 text: popupRoot.appTitleText
                 font.pixelSize: Appearance.font.pixelSize.normal
                 font.weight: Font.Medium
-                color: Appearance.colors.colOnSurface
+                color: BarPopupTheme.colTextPrimary
                 wrapMode: Text.Wrap
                 maximumLineCount: 4
                 elide: Text.ElideRight
@@ -176,7 +180,7 @@ StyledPopup {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: Appearance.colors.colLayer0Border
+                color: BarPopupTheme.colDivider
             }
 
             RowLayout {
@@ -201,31 +205,31 @@ StyledPopup {
                 MaterialSymbol {
                     text: "computer"
                     iconSize: 14
-                    color: Appearance.colors.colSubtext
+                    color: BarPopupTheme.colTextSecondary
                 }
 
                 StyledText {
                     text: popupRoot.monitor?.name ?? "Unknown"
                     font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colSubtext
+                    color: BarPopupTheme.colTextSecondary
                 }
 
                 StyledText {
                     text: "•"
                     font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colSubtext
+                    color: BarPopupTheme.colTextTertiary
                 }
 
                 MaterialSymbol {
                     text: "grid_view"
                     iconSize: 14
-                    color: Appearance.colors.colSubtext
+                    color: BarPopupTheme.colTextSecondary
                 }
 
                 StyledText {
                     text: `${Translation.tr("Workspace")} ${popupRoot.monitor?.activeWorkspace?.id ?? 1}`
                     font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colSubtext
+                    color: BarPopupTheme.colTextSecondary
                 }
             }
         }

@@ -12,10 +12,10 @@ StyledPopup {
     }
 
     Row {
-        spacing: 5
+        spacing: BarPopupTheme.spacingHorizontal
 
         Column {
-            spacing: 5
+            spacing: BarPopupTheme.spacingVertical
 
             ResourceCard {
                 label: "RAM"
@@ -34,15 +34,15 @@ StyledPopup {
                     ? `${Math.round(ResourceUsage.cpuTemp)}°C • Boost ${ResourceUsage.cpuBoostEnabled ? "ON" : "OFF"}`
                     : `${Math.round(ResourceUsage.cpuTemp)}°C`
                 sublabelColor: ResourceUsage.cpuTemp > 80 ? Appearance.colors.colError
-                    : ResourceUsage.cpuTemp > 60 ? Appearance.m3colors.m3tertiary
-                    : (ResourceUsage.hasBoostControl && ResourceUsage.cpuBoostEnabled ? (Appearance.colors.colPrimary || Appearance.m3colors.m3primary) : Appearance.colors.colOnLayer1)
+                    : ResourceUsage.cpuTemp > 60 ? (BarPopupTheme.isWuWa ? ResonanceTheme.warningOrange : Appearance.m3colors.m3tertiary)
+                    : (ResourceUsage.hasBoostControl && ResourceUsage.cpuBoostEnabled ? BarPopupTheme.colAccent : BarPopupTheme.colTextSecondary)
                 clickable: ResourceUsage.hasBoostControl
                 onClicked: ResourceUsage.toggleCpuBoost()
             }
         }
 
         Column {
-            spacing: 5
+            spacing: BarPopupTheme.spacingVertical
 
             ResourceCard {
                 label: "Swap"

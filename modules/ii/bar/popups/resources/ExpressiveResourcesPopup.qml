@@ -394,8 +394,10 @@ BarShared.StyledPopup {
             id: heroCard
             implicitWidth: 380
             implicitHeight: 140
-            radius: Appearance.rounding.large
-            color: Appearance.colors.colPrimaryContainer
+            radius: BarPopupTheme.radiusCard
+            color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundElevated : Appearance.colors.colPrimaryContainer
+            border.width: BarPopupTheme.cardBorderWidth
+            border.color: BarPopupTheme.colCardBorder
 
             opacity: 0.0
             scale: 0.85
@@ -629,7 +631,7 @@ BarShared.StyledPopup {
                             text: root.cleanCpu(ResourceUsage.cpuModel)
                             font.pixelSize: 24
                             font.weight: Font.Black
-                            color: Appearance.colors.colOnPrimaryContainer
+                            color: BarPopupTheme.colTextPrimary
                             elide: Text.ElideRight
                             maximumLineCount: 1
                             opacity: 1.0
@@ -667,8 +669,8 @@ BarShared.StyledPopup {
                             text: root.cleanGpu(ResourceUsage.gpuModel, ResourceUsage.cpuModel)
                             font.pixelSize: Appearance.font.pixelSize.small
                             font.weight: Font.DemiBold
-                            color: Appearance.colors.colOnPrimaryContainer
-                            opacity: 0.7
+                            color: BarPopupTheme.colTextSecondary
+                            opacity: 0.75
                             elide: Text.ElideRight
                             maximumLineCount: 1
 
@@ -737,8 +739,10 @@ BarShared.StyledPopup {
                 id: cpuCard
                 Layout.fillWidth: true
                 implicitHeight: 195
-                radius: Appearance.rounding.large
-                color: Appearance.colors.colSurfaceContainerHigh
+                radius: BarPopupTheme.radiusCard
+                color: BarPopupTheme.colCardBackground
+                border.width: BarPopupTheme.cardBorderWidth
+                border.color: BarPopupTheme.colCardBorder
 
                 property bool innerStartAnim: false
                 onInnerStartAnimChanged: {
@@ -985,8 +989,10 @@ BarShared.StyledPopup {
                 id: gpuCard
                 Layout.fillWidth: true
                 implicitHeight: 195
-                radius: Appearance.rounding.large
-                color: Appearance.colors.colSurfaceContainerHigh
+                radius: BarPopupTheme.radiusCard
+                color: BarPopupTheme.colCardBackground
+                border.width: BarPopupTheme.cardBorderWidth
+                border.color: BarPopupTheme.colCardBorder
 
                 property bool innerStartAnim: false
                 onInnerStartAnimChanged: {
@@ -1237,9 +1243,11 @@ BarShared.StyledPopup {
             radius: Appearance.rounding.full
 
             readonly property real _percent: ResourceUsage.memoryUsedPercentage
-            readonly property color _fillColor: Appearance.colors.colSecondaryContainer
+            readonly property color _fillColor: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : Appearance.colors.colSecondaryContainer
 
-            color: ColorUtils.applyAlpha(_fillColor, 0.25)
+            color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackground : ColorUtils.applyAlpha(_fillColor, 0.25)
+            border.width: BarPopupTheme.cardBorderWidth
+            border.color: BarPopupTheme.colCardBorder
 
             layer.enabled: true
             layer.samples: 4
@@ -1519,9 +1527,11 @@ BarShared.StyledPopup {
             radius: Appearance.rounding.full
 
             readonly property real _percent: ResourceUsage.swapUsedPercentage
-            readonly property color _fillColor: Appearance.colors.colSecondaryContainer
+            readonly property color _fillColor: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : Appearance.colors.colSecondaryContainer
 
-            color: ColorUtils.applyAlpha(_fillColor, 0.25)
+            color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackground : ColorUtils.applyAlpha(_fillColor, 0.25)
+            border.width: BarPopupTheme.cardBorderWidth
+            border.color: BarPopupTheme.colCardBorder
 
             layer.enabled: true
             layer.samples: 4
@@ -1800,9 +1810,11 @@ BarShared.StyledPopup {
             radius: Appearance.rounding.full
 
             readonly property real _percent: ResourceUsage.diskUsedPercentage
-            readonly property color _fillColor: Appearance.colors.colSecondaryContainer
+            readonly property color _fillColor: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackgroundActive : Appearance.colors.colSecondaryContainer
 
-            color: ColorUtils.applyAlpha(_fillColor, 0.25)
+            color: BarPopupTheme.isWuWa ? BarPopupTheme.colCardBackground : ColorUtils.applyAlpha(_fillColor, 0.25)
+            border.width: BarPopupTheme.cardBorderWidth
+            border.color: BarPopupTheme.colCardBorder
 
             layer.enabled: true
             layer.samples: 4
