@@ -43,6 +43,7 @@ Scope {
             screen: root.focusedScreen
             visible: sessionLoader.active
             property string subtitle
+            readonly property bool isWuWa: ResonanceTheme.enabled
 
             function hide() {
                 GlobalStates.sessionOpen = false;
@@ -52,7 +53,9 @@ Scope {
             WlrLayershell.namespace: "quickshell:session"
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
-            color: ColorUtils.transparentize(Appearance.m3colors.m3background, Appearance.m3colors.darkmode ? 0.05 : 0.12)
+            color: isWuWa
+                ? ResonanceTheme.alpha(ResonanceTheme.colTealInkDark, Math.min(0.90, 0.82 + 0.06 * ResonanceTheme.intensity))
+                : ColorUtils.transparentize(Appearance.m3colors.m3background, Appearance.m3colors.darkmode ? 0.05 : 0.12)
 
             anchors {
                 top: true
@@ -94,6 +97,7 @@ Scope {
                             pixelSize: Appearance.font.pixelSize.title
                             variableAxes: Appearance.font.variableAxes.title
                         }
+                        color: sessionRoot.isWuWa ? ResonanceTheme.textPrimary : Appearance.colors.colOnSurface
                         text: Translation.tr("Session")
                     }
 
@@ -102,6 +106,7 @@ Scope {
                         Layout.alignment: Qt.AlignHCenter
                         horizontalAlignment: Text.AlignHCenter
                         font.pixelSize: Appearance.font.pixelSize.normal
+                        color: sessionRoot.isWuWa ? ResonanceTheme.textSecondary : Appearance.colors.colSubtext
                         text: Translation.tr("Arrow keys to navigate, Enter to select\nEsc or click anywhere to cancel")
                     }
                 }
@@ -259,8 +264,10 @@ Scope {
                     visible: active
                     sourceComponent: DescriptionLabel {
                         text: Translation.tr("There might be a download in progress. Check your Downloads folder.")
-                        textColor: Appearance.m3colors.m3onErrorContainer
-                        color: Appearance.m3colors.m3errorContainer
+                        textColor: sessionRoot.isWuWa ? ResonanceTheme.colWarmIvory : Appearance.m3colors.m3onErrorContainer
+                        color: sessionRoot.isWuWa ? ResonanceTheme.alpha(ResonanceTheme.warningOrange, 0.25 * ResonanceTheme.intensity) : Appearance.m3colors.m3errorContainer
+                        borderWidth: sessionRoot.isWuWa ? 1 : 0
+                        borderColor: sessionRoot.isWuWa ? ResonanceTheme.alpha(ResonanceTheme.warningOrange, 0.65 * ResonanceTheme.intensity) : "transparent"
                     }
                 }
 
@@ -270,8 +277,10 @@ Scope {
                     visible: active
                     sourceComponent: DescriptionLabel {
                         text: Translation.tr("Your package manager is running")
-                        textColor: Appearance.m3colors.m3onErrorContainer
-                        color: Appearance.m3colors.m3errorContainer
+                        textColor: sessionRoot.isWuWa ? ResonanceTheme.colWarmIvory : Appearance.m3colors.m3onErrorContainer
+                        color: sessionRoot.isWuWa ? ResonanceTheme.alpha(ResonanceTheme.warningOrange, 0.25 * ResonanceTheme.intensity) : Appearance.m3colors.m3errorContainer
+                        borderWidth: sessionRoot.isWuWa ? 1 : 0
+                        borderColor: sessionRoot.isWuWa ? ResonanceTheme.alpha(ResonanceTheme.warningOrange, 0.65 * ResonanceTheme.intensity) : "transparent"
                     }
                 }
             }
@@ -281,12 +290,18 @@ Scope {
     component DescriptionLabel: Rectangle {
         id: descriptionLabel
         property string text
-        property color textColor: Appearance.colors.colOnTooltip
-        color: Appearance.colors.colTooltip
+        property bool isWuWa: ResonanceTheme.enabled
+        property color textColor: isWuWa ? ResonanceTheme.textPrimary : Appearance.colors.colOnTooltip
+        property real borderWidth: isWuWa ? 1 : 0
+        property color borderColor: isWuWa ? ResonanceTheme.borderHairline : "transparent"
+        color: isWuWa ? ResonanceTheme.bgGlassElevated : Appearance.colors.colTooltip
+        border.width: descriptionLabel.borderWidth
+        border.color: descriptionLabel.borderColor
         clip: true
-        radius: Appearance.rounding.normal
+        radius: isWuWa ? Appearance.rounding.large : Appearance.rounding.normal
         implicitHeight: descriptionLabelText.implicitHeight + 10 * 2
         implicitWidth: descriptionLabelText.implicitWidth + 15 * 2
+        visible: text.length > 0
 
         Behavior on implicitWidth {
             animation: Appearance.animation.elementMove.numberAnimation.createObject(this)
