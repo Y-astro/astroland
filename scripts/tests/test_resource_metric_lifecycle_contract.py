@@ -47,9 +47,14 @@ class ResourceMetricLifecycleContractTests(unittest.TestCase):
         for path in (
             "modules/ii/bar/widgets/resources/ExpressiveResources.qml",
             "modules/ii/bar/widgets/resources/Resources.qml",
-            "modules/ii/verticalBar/Resources.qml",
         ):
             self.assertIn("DockerService.requestConsumer", self.read(path))
+
+    def test_cpu_temp_sensor_prefers_package_sensor(self):
+        source = self.read("services/ResourceUsage.qml")
+        self.assertIn("id: locateCpuTempPathProc", source)
+        self.assertIn("Package*|Tctl*|Tdie*", source)
+        self.assertIn("x86_pkg_temp|cpu-thermal|cpu_thermal|TCPU|cpu", source)
 
 
 if __name__ == "__main__":

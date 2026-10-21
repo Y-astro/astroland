@@ -61,6 +61,7 @@ Singleton {
     property list<real> cpuUsageHistory: []
     property list<real> memoryUsageHistory: []
     property list<real> swapUsageHistory: []
+    property list<real> cpuFreqHistory: []
 
     function kbToGbString(kb) {
         return (kb / (1024 * 1024)).toFixed(1) + " GB";
@@ -114,12 +115,20 @@ Singleton {
             cpuUsageHistory.shift()
         }
     }
+    function updateCpuFreqHistory() {
+        const freq = Number.isFinite(cpuFreqMhz) && cpuFreqMhz > 0 ? cpuFreqMhz : 0;
+        cpuFreqHistory = [...cpuFreqHistory, freq];
+        if (cpuFreqHistory.length > historyLength) {
+            cpuFreqHistory.shift();
+        }
+    }
 	function updateHistories() {
 		if (!historyMonitoringEnabled)
 			return;
         updateMemoryUsageHistory()
         updateCpuUsageHistory()
         updateDiskUsageHistory()
+        updateCpuFreqHistory()
         if (swapMonitoringEnabled)
             updateSwapUsageHistory()
     }
@@ -298,6 +307,28 @@ Singleton {
         }
     }
 
+    // Instantaneous scaling clock speed of core 0 (in MHz).
+    // Note: this samples CPU core 0 (/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq),
+    // representing core 0's instantaneous frequency, not an all-core aggregate average.
+    property string cpuFreqPath: "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq"
+
+    FileView {
+        id: fileCpuFreq
+        path: root.cpuFreqPath
+        printErrors: false
+        onLoaded: {
+            const rawKHz = Number(fileCpuFreq.text().trim());
+            if (Number.isFinite(rawKHz) && rawKHz > 0) {
+                root.cpuFreqMhz = rawKHz / 1000.0;
+            } else {
+                root.cpuFreqMhz = 0;
+            }
+            if (root.cpuFreqHistory.length === 0 && root.cpuFreqMhz > 0) {
+                root.cpuFreqHistory = [root.cpuFreqMhz];
+            }
+        }
+    }
+
     FileView {
         id: cpuTempFileView
         onLoaded: {
@@ -310,7 +341,34 @@ Singleton {
 
     Process {
         id: locateCpuTempPathProc
-        command: ["bash", "-c", "for hw in /sys/class/hwmon/hwmon*; do if [ -f \"$hw/name\" ]; then name=$(cat \"$hw/name\" 2>/dev/null); if [ \"$name\" = \"k10temp\" ] || [ \"$name\" = \"zenpower\" ] || [ \"$name\" = \"coretemp\" ]; then for t_input in \"$hw\"/temp*_input; do if [ -f \"$t_input\" ]; then echo \"$t_input\"; exit 0; fi; done; fi; fi; done; for tz in /sys/class/thermal/thermal_zone*; do if [ -f \"$tz/type\" ] && [ -f \"$tz/temp\" ]; then type=$(cat \"$tz/type\" 2>/dev/null); if [ \"$type\" = \"x86_pkg_temp\" ] || [ \"$type\" = \"cpu-thermal\" ] || [ \"$type\" = \"cpu_thermal\" ] || [ \"$type\" = \"TCPU\" ] || [ \"$type\" = \"cpu\" ] || [ \"$type\" = \"acpitz\" ]; then echo \"$tz/temp\"; exit 0; fi; fi; done"]
+        command: [
+            "bash", "-c",
+            "for hw in /sys/class/hwmon/hwmon*; do " +
+            "  [ -f \"$hw/name\" ] || continue; " +
+            "  name=$(cat \"$hw/name\" 2>/dev/null); " +
+            "  case \"$name\" in coretemp|k10temp|zenpower) ;; *) continue ;; esac; " +
+            "  for lbl in \"$hw\"/temp*_label; do " +
+            "    [ -f \"$lbl\" ] || continue; " +
+            "    val=$(cat \"$lbl\" 2>/dev/null); " +
+            "    case \"$val\" in Package*|Tctl*|Tdie*) " +
+            "      inp=\"${lbl%_label}_input\"; " +
+            "      if [ -f \"$inp\" ]; then echo \"$inp\"; exit 0; fi ;; " +
+            "    esac; " +
+            "  done; " +
+            "  if [ -f \"$hw/temp1_input\" ]; then echo \"$hw/temp1_input\"; exit 0; fi; " +
+            "  for inp in \"$hw\"/temp*_input; do if [ -f \"$inp\" ]; then echo \"$inp\"; exit 0; fi; done; " +
+            "done; " +
+            "for tz in /sys/class/thermal/thermal_zone*; do " +
+            "  [ -f \"$tz/type\" ] && [ -f \"$tz/temp\" ] || continue; " +
+            "  type=$(cat \"$tz/type\" 2>/dev/null); " +
+            "  case \"$type\" in x86_pkg_temp|cpu-thermal|cpu_thermal|TCPU|cpu) echo \"$tz/temp\"; exit 0 ;; esac; " +
+            "done; " +
+            "for tz in /sys/class/thermal/thermal_zone*; do " +
+            "  [ -f \"$tz/type\" ] && [ -f \"$tz/temp\" ] || continue; " +
+            "  type=$(cat \"$tz/type\" 2>/dev/null); " +
+            "  if [ \"$type\" = \"acpitz\" ]; then echo \"$tz/temp\"; exit 0; fi; " +
+            "done"
+        ]
         running: false
         stdout: StdioCollector {
             onStreamFinished: {
@@ -428,6 +486,7 @@ Singleton {
         onTriggered: {
             fileMeminfo.reload();
             fileStat.reload();
+            if (root.cpuFreqPath) fileCpuFreq.reload();
             if (root.hasBoostControl) fileBoost.reload();
             if (root.temperatureMonitoringEnabled && root.cpuTempPath)
                 cpuTempFileView.reload();

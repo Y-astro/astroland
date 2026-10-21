@@ -30,14 +30,30 @@ apply_kitty() {
     echo "Template file not found for Kitty theme. Skipping that."
     return
   fi
-  # Copy template
+  if [ ${#colorlist[@]} -eq 0 ]; then
+    echo "No colors found in material_colors.scss. Skipping Kitty theme update."
+    return
+  fi
+
+  # Generate to temporary file first so kitty never reads an incomplete template
   mkdir -p "$STATE_DIR"/user/generated/terminal
-  cp "$SCRIPT_DIR/terminal/kitty-theme.conf" "$STATE_DIR"/user/generated/terminal/kitty-theme.conf
+  local tmp_file
+  tmp_file="$(mktemp "$STATE_DIR/user/generated/terminal/kitty-theme.XXXXXX.tmp")"
+  cp "$SCRIPT_DIR/terminal/kitty-theme.conf" "$tmp_file"
+
   # Apply colors
   for i in "${!colorlist[@]}"; do
     col="${colorlist[$i]//\$/\\\$}"
-    sed -i "s/${col} #/${colorvalues[$i]#\#}/g" "$STATE_DIR"/user/generated/terminal/kitty-theme.conf
+    sed -i "s/${col} #/${colorvalues[$i]#\#}/g" "$tmp_file"
   done
+
+  # Atomically replace live config only if variables were resolved
+  if ! grep -q '#\$' "$tmp_file"; then
+    mv "$tmp_file" "$STATE_DIR"/user/generated/terminal/kitty-theme.conf
+  else
+    echo "Warning: Unresolved variables in kitty theme. Keeping existing theme." >&2
+    rm -f "$tmp_file"
+  fi
 
   # Reload
   kill -SIGUSR1 $(pidof kitty) 2>/dev/null || true
@@ -49,16 +65,26 @@ apply_anyterm() {
     echo "Template file not found for Terminal. Skipping that."
     return
   fi
-  # Copy template
+  if [ ${#colorlist[@]} -eq 0 ]; then
+    echo "No colors found in material_colors.scss. Skipping terminal sequences update."
+    return
+  fi
+
+  # Generate to temporary file first
   mkdir -p "$STATE_DIR"/user/generated/terminal
-  cp "$SCRIPT_DIR/terminal/sequences.txt" "$STATE_DIR"/user/generated/terminal/sequences.txt
+  local tmp_file
+  tmp_file="$(mktemp "$STATE_DIR/user/generated/terminal/sequences.XXXXXX.tmp")"
+  cp "$SCRIPT_DIR/terminal/sequences.txt" "$tmp_file"
+
   # Apply colors
   for i in "${!colorlist[@]}"; do
     col="${colorlist[$i]//\$/\\\$}"
-    sed -i "s/${col} #/${colorvalues[$i]#\#}/g" "$STATE_DIR"/user/generated/terminal/sequences.txt
+    sed -i "s/${col} #/${colorvalues[$i]#\#}/g" "$tmp_file"
   done
 
-  sed -i "s/\$alpha/$term_alpha/g" "$STATE_DIR/user/generated/terminal/sequences.txt"
+  sed -i "s/\$alpha/$term_alpha/g" "$tmp_file"
+
+  mv "$tmp_file" "$STATE_DIR"/user/generated/terminal/sequences.txt
 
   for file in /dev/pts/*; do
     if [[ $file =~ ^/dev/pts/[0-9]+$ ]]; then
@@ -84,11 +110,11 @@ CONFIG_FILE="$XDG_CONFIG_HOME/illogical-impulse/config.json"
 if [ -f "$CONFIG_FILE" ]; then
   enable_terminal=$(jq -r '.appearance.wallpaperTheming.enableTerminal' "$CONFIG_FILE")
   if [ "$enable_terminal" = "true" ]; then
-    apply_term &
+    apply_term
   fi
 else
   echo "Config file not found at $CONFIG_FILE. Applying terminal theming by default."
-  apply_term &
+  apply_term
 fi
 
 # apply_qt & # Qt theming is already handled by kde-material-colors
