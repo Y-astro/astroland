@@ -7,19 +7,38 @@ import qs.modules.common.widgets
 Rectangle {
     id: root
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     property string text: ""
 
     visible: root.text !== ""
     implicitHeight: 22
     implicitWidth: label.implicitWidth + 14
     radius: Appearance.rounding.full
-    color: Appearance.colors.colSecondaryContainer
+    color: root.applyWuWa ? SettingsTheme.colItemBg : Appearance.colors.colSecondaryContainer
+    border.width: root.applyWuWa ? 1 : 0
+    border.color: root.applyWuWa ? SettingsTheme.colRowBorder : "transparent"
 
     StyledText {
         id: label
         anchors.centerIn: parent
         text: root.text
         font.pixelSize: Appearance.font.pixelSize.smallest
-        color: Appearance.colors.colOnSecondaryContainer
+        color: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnSecondaryContainer
     }
 }

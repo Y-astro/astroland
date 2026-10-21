@@ -23,15 +23,17 @@ ContentPage {
             topRightRadius: Appearance.rounding.full
             bottomLeftRadius: Appearance.rounding.full
             bottomRightRadius: Appearance.rounding.full
-            colBackground: Appearance.colors.colSecondaryContainer
-            colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-            colRipple: Appearance.colors.colSecondaryContainerActive
+            colBackground: SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colSecondaryContainer
+            colBackgroundHover: SettingsTheme.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colSecondaryContainerHover
+            colRipple: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colSecondaryContainerActive
+            borderWidth: SettingsTheme.isWuWa ? 1 : 0
+            borderColor: SettingsTheme.isWuWa ? SettingsTheme.colCardBorder : "transparent"
 
             MaterialSymbol {
                 anchors.centerIn: parent
                 text: "arrow_back"
                 iconSize: Appearance.font.pixelSize.large
-                color: Appearance.colors.colOnSecondaryContainer
+                color: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnSecondaryContainer
             }
 
             onClicked: root.goBack()
@@ -41,7 +43,7 @@ ContentPage {
             text: Translation.tr("Alarm & Audio Controls")
             font.pixelSize: Appearance.font.pixelSize.large
             font.family: Appearance.font.family.title
-            color: Appearance.colors.colOnLayer0
+            color: SettingsTheme.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer0
         }
     }
 

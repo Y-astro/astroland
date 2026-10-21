@@ -99,8 +99,8 @@ Item {
                             symbol: "widgets"
                             chosen: Config.options.appearance.wallpaperTheming.enableQtApps
                             colContent: themingTile.colContent
-                            colChosen: Appearance.colors.colPrimary
-                            colOnChosen: Appearance.colors.colOnPrimary
+                            colChosen: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
+                            colOnChosen: SettingsTheme.isWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary
                             onClicked: Config.options.appearance.wallpaperTheming.enableQtApps = !chosen
                         }
                         ColorsChip {
@@ -109,8 +109,8 @@ Item {
                             symbol: "terminal"
                             chosen: Config.options.appearance.wallpaperTheming.enableTerminal
                             colContent: themingTile.colContent
-                            colChosen: Appearance.colors.colPrimary
-                            colOnChosen: Appearance.colors.colOnPrimary
+                            colChosen: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
+                            colOnChosen: SettingsTheme.isWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary
                             onClicked: Config.options.appearance.wallpaperTheming.enableTerminal = !chosen
                         }
                     }

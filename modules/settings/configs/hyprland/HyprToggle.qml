@@ -91,8 +91,12 @@ ConfigSwitch {
                     iconSize: root.iconSize
                     padding: 6
                     fill: root.checked ? 1 : 0
-                    color: root.checked ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer3
-                    colSymbol: root.checked ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer3
+                    color: root.checked
+                        ? (root.applyWuWa ? SettingsTheme.colControlIconActiveBg : Appearance.colors.colPrimaryContainer)
+                        : (root.applyWuWa ? SettingsTheme.colControlIconBg : Appearance.colors.colLayer3)
+                    colSymbol: root.checked
+                        ? (root.applyWuWa ? SettingsTheme.colControlIconOnActive : Appearance.colors.colOnPrimaryContainer)
+                        : (root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer3)
                 }
             }
 
@@ -105,7 +109,7 @@ ConfigSwitch {
                     Layout.fillWidth: true
                     text: root.text
                     font.pixelSize: root.font.pixelSize
-                    color: Appearance.colors.colOnLayer2
+                    color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer2
                     wrapMode: Text.WordWrap
                 }
 
@@ -114,7 +118,7 @@ ConfigSwitch {
                     visible: root.subtitle !== ""
                     text: root.subtitle
                     font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colSubtext
+                    color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
                     wrapMode: Text.WordWrap
                 }
             }

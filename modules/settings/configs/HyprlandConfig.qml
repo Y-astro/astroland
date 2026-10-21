@@ -462,9 +462,12 @@ Item {
                         iconText: "history"
                         buttonText: Translation.tr("Rollback")
                         expanded: hovered
-                        colBackground: Appearance.colors.colSurfaceContainerHigh
-                        colBackgroundHover: Appearance.colors.colSurfaceContainerHighest
-                        colOnBackground: Appearance.colors.colOnSurface
+                        colBackground: SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colSurfaceContainerHigh
+                        colBackgroundHover: SettingsTheme.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colSurfaceContainerHighest
+                        colRipple: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colSurfaceContainerHighestActive
+                        colOnBackground: SettingsTheme.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnSurface
+                        borderWidth: SettingsTheme.isWuWa ? 1 : 0
+                        borderColor: SettingsTheme.isWuWa ? SettingsTheme.colCardBorder : "transparent"
                         onClicked: HyprlandGui.rollback()
 
                         StyledToolTip {
@@ -479,6 +482,12 @@ Item {
                         buttonText: Translation.tr("Save %1 change(s)").arg(Math.max(1, HyprlandGui.pending.count))
                         expanded: hovered
                         enabled: !HyprlandGui.busy
+                        colBackground: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimaryContainer
+                        colBackgroundHover: SettingsTheme.isWuWa ? SettingsTheme.colNavActiveHover : Appearance.colors.colPrimaryContainerHover
+                        colRipple: SettingsTheme.isWuWa ? SettingsTheme.colNavActiveHover : Appearance.colors.colPrimaryContainerActive
+                        colOnBackground: SettingsTheme.isWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimaryContainer
+                        borderWidth: SettingsTheme.isWuWa ? 1 : 0
+                        borderColor: SettingsTheme.isWuWa ? SettingsTheme.colAccent : "transparent"
                         onClicked: HyprlandGui.save()
 
                         StyledToolTip {

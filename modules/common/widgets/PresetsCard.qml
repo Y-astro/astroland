@@ -11,6 +11,23 @@ import qs.modules.common.functions
 Rectangle {
     id: root
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     property string imageSource: ""
     property string title: ""
     property string description: ""
@@ -23,9 +40,9 @@ Rectangle {
     implicitWidth: 293 
     implicitHeight: contentColumn.implicitHeight + 14
     radius: Appearance.rounding.normal
-    color: Appearance.colors.colLayer1
-    border.width: root.inUse ? 2 : 1
-    border.color: root.inUse ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border
+    color: root.applyWuWa ? SettingsTheme.colCardBg : Appearance.colors.colLayer1
+    border.width: root.applyWuWa ? (root.inUse ? 2 : SettingsTheme.cardBorderWidth) : (root.inUse ? 2 : 1)
+    border.color: root.applyWuWa ? (root.inUse ? SettingsTheme.colAccent : SettingsTheme.colCardBorder) : (root.inUse ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border)
 
     Behavior on border.color {
         ColorAnimation {
@@ -59,8 +76,12 @@ Rectangle {
                 iconSize: Appearance.font.pixelSize.normal
                 implicitSize: 36
                 font: Appearance.font.family.main
-                color: root.inUse ? Appearance.colors.colPrimary : Appearance.colors.colPrimaryContainer
-                colSymbol: root.inUse ? Appearance.colors.colOnPrimary : Appearance.colors.colOnPrimaryContainer
+                color: root.applyWuWa
+                    ? (root.inUse ? SettingsTheme.colAccent : SettingsTheme.colItemBg)
+                    : (root.inUse ? Appearance.colors.colPrimary : Appearance.colors.colPrimaryContainer)
+                colSymbol: root.applyWuWa
+                    ? (root.inUse ? SettingsTheme.colNavOnActive : SettingsTheme.colTextPrimary)
+                    : (root.inUse ? Appearance.colors.colOnPrimary : Appearance.colors.colOnPrimaryContainer)
                 Layout.alignment: Qt.AlignVCenter
             }
 
@@ -77,7 +98,7 @@ Rectangle {
                         text: root.title
                         font.pixelSize: Appearance.font.pixelSize.large
                         font.weight: Font.DemiBold
-                        color: Appearance.colors.colOnLayer1
+                        color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
                         elide: Text.ElideRight
                         wrapMode: Text.NoWrap
                     }
@@ -85,7 +106,7 @@ Rectangle {
                     Rectangle {
                         visible: root.inUse
                         radius: Appearance.rounding.full
-                        color: Appearance.colors.colPrimaryContainer
+                        color: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimaryContainer
                         implicitHeight: 20
                         implicitWidth: activeRow.implicitWidth + 10
                         Layout.alignment: Qt.AlignVCenter
@@ -97,13 +118,13 @@ Rectangle {
                             MaterialSymbol {
                                 text: "check"
                                 iconSize: 12
-                                color: Appearance.colors.colOnPrimaryContainer
+                                color: root.applyWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimaryContainer
                             }
                             StyledText {
                                 text: Translation.tr("Active")
                                 font.pixelSize: Appearance.font.pixelSize.smaller
                                 font.weight: Font.DemiBold
-                                color: Appearance.colors.colOnPrimaryContainer
+                                color: root.applyWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimaryContainer
                             }
                         }
                     }
@@ -115,7 +136,7 @@ Rectangle {
                     visible: root.description.length > 0
                     text: root.description
                     font.pixelSize: Appearance.font.pixelSize.small
-                    color: Appearance.colors.colSubtext
+                    color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
                     elide: Text.ElideRight
                 }
             }
@@ -131,14 +152,14 @@ Rectangle {
                     implicitHeight: 32
                     buttonRadius: Appearance.rounding.full
                     colBackground: "transparent"
-                    colBackgroundHover: Appearance.colors.colLayer2Hover
-                    colRipple: Appearance.colors.colLayer2Active
+                    colBackgroundHover: root.applyWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer2Hover
+                    colRipple: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer2Active
                     onClicked: menuPopup.visible = !menuPopup.visible
                     contentItem: MaterialSymbol {
                         anchors.centerIn: parent
                         text: "more_vert"
                         iconSize: Appearance.font.pixelSize.large
-                        color: Appearance.colors.colOnLayer1
+                        color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
                     }
                 }
                 PresetPopup {
@@ -158,7 +179,7 @@ Rectangle {
             Layout.bottomMargin: 4
             implicitHeight: 130
             radius: 0
-            color: Appearance.colors.colLayer2
+            color: root.applyWuWa ? SettingsTheme.colItemBg : Appearance.colors.colLayer2
             clip: true
 
             StyledImage {
@@ -185,7 +206,7 @@ Rectangle {
                 visible: root.imageSource === ""
                 text: "wallpaper"
                 iconSize: Appearance.font.pixelSize.huge
-                color: Appearance.colors.colSubtext
+                color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
             }
 
             MouseArea {
@@ -238,12 +259,22 @@ Rectangle {
                 implicitHeight: 36
                 horizontalPadding: 14
                 verticalPadding: 8
-                colBackground: root.inUse ? Appearance.colors.colSecondaryContainer : Appearance.colors.colPrimaryContainer
-                colBackgroundHover: root.inUse ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colPrimaryContainerHover
-                colBackgroundActive: root.inUse ? Appearance.colors.colSecondaryContainerActive : Appearance.colors.colPrimaryContainerActive
+                borderWidth: root.applyWuWa && root.inUse ? 1 : 0
+                borderColor: root.applyWuWa ? SettingsTheme.colCardBorder : "transparent"
+                colBackground: root.applyWuWa
+                    ? (root.inUse ? SettingsTheme.colItemBg : SettingsTheme.colAccent)
+                    : (root.inUse ? Appearance.colors.colSecondaryContainer : Appearance.colors.colPrimaryContainer)
+                colBackgroundHover: root.applyWuWa
+                    ? (root.inUse ? SettingsTheme.colRowHover : SettingsTheme.colNavActiveHover)
+                    : (root.inUse ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colPrimaryContainerHover)
+                colBackgroundActive: root.applyWuWa
+                    ? (root.inUse ? SettingsTheme.colRowHover : SettingsTheme.colNavActiveHover)
+                    : (root.inUse ? Appearance.colors.colSecondaryContainerActive : Appearance.colors.colPrimaryContainerActive)
                 contentItem: StyledText {
                     text: root.inUse ? Translation.tr("Applied") : Translation.tr("Apply")
-                    color: root.inUse ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnPrimaryContainer
+                    color: root.applyWuWa
+                        ? (root.inUse ? SettingsTheme.colTextSecondary : SettingsTheme.colNavOnActive)
+                        : (root.inUse ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnPrimaryContainer)
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }

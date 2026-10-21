@@ -14,6 +14,23 @@ import qs.modules.common.widgets
 Rectangle {
     id: root
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     property string symbol: ""
     property var shapeOn: MaterialShape.Shape.Cookie9Sided
     property var shapeOff: MaterialShape.Shape.Circle
@@ -27,13 +44,26 @@ Rectangle {
     signal configureRequested()
 
     readonly property bool engaged: tileHover.hovered
-    readonly property color colContent: root.checked ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer1
+    readonly property color colContent: root.applyWuWa
+        ? SettingsTheme.colTextPrimary
+        : (root.checked ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer1)
 
     radius: Appearance.rounding.verylarge
-    color: root.checked
-        ? (root.engaged ? Appearance.colors.colPrimaryContainerHover : Appearance.colors.colPrimaryContainer)
-        : (root.engaged ? Appearance.colors.colLayer1Hover : Appearance.colors.colLayer1)
+    color: root.applyWuWa
+        ? (root.checked
+            ? (root.engaged ? Qt.lighter(SettingsTheme.colCardBg, 1.25) : SettingsTheme.colCardBg)
+            : (root.engaged ? SettingsTheme.colRowHover : SettingsTheme.colCardBg))
+        : (root.checked
+            ? (root.engaged ? Appearance.colors.colPrimaryContainerHover : Appearance.colors.colPrimaryContainer)
+            : (root.engaged ? Appearance.colors.colLayer1Hover : Appearance.colors.colLayer1))
+    border.width: root.applyWuWa ? 1 : 0
+    border.color: root.applyWuWa
+        ? (root.checked ? SettingsTheme.colAccent : SettingsTheme.colCardBorder)
+        : "transparent"
     Behavior on color {
+        animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+    }
+    Behavior on border.color {
         animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
     }
 
@@ -66,8 +96,12 @@ Rectangle {
                 padding: 11
                 fill: root.checked ? 1 : 0
                 shape: root.checked ? root.shapeOn : root.shapeOff
-                color: root.checked ? Appearance.colors.colPrimary : Appearance.colors.colSecondaryContainer
-                colSymbol: root.checked ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+                color: root.applyWuWa
+                    ? (root.checked ? SettingsTheme.colAccent : SettingsTheme.colItemBg)
+                    : (root.checked ? Appearance.colors.colPrimary : Appearance.colors.colSecondaryContainer)
+                colSymbol: root.applyWuWa
+                    ? (root.checked ? SettingsTheme.colNavOnActive : SettingsTheme.colTextSecondary)
+                    : (root.checked ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer)
                 Behavior on color {
                     animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
                 }
@@ -81,9 +115,9 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 sizeScale: 0.85
                 checked: root.checked
-                activeColor: Appearance.colors.colPrimary
-                activeThumbColor: Appearance.colors.colOnPrimary
-                inactiveColor: Appearance.colors.colSurfaceContainerHighest
+                activeColor: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
+                activeThumbColor: root.applyWuWa ? SettingsTheme.colThumbActive : Appearance.colors.colOnPrimary
+                inactiveColor: root.applyWuWa ? SettingsTheme.colTrackInactive : Appearance.colors.colSurfaceContainerHighest
                 onToggled: root.toggled(checked)
             }
         }
@@ -107,7 +141,7 @@ Rectangle {
             Layout.preferredHeight: summaryMetrics.height * 2
             text: root.summary
             font.pixelSize: Appearance.font.pixelSize.smaller
-            color: root.colContent
+            color: root.applyWuWa ? SettingsTheme.colTextSecondary : root.colContent
             opacity: 0.8
             wrapMode: Text.WordWrap
             maximumLineCount: 2
@@ -144,10 +178,12 @@ Rectangle {
                 implicitWidth: configureRow.implicitWidth + 28
                 buttonRadius: height / 2
                 buttonRadiusPressed: Appearance.rounding.small
-                colBackground: ColorUtils.applyAlpha(root.colContent, 0.1)
-                colBackgroundHover: ColorUtils.applyAlpha(root.colContent, 0.18)
-                colBackgroundActive: ColorUtils.applyAlpha(root.colContent, 0.26)
-                colRipple: ColorUtils.applyAlpha(root.colContent, 0.26)
+                borderWidth: root.applyWuWa ? 1 : 0
+                borderColor: root.applyWuWa ? SettingsTheme.colRowBorder : "transparent"
+                colBackground: root.applyWuWa ? SettingsTheme.colItemBg : ColorUtils.applyAlpha(root.colContent, 0.1)
+                colBackgroundHover: root.applyWuWa ? SettingsTheme.colRowHover : ColorUtils.applyAlpha(root.colContent, 0.18)
+                colBackgroundActive: root.applyWuWa ? SettingsTheme.colRowHover : ColorUtils.applyAlpha(root.colContent, 0.26)
+                colRipple: root.applyWuWa ? SettingsTheme.colRowHover : ColorUtils.applyAlpha(root.colContent, 0.26)
                 onClicked: root.configureRequested()
 
                 contentItem: Item {
@@ -159,13 +195,13 @@ Rectangle {
                         MaterialSymbol {
                             text: "tune"
                             iconSize: Appearance.font.pixelSize.normal
-                            color: root.colContent
+                            color: root.applyWuWa ? SettingsTheme.colTextPrimary : root.colContent
                         }
                         StyledText {
                             text: Translation.tr("Configure")
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             font.weight: Font.DemiBold
-                            color: root.colContent
+                            color: root.applyWuWa ? SettingsTheme.colTextPrimary : root.colContent
                         }
                     }
                 }

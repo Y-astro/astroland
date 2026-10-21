@@ -214,9 +214,11 @@ Item {
         topRightRadius: Appearance.rounding.full
         bottomLeftRadius: Appearance.rounding.full
         bottomRightRadius: Appearance.rounding.full
-        colBackground: Appearance.colors.colLayer3
-        colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-        colRipple: Appearance.colors.colSecondaryContainerActive
+        colBackground: SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colLayer3
+        colBackgroundHover: SettingsTheme.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colSecondaryContainerHover
+        colRipple: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colSecondaryContainerActive
+        borderWidth: SettingsTheme.isWuWa ? 1 : 0
+        borderColor: SettingsTheme.isWuWa ? SettingsTheme.colRowBorder : "transparent"
         opacity: available ? 1 : 0.4
         onClicked: SoundService.preview(previewButton.themeId, previewButton.modelData.events)
 
@@ -224,7 +226,7 @@ Item {
             anchors.centerIn: parent
             text: previewButton.modelData.icon
             iconSize: Appearance.font.pixelSize.large
-            color: Appearance.colors.colOnLayer3
+            color: SettingsTheme.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer3
         }
 
         StyledToolTip {
@@ -242,9 +244,13 @@ Item {
         Layout.fillWidth: true
         implicitHeight: cardLayout.implicitHeight + 28
         radius: Appearance.rounding.normal
-        color: selected ? Appearance.colors.colSecondaryContainer : Appearance.colors.colLayer2Base
+        color: SettingsTheme.isWuWa
+            ? (selected ? SettingsTheme.colRowHover : SettingsTheme.colRowBg)
+            : (selected ? Appearance.colors.colSecondaryContainer : Appearance.colors.colLayer2Base)
         border.width: 1
-        border.color: selected ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border
+        border.color: SettingsTheme.isWuWa
+            ? (selected ? SettingsTheme.colAccent : SettingsTheme.colRowBorder)
+            : (selected ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border)
 
         MouseArea {
             anchors.fill: parent
@@ -269,7 +275,9 @@ Item {
                 MaterialSymbol {
                     text: card.selected ? "radio_button_checked" : "radio_button_unchecked"
                     iconSize: Appearance.font.pixelSize.huge
-                    color: card.selected ? Appearance.colors.colPrimary : Appearance.colors.colSubtext
+                    color: SettingsTheme.isWuWa
+                        ? (card.selected ? SettingsTheme.colAccent : SettingsTheme.colTextSecondary)
+                        : (card.selected ? Appearance.colors.colPrimary : Appearance.colors.colSubtext)
                 }
 
                 ColumnLayout {
@@ -280,14 +288,16 @@ Item {
                         text: card.modelData.name
                         font.pixelSize: Appearance.font.pixelSize.normal
                         font.weight: Font.DemiBold
-                        color: card.selected ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer2
+                        color: SettingsTheme.isWuWa
+                            ? SettingsTheme.colTextPrimary
+                            : (card.selected ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer2)
                     }
 
                     StyledText {
                         visible: card.modelData.comment !== ""
                         text: card.modelData.comment
                         font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colSubtext
+                        color: SettingsTheme.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
                     }
                 }
 
@@ -295,14 +305,18 @@ Item {
                     implicitWidth: countText.implicitWidth + 16
                     implicitHeight: countText.implicitHeight + 6
                     radius: Appearance.rounding.full
-                    color: card.selected ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer3
+                    color: SettingsTheme.isWuWa
+                        ? (card.selected ? SettingsTheme.colAccent : SettingsTheme.colItemBg)
+                        : (card.selected ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer3)
 
                     StyledText {
                         id: countText
                         anchors.centerIn: parent
                         text: Translation.tr("%1 sounds").arg(card.soundCount)
                         font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: card.selected ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer3
+                        color: SettingsTheme.isWuWa
+                            ? (card.selected ? SettingsTheme.colNavOnActive : SettingsTheme.colTextSecondary)
+                            : (card.selected ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer3)
                     }
                 }
             }

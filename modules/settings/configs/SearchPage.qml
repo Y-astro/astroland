@@ -29,13 +29,14 @@ ContentPage {
 
     Item {
         Layout.fillWidth: true
-        Layout.fillHeight: true
+        Layout.topMargin: 60
+        implicitHeight: 400
         visible: searchPageRoot.queryString !== "" && searchPageRoot.results.length === 0
 
         PagePlaceholder {
             anchors.fill: parent
             icon: "search_off"
-            shape: MaterialShape.Shape.Circle
+            shape: SettingsTheme.isWuWa ? MaterialShape.Shape.Cookie12Sided : MaterialShape.Shape.Circle
             title: Translation.tr("No results")
             description: Translation.tr("No settings match your search.")
         }

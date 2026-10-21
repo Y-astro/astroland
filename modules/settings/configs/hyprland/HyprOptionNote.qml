@@ -24,6 +24,23 @@ import qs.modules.common.widgets
 Rectangle {
     id: root
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     /// Every key the section owns. The note reports on whichever of them has something to say.
     property var keys: []
     /// Extra lines the section wants in the same footer, as `{ icon, text }`. For the things a
@@ -119,8 +136,12 @@ Rectangle {
     visible: root.hasActions || root.hasProse
     Layout.fillWidth: true
     implicitHeight: visible ? layout.implicitHeight + 20 : 0
-    color: root.shellOwned.length > 0 || root.shadowed.length > 0
-        ? Appearance.colors.colSurfaceContainerHigh : Appearance.colors.colLayer2
+    color: root.applyWuWa
+        ? SettingsTheme.colRowBg
+        : (root.shellOwned.length > 0 || root.shadowed.length > 0
+            ? Appearance.colors.colSurfaceContainerHigh : Appearance.colors.colLayer2)
+    border.width: root.applyWuWa ? 1 : 0
+    border.color: root.applyWuWa ? SettingsTheme.colRowBorder : "transparent"
 
     // Only the bottom corners need thinking about: the note is the last row of its group, and
     // never the first, because a section always has controls above it.
@@ -178,14 +199,14 @@ Rectangle {
                 Layout.alignment: Qt.AlignTop
                 text: "layers"
                 iconSize: Appearance.font.pixelSize.normal
-                color: Appearance.colors.colSubtext
+                color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
             }
 
             StyledText {
                 Layout.fillWidth: true
                 text: root.summary
                 font.pixelSize: Appearance.font.pixelSize.smaller
-                color: Appearance.colors.colSubtext
+                color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
                 wrapMode: Text.WordWrap
             }
         }
@@ -318,9 +339,11 @@ Rectangle {
         implicitHeight: 28
         implicitWidth: noteButtonRow.implicitWidth + 20
         buttonRadius: Appearance.rounding.full
-        colBackground: Appearance.colors.colSecondaryContainer
-        colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-        colRipple: Appearance.colors.colSecondaryContainerActive
+        colBackground: root.applyWuWa ? SettingsTheme.colItemBg : Appearance.colors.colSecondaryContainer
+        colBackgroundHover: root.applyWuWa ? SettingsTheme.colRowHover : Appearance.colors.colSecondaryContainerHover
+        colRipple: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colSecondaryContainerActive
+        borderWidth: root.applyWuWa ? 1 : 0
+        borderColor: root.applyWuWa ? SettingsTheme.colRowBorder : "transparent"
 
         contentItem: RowLayout {
             id: noteButtonRow
@@ -330,14 +353,14 @@ Rectangle {
                 Layout.leftMargin: 10
                 text: noteButton.buttonIcon
                 iconSize: 14
-                color: Appearance.colors.colOnSecondaryContainer
+                color: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnSecondaryContainer
             }
 
             StyledText {
                 Layout.rightMargin: 10
                 text: noteButton.label
                 font.pixelSize: Appearance.font.pixelSize.smaller
-                color: Appearance.colors.colOnSecondaryContainer
+                color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnSecondaryContainer
             }
         }
     }

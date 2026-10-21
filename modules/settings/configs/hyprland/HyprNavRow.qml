@@ -20,6 +20,23 @@ import qs.modules.common.widgets
 RippleButton {
     id: root
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     property string buttonIcon: ""
     /// An actual desktop-app icon for a selected association. When absent, the category glyph
     /// remains visible so ordinary navigation rows keep their established appearance.
@@ -47,9 +64,11 @@ RippleButton {
     implicitHeight: contentLayout.implicitHeight + 20
     useDynamicRadius: true
 
-    colBackground: Appearance.colors.colLayer2
-    colBackgroundHover: Appearance.colors.colLayer2Hover
-    colRipple: Appearance.colors.colLayer2Active
+    colBackground: root.applyWuWa ? SettingsTheme.colRowBg : Appearance.colors.colLayer2
+    colBackgroundHover: root.applyWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer2Hover
+    colRipple: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer2Active
+    borderWidth: root.applyWuWa ? 1 : 0
+    borderColor: root.applyWuWa ? SettingsTheme.colRowBorder : "transparent"
 
     onClicked: {
         root.openSubPage();
@@ -70,7 +89,7 @@ RippleButton {
         id: highlightOverlay
         anchors.fill: parent
         radius: root.buttonEffectiveRadius
-        color: Appearance.colors.colSecondaryContainer
+        color: root.applyWuWa ? SettingsTheme.colRowHover : Appearance.colors.colSecondaryContainer
     }
 
     ScrollAnimate {}
@@ -99,8 +118,8 @@ RippleButton {
                     iconSize: 18
                     padding: 6
                     fill: 0
-                    color: Appearance.colors.colLayer3
-                    colSymbol: Appearance.colors.colOnLayer3
+                    color: root.applyWuWa ? SettingsTheme.colItemBg : Appearance.colors.colLayer3
+                    colSymbol: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnLayer3
                 }
             }
 
@@ -121,7 +140,7 @@ RippleButton {
                     Layout.fillWidth: true
                     text: root.text
                     font.pixelSize: Appearance.font.pixelSize.small
-                    color: Appearance.colors.colOnLayer2
+                    color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer2
                     wrapMode: Text.WordWrap
                 }
 
@@ -130,7 +149,7 @@ RippleButton {
                     visible: root.description.length > 0
                     text: root.description
                     font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colSubtext
+                    color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
                     wrapMode: Text.WordWrap
                 }
             }
@@ -143,7 +162,7 @@ RippleButton {
                 horizontalAlignment: Text.AlignRight
                 elide: Text.ElideRight
                 font.pixelSize: Appearance.font.pixelSize.small
-                color: Appearance.colors.colSubtext
+                color: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colSubtext
                 opacity: root.enabled ? 1 : 0.4
             }
 
@@ -156,7 +175,7 @@ RippleButton {
                 Layout.alignment: Qt.AlignVCenter
                 text: "chevron_right"
                 iconSize: Appearance.font.pixelSize.large
-                color: Appearance.colors.colSubtext
+                color: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colSubtext
                 opacity: root.enabled ? 1 : 0.4
             }
         }

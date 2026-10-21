@@ -35,7 +35,9 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: index === 0 ? 190 : 150
                 radius: Appearance.rounding.large
-                color: Appearance.colors.colLayer1
+                color: SettingsTheme.isWuWa ? SettingsTheme.colCardBg : Appearance.colors.colLayer1
+                border.width: SettingsTheme.isWuWa ? SettingsTheme.cardBorderWidth : 0
+                border.color: SettingsTheme.isWuWa ? SettingsTheme.colCardBorder : "transparent"
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -46,7 +48,9 @@ Item {
                         Layout.preferredWidth: parent.width * (index === 0 ? 0.34 : 0.48)
                         Layout.preferredHeight: Appearance.font.pixelSize.normal
                         radius: Appearance.rounding.small
-                        color: Appearance.colors.colLayer3
+                        color: SettingsTheme.isWuWa ? SettingsTheme.colRowBg : Appearance.colors.colLayer3
+                        border.width: SettingsTheme.isWuWa ? 1 : 0
+                        border.color: SettingsTheme.isWuWa ? SettingsTheme.colRowBorder : "transparent"
                     }
 
                     Item {
@@ -60,8 +64,10 @@ Item {
                             Layout.fillWidth: true
                             Layout.preferredHeight: Appearance.font.pixelSize.small
                             radius: Appearance.rounding.small
-                            color: Appearance.colors.colLayer3
-                            opacity: 0.72
+                            color: SettingsTheme.isWuWa ? SettingsTheme.colRowBg : Appearance.colors.colLayer3
+                            border.width: SettingsTheme.isWuWa ? 1 : 0
+                            border.color: SettingsTheme.isWuWa ? SettingsTheme.colRowBorder : "transparent"
+                            opacity: SettingsTheme.isWuWa ? 0.9 : 0.72
                         }
                     }
                 }

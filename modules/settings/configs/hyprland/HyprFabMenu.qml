@@ -20,6 +20,23 @@ import qs.modules.common.widgets
 Item {
     id: root
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     /// `[{ icon, label, danger, checkable, checked }]`, drawn bottom-up in the order given.
     property var actions: []
     property bool expanded: false
@@ -76,12 +93,19 @@ Item {
                 visible: opacity > 0
                 enabled: root.expanded
 
-                colBackground: item.checkedOn ? Appearance.colors.colPrimaryContainer
-                    : Appearance.colors.colSurfaceContainerHigh
-                colBackgroundHover: item.checkedOn ? Appearance.colors.colPrimaryContainerHover
-                    : Appearance.colors.colSurfaceContainerHighest
-                colRipple: item.checkedOn ? Appearance.colors.colPrimaryContainerActive
-                    : Appearance.colors.colSurfaceContainerHighestActive
+                colBackground: root.applyWuWa
+                    ? (item.checkedOn ? SettingsTheme.colAccent : SettingsTheme.colItemBg)
+                    : (item.checkedOn ? Appearance.colors.colPrimaryContainer : Appearance.colors.colSurfaceContainerHigh)
+                colBackgroundHover: root.applyWuWa
+                    ? (item.checkedOn ? SettingsTheme.colNavActiveHover : SettingsTheme.colRowHover)
+                    : (item.checkedOn ? Appearance.colors.colPrimaryContainerHover : Appearance.colors.colSurfaceContainerHighest)
+                colRipple: root.applyWuWa
+                    ? (item.checkedOn ? SettingsTheme.colNavActiveHover : SettingsTheme.colAccent)
+                    : (item.checkedOn ? Appearance.colors.colPrimaryContainerActive : Appearance.colors.colSurfaceContainerHighestActive)
+                borderWidth: root.applyWuWa ? 1 : 0
+                borderColor: root.applyWuWa
+                    ? (item.checkedOn ? SettingsTheme.colAccent : SettingsTheme.colCardBorder)
+                    : "transparent"
 
                 // One-shot entrance, staggered from the FAB outwards: opacity and a short lift,
                 // no scale and nothing that keeps moving once the menu has arrived.
@@ -124,8 +148,9 @@ Item {
                             font.pixelSize: Appearance.font.pixelSize.small
                             font.weight: Font.DemiBold
                             color: item.danger ? Appearance.colors.colError
-                                : (item.checkedOn ? Appearance.colors.colOnPrimaryContainer
-                                    : Appearance.colors.colOnSurface)
+                                : (root.applyWuWa
+                                    ? (item.checkedOn ? SettingsTheme.colNavOnActive : SettingsTheme.colTextPrimary)
+                                    : (item.checkedOn ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSurface))
                         }
 
                         MaterialSymbol {
@@ -135,8 +160,9 @@ Item {
                             iconSize: 20
                             fill: item.checkedOn ? 1 : 0
                             color: item.danger ? Appearance.colors.colError
-                                : (item.checkedOn ? Appearance.colors.colOnPrimaryContainer
-                                    : Appearance.colors.colOnSurface)
+                                : (root.applyWuWa
+                                    ? (item.checkedOn ? SettingsTheme.colNavOnActive : SettingsTheme.colTextPrimary)
+                                    : (item.checkedOn ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSurface))
                         }
                     }
                 }
@@ -149,10 +175,12 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         iconText: root.expanded ? "close" : root.icon
-        colBackground: Appearance.colors.colSurfaceContainerHigh
-        colBackgroundHover: Appearance.colors.colSurfaceContainerHighest
-        colRipple: Appearance.colors.colSurfaceContainerHighestActive
-        colOnBackground: Appearance.colors.colOnSurface
+        colBackground: root.applyWuWa ? SettingsTheme.colItemBg : Appearance.colors.colSurfaceContainerHigh
+        colBackgroundHover: root.applyWuWa ? SettingsTheme.colRowHover : Appearance.colors.colSurfaceContainerHighest
+        colRipple: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colSurfaceContainerHighestActive
+        colOnBackground: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnSurface
+        borderWidth: root.applyWuWa ? 1 : 0
+        borderColor: root.applyWuWa ? SettingsTheme.colCardBorder : "transparent"
         onClicked: root.expanded = !root.expanded
 
         StyledToolTip {

@@ -9,6 +9,23 @@ TabBar {
     property real indicatorPadding: 8
     Layout.fillWidth: true
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     background: Item {
         WheelHandler {
             onWheel: (event) => {
@@ -26,7 +43,7 @@ TabBar {
             topRightRadius: height
             bottomLeftRadius: 0
             bottomRightRadius: 0
-            color: Appearance.colors.colPrimary
+            color: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
             // Animation
             property real baseWidth: root.width / root.count
             AnimatedTabIndexPair {
@@ -47,7 +64,7 @@ TabBar {
                 left: parent.left
                 right: parent.right
             }
-            color: Appearance.colors.colOutlineVariant
+            color: root.applyWuWa ? SettingsTheme.colCardBorder : Appearance.colors.colOutlineVariant
         }
     }
 }

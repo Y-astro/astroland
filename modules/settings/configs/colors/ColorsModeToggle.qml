@@ -20,8 +20,8 @@ RowLayout {
     function setDark(dark: bool) {
         if (Appearance.m3colors.darkmode === dark)
             return;
-        const background = Config.options?.background;
-        if (background?.useSeparateLightModeWallpaper) {
+        const background = (Config.options && Config.options.background) ? Config.options.background : null;
+        if (background && background.useSeparateLightModeWallpaper) {
             const path = dark ? background.wallpaperPath : background.lightModeWallpaperPath;
             if (path && path !== "") {
                 if (dark)
@@ -59,6 +59,23 @@ RowLayout {
         required property string label
         required property var activeShape
 
+        readonly property bool inSettings: {
+            var win = root.QsWindow ? root.QsWindow.window : null;
+            if (win && win.isSettingsWindow)
+                return true;
+            var p = root.parent;
+            var depth = 0;
+            while (p && depth < 20) {
+                if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                    return true;
+                p = p.parent;
+                depth++;
+            }
+            return false;
+        }
+        readonly property bool isSettingsScope: inSettings
+        readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
         readonly property bool current: Appearance.m3colors.darkmode === segment.dark
         readonly property real outer: Math.min(height / 2, Appearance.rounding.full)
         // Animated here rather than on the corners: RippleButton already owns a
@@ -67,7 +84,9 @@ RowLayout {
         Behavior on inner {
             animation: Appearance.animation.elementMoveSmall.numberAnimation.createObject(this)
         }
-        readonly property color colContent: segment.current ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+        readonly property color colContent: segment.current
+            ? (segment.applyWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary)
+            : (segment.applyWuWa ? (segment.hovered ? SettingsTheme.colTextPrimary : SettingsTheme.colTextSecondary) : Appearance.colors.colOnSecondaryContainer)
 
         Layout.fillWidth: true
         Layout.preferredWidth: 1
@@ -79,11 +98,22 @@ RowLayout {
         topRightRadius: segment.first ? segment.inner : segment.outer
         bottomRightRadius: segment.first ? segment.inner : segment.outer
 
+        borderWidth: segment.applyWuWa ? 1 : 0
+        borderColor: segment.applyWuWa ? (segment.current ? SettingsTheme.colAccent : SettingsTheme.colRowBorder) : "transparent"
+
         toggled: segment.current
-        colBackground: Appearance.colors.colSecondaryContainer
-        colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-        colBackgroundActive: Appearance.colors.colSecondaryContainerActive
-        colRipple: Appearance.colors.colSecondaryContainerActive
+        colBackground: segment.applyWuWa
+            ? (segment.current ? SettingsTheme.colAccent : SettingsTheme.colRowBg)
+            : Appearance.colors.colSecondaryContainer
+        colBackgroundHover: segment.applyWuWa
+            ? (segment.current ? SettingsTheme.colNavActiveHover : SettingsTheme.colRowHover)
+            : Appearance.colors.colSecondaryContainerHover
+        colBackgroundActive: segment.applyWuWa
+            ? (segment.current ? SettingsTheme.colNavActiveHover : SettingsTheme.colRowHover)
+            : Appearance.colors.colSecondaryContainerActive
+        colRipple: segment.applyWuWa
+            ? (segment.current ? SettingsTheme.colNavActiveHover : SettingsTheme.colRowHover)
+            : Appearance.colors.colSecondaryContainerActive
         onClicked: root.setDark(segment.dark)
 
         contentItem: Item {
@@ -98,8 +128,12 @@ RowLayout {
                     padding: 5
                     fill: segment.current ? 1 : 0
                     shape: segment.current ? segment.activeShape : MaterialShape.Shape.Circle
-                    color: segment.current ? Appearance.colors.colOnPrimary : "transparent"
-                    colSymbol: segment.current ? Appearance.colors.colPrimary : segment.colContent
+                    color: segment.current
+                        ? (segment.applyWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary)
+                        : "transparent"
+                    colSymbol: segment.current
+                        ? (segment.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary)
+                        : segment.colContent
                     Behavior on color {
                         animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
                     }

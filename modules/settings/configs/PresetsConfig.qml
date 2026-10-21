@@ -249,10 +249,12 @@ Item {
             }
         }
 
-        colBackground: Appearance.colors.colTertiaryContainer
-        colBackgroundHover: Appearance.colors.colTertiaryContainerHover
-        colRipple: Appearance.colors.colTertiaryContainerActive
-        colOnBackground: Appearance.colors.colOnTertiaryContainer
+        colBackground: SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colTertiaryContainer
+        colBackgroundHover: SettingsTheme.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colTertiaryContainerHover
+        colRipple: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colTertiaryContainerActive
+        colOnBackground: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnTertiaryContainer
+        borderWidth: SettingsTheme.isWuWa ? 1 : 0
+        borderColor: SettingsTheme.isWuWa ? SettingsTheme.colCardBorder : "transparent"
 
         onClicked: {
             // MALLOC_CONF: the allocator setting the session start uses, see hyprland/execs.lua.
@@ -307,10 +309,12 @@ Item {
             }
         }
 
-        colBackground: Appearance.colors.colSecondaryContainer
-        colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-        colRipple: Appearance.colors.colSecondaryContainerActive
-        colOnBackground: Appearance.colors.colOnSecondaryContainer
+        colBackground: SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colSecondaryContainer
+        colBackgroundHover: SettingsTheme.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colSecondaryContainerHover
+        colRipple: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colSecondaryContainerActive
+        colOnBackground: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnSecondaryContainer
+        borderWidth: SettingsTheme.isWuWa ? 1 : 0
+        borderColor: SettingsTheme.isWuWa ? SettingsTheme.colCardBorder : "transparent"
 
         onClicked: {
             PresetStore.revert();

@@ -12,14 +12,31 @@ import qs.modules.common.widgets
 RippleButton {
     id: root
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     property string symbol: ""
     property string label: ""
     property bool chosen: false
     property int count: -1
     /// Chips on a coloured card take its content colour for the outline and text.
-    property color colContent: Appearance.colors.colOnSurfaceVariant
-    property color colChosen: Appearance.colors.colSecondaryContainer
-    property color colOnChosen: Appearance.colors.colOnSecondaryContainer
+    property color colContent: applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnSurfaceVariant
+    property color colChosen: applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colSecondaryContainer
+    property color colOnChosen: applyWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnSecondaryContainer
 
     implicitHeight: 36
     implicitWidth: chipRow.implicitWidth + 28
@@ -27,19 +44,19 @@ RippleButton {
     buttonRadiusPressed: Appearance.rounding.small
     toggled: root.chosen
     colBackground: "transparent"
-    colBackgroundHover: ColorUtils.applyAlpha(root.colContent, 0.08)
-    colBackgroundActive: ColorUtils.applyAlpha(root.colContent, 0.16)
-    colRipple: ColorUtils.applyAlpha(root.colContent, 0.16)
+    colBackgroundHover: applyWuWa ? SettingsTheme.colRowHover : ColorUtils.applyAlpha(root.colContent, 0.08)
+    colBackgroundActive: applyWuWa ? SettingsTheme.colRowHover : ColorUtils.applyAlpha(root.colContent, 0.16)
+    colRipple: applyWuWa ? SettingsTheme.colRowHover : ColorUtils.applyAlpha(root.colContent, 0.16)
     colBackgroundToggled: root.colChosen
-    colBackgroundToggledHover: ColorUtils.mix(root.colChosen, root.colOnChosen, 0.9)
-    colBackgroundToggledActive: ColorUtils.mix(root.colChosen, root.colOnChosen, 0.8)
-    colRippleToggled: ColorUtils.mix(root.colChosen, root.colOnChosen, 0.8)
+    colBackgroundToggledHover: applyWuWa ? SettingsTheme.colNavActiveHover : ColorUtils.mix(root.colChosen, root.colOnChosen, 0.9)
+    colBackgroundToggledActive: applyWuWa ? SettingsTheme.colNavActiveHover : ColorUtils.mix(root.colChosen, root.colOnChosen, 0.8)
+    colRippleToggled: applyWuWa ? SettingsTheme.colNavActiveHover : ColorUtils.mix(root.colChosen, root.colOnChosen, 0.8)
     opacity: root.enabled ? 1 : 0.4
 
     DashedBorder {
         anchors.fill: parent
         visible: !root.chosen
-        color: ColorUtils.applyAlpha(root.colContent, 0.55)
+        color: root.applyWuWa ? SettingsTheme.colCardBorder : ColorUtils.applyAlpha(root.colContent, 0.55)
         borderWidth: 1
         dashLength: 4
         gapLength: 3
@@ -72,7 +89,9 @@ RippleButton {
                 implicitWidth: Math.max(implicitHeight, countText.implicitWidth + 10)
                 implicitHeight: 20
                 radius: height / 2
-                color: root.chosen ? ColorUtils.applyAlpha(root.colOnChosen, 0.14) : ColorUtils.applyAlpha(root.colContent, 0.12)
+                color: root.chosen
+                    ? (root.applyWuWa ? ColorUtils.applyAlpha(SettingsTheme.colNavOnActive, 0.18) : ColorUtils.applyAlpha(root.colOnChosen, 0.14))
+                    : (root.applyWuWa ? SettingsTheme.colItemBg : ColorUtils.applyAlpha(root.colContent, 0.12))
 
                 StyledText {
                     id: countText
@@ -80,7 +99,7 @@ RippleButton {
                     text: String(root.count)
                     font.pixelSize: Appearance.font.pixelSize.smallest
                     font.weight: Font.Bold
-                    color: root.chosen ? root.colOnChosen : root.colContent
+                    color: root.chosen ? root.colOnChosen : (root.applyWuWa ? SettingsTheme.colTextPrimary : root.colContent)
                 }
             }
         }

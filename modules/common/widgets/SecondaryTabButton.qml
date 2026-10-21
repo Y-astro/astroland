@@ -13,6 +13,23 @@ TabButton {
     property int rippleDuration: 1200
     property int tabContentWidth: buttonBackground.width - buttonBackground.radius*2
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     property color colBackground: ColorUtils.transparentize(Appearance.colors.colSurfaceContainer)
     property color colBackgroundHover: ColorUtils.transparentize(Appearance.colors.colOnSurface, root.checked ? 1 : 0.95)
     property color colRipple: ColorUtils.transparentize(Appearance.colors.colOnSurface, 0.95)
@@ -93,7 +110,7 @@ TabButton {
             fill: parent
             margins: 3
         }
-        radius: Appearance?.rounding.normal
+        radius: Appearance.rounding.normal
         implicitHeight: 42
         color: (root.hovered ? root.colBackgroundHover : root.colBackground)
         layer.enabled: true
@@ -120,7 +137,7 @@ TabButton {
             visible: width > 0 && height > 0
 
             Behavior on opacity {
-                animation: Appearance?.animation.elementMoveFast.colorAnimation.createObject(this)
+                animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
             }
 
             RadialGradient {
@@ -147,8 +164,8 @@ TabButton {
             
             Loader {
                 id: iconLoader
-                active: buttonIcon?.length > 0
-                sourceComponent: buttonIcon?.length > 0 ? materialSymbolComponent : null
+                active: !!buttonIcon && buttonIcon.length > 0
+                sourceComponent: (!!buttonIcon && buttonIcon.length > 0) ? materialSymbolComponent : null
                 Layout.rightMargin: 5
             }
 
@@ -159,7 +176,9 @@ TabButton {
                     text: buttonIcon
                     iconSize: Appearance.font.pixelSize.huge
                     fill: root.checked ? 1 : 0
-                    color: root.checked ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1
+                    color: root.checked
+                        ? (root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary)
+                        : (root.applyWuWa ? (root.hovered ? SettingsTheme.colTextPrimary : SettingsTheme.colTextSecondary) : Appearance.colors.colOnLayer1)
                     Behavior on color {
                         animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
                     }
@@ -169,7 +188,9 @@ TabButton {
                 id: buttonTextWidget
                 verticalAlignment: Text.AlignVCenter
                 font.pixelSize: Appearance.font.pixelSize.small
-                color: root.checked ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1
+                color: root.checked
+                    ? (root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary)
+                    : (root.applyWuWa ? (root.hovered ? SettingsTheme.colTextPrimary : SettingsTheme.colTextSecondary) : Appearance.colors.colOnLayer1)
                 text: buttonText
                 Behavior on color {
                     animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)

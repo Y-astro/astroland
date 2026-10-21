@@ -7,14 +7,31 @@ import qs.modules.common.widgets
 TextField {
     id: filterField
 
+    readonly property bool inSettings: {
+        var win = filterField.QsWindow ? filterField.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = filterField.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     property alias colBackground: background.color
 
     Layout.fillHeight: true
     implicitWidth: 200
     padding: 10
 
-    placeholderTextColor: Appearance.colors.colSubtext
-    color: Appearance.colors.colOnLayer1
+    placeholderTextColor: filterField.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
+    color: filterField.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
     font {
         family: Appearance.font.family.main
         pixelSize: Appearance.font.pixelSize.small
@@ -22,8 +39,8 @@ TextField {
         variableAxes: Appearance.font.variableAxes.main
     }
     renderType: Text.NativeRendering
-    selectedTextColor: Appearance.colors.colOnSecondaryContainer
-    selectionColor: Appearance.colors.colSecondaryContainer
+    selectedTextColor: filterField.applyWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnSecondaryContainer
+    selectionColor: filterField.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colSecondaryContainer
 
     // Set this to the item that should receive focus (and key events)
     // when Ctrl is held, e.g. cheatsheetBackground for tab switching.
@@ -39,8 +56,14 @@ TextField {
 
     background: Rectangle {
         id: background
-        color: Appearance.colors.colLayer1
+        color: filterField.applyWuWa
+            ? (filterField.activeFocus ? SettingsTheme.colSearchFieldFocused : SettingsTheme.colSearchField)
+            : Appearance.colors.colLayer1
         radius: Appearance.rounding.full
+        border.width: filterField.applyWuWa ? 1 : 0
+        border.color: filterField.applyWuWa
+            ? (filterField.activeFocus ? SettingsTheme.colBorderFocused : SettingsTheme.colCardBorder)
+            : "transparent"
     }
 
     StyledTextContextMenuLoader {

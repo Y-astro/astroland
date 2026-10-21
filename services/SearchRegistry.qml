@@ -42,7 +42,7 @@ Item {
         root._memoResults = null;
         root.indexed = false;
         root.indexing = true;
-        let configRoot = FileUtils.trimFileProtocol(Directories.config) + "/quickshell/ii/";
+        let configRoot = FileUtils.trimFileProtocol(Quickshell.shellPath("")) + "/";
         let basePath = configRoot + "modules/settings/configs/";
 
         let files = [];
@@ -59,7 +59,7 @@ Item {
                 ids.push(p.id);
                 subPages.push("");
             }
-            for (let sub of (p.subPages ?? [])) {
+            for (let sub of ((p && p.subPages) ? p.subPages : [])) {
                 files.push(basePath + sub);
                 ids.push(p.id);
                 subPages.push(sub);
@@ -70,10 +70,10 @@ Item {
             // own lazy loader instead of trying to open the source as a page.
             // A source that stands in for a sub-page's options opens that
             // sub-page instead (`searchSubPages`).
-            for (let source of (p.searchSources ?? [])) {
+            for (let source of ((p && p.searchSources) ? p.searchSources : [])) {
                 files.push(basePath + source);
                 ids.push(p.id);
-                subPages.push(p.searchSubPages?.[source] ?? "");
+                subPages.push((p && p.searchSubPages && p.searchSubPages[source]) ? p.searchSubPages[source] : "");
             }
         }
 
@@ -392,7 +392,9 @@ Item {
             // nowhere before, which left a page findable only under the words
             // printed on its own sections.
             const page = SettingsPageRegistry.pageById(pageId);
-            for (let term of [page?.name ?? "", ...(page?.aliases ?? [])]) {
+            const pageName = (page && page.name) ? page.name : "";
+            const pageAliases = (page && page.aliases) ? page.aliases : [];
+            for (let term of [pageName, ...pageAliases]) {
                 if (term.length > 0 && searchStrings.indexOf(term) === -1)
                     searchStrings.push(term);
             }

@@ -5,6 +5,24 @@ import qs.modules.common.widgets
 
 RippleButton {
     id: buttonWithIconRoot
+
+    readonly property bool inSettings: {
+        var win = buttonWithIconRoot.QsWindow ? buttonWithIconRoot.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = buttonWithIconRoot.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     property string nerdIcon
     property string materialIcon
     property string hoverMaterialIcon: ""
@@ -21,7 +39,7 @@ RippleButton {
     property string mainText: "Button text"
     readonly property real contentImplicitWidth: contentItem ? contentItem.implicitWidth : 0
     readonly property real contentImplicitHeight: contentItem ? contentItem.implicitHeight : 0
-    property color colText: Appearance.colors.colOnSecondaryContainer
+    property color colText: buttonWithIconRoot.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnSecondaryContainer
     property Component mainContentComponent: Component {
         StyledText {
             visible: text !== ""
@@ -36,7 +54,11 @@ RippleButton {
     implicitHeight: 35
     horizontalPadding: 10
     buttonRadius: Appearance.rounding.small
-    colBackground: Appearance.colors.colLayer2
+    colBackground: buttonWithIconRoot.applyWuWa ? SettingsTheme.colItemBg : Appearance.colors.colLayer2
+    colBackgroundHover: buttonWithIconRoot.applyWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer2Hover
+    colRipple: buttonWithIconRoot.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer2Active
+    borderWidth: buttonWithIconRoot.applyWuWa ? 1 : 0
+    borderColor: buttonWithIconRoot.applyWuWa ? SettingsTheme.colCardBorder : "transparent"
 
     contentItem: Item {
         implicitWidth: contentRow.implicitWidth

@@ -181,7 +181,9 @@ Item {
         width: paletteRow.implicitWidth + 16
         height: 40
         radius: height / 2
-        color: Appearance.colors.colSurfaceContainerHigh
+        color: SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colSurfaceContainerHigh
+        border.width: SettingsTheme.isWuWa ? 1 : 0
+        border.color: SettingsTheme.isWuWa ? SettingsTheme.colCardBorder : "transparent"
 
         Row {
             id: paletteRow
@@ -215,7 +217,9 @@ Item {
         width: wpeRow.implicitWidth + 24
         height: 32
         radius: height / 2
-        color: Appearance.colors.colTertiaryContainer
+        color: SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colTertiaryContainer
+        border.width: SettingsTheme.isWuWa ? 1 : 0
+        border.color: SettingsTheme.isWuWa ? SettingsTheme.colCardBorder : "transparent"
 
         RowLayout {
             id: wpeRow
@@ -225,13 +229,13 @@ Item {
                 text: "play_circle"
                 iconSize: Appearance.font.pixelSize.normal
                 fill: 1
-                color: Appearance.colors.colOnTertiaryContainer
+                color: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnTertiaryContainer
             }
             StyledText {
                 text: Translation.tr("Wallpaper Engine")
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 font.weight: Font.DemiBold
-                color: Appearance.colors.colOnTertiaryContainer
+                color: SettingsTheme.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnTertiaryContainer
             }
         }
     }
@@ -340,16 +344,18 @@ Item {
         implicitHeight: 36
         buttonRadius: height / 2
         buttonRadiusPressed: Appearance.rounding.small
-        colBackground: Appearance.colors.colSurfaceContainerHigh
-        colBackgroundHover: Appearance.colors.colSurfaceContainerHighestHover
-        colRipple: Appearance.colors.colSurfaceContainerHighestActive
+        colBackground: SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colSurfaceContainerHigh
+        colBackgroundHover: SettingsTheme.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colSurfaceContainerHighestHover
+        colRipple: SettingsTheme.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colSurfaceContainerHighestActive
+        borderWidth: SettingsTheme.isWuWa ? 1 : 0
+        borderColor: SettingsTheme.isWuWa ? SettingsTheme.colCardBorder : "transparent"
 
         contentItem: MaterialSymbol {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             text: iconButton.symbol
             iconSize: Appearance.font.pixelSize.larger
-            color: Appearance.colors.colOnSurface
+            color: SettingsTheme.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnSurface
         }
 
         StyledToolTip {

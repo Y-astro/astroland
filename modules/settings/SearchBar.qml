@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
+import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
@@ -20,6 +21,7 @@ RowLayout {
     implicitHeight: 56
 
     // ── Public state (bind from parent) ────────────────────────────────────
+    property alias searchInput: searchInput
     property int lastSearchIndex: -1
     property int resultsCount: 0
 

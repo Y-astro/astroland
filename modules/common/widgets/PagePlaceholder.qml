@@ -7,6 +7,23 @@ import qs.modules.common.widgets
 Item {
     id: root
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     property bool shown: true
     property alias icon: shapeWidget.text
     property alias iconSize: shapeWidget.iconSize
@@ -224,7 +241,7 @@ Item {
                     width: parent.width
                     height: parent.height
                     radius: width / 2
-                    color: Appearance.colors.colPrimary
+                    color: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
                     opacity: (1.0 - root.rippleProgress) * 0.4
                     scale: root.rippleProgress
                 }
@@ -236,7 +253,7 @@ Item {
                     height: parent.height
                     radius: width / 2
                     color: "transparent"
-                    border.color: Appearance.colors.colPrimary
+                    border.color: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
                     border.width: 3
                     opacity: (1.0 - root.rippleProgress) * 0.8
                     scale: Math.pow(root.rippleProgress, 0.7)
@@ -249,6 +266,8 @@ Item {
                 padding: 12
                 iconSize: Math.round(56 * root.sizeScale)
                 rotation: -30 * (1 - root.opacity)
+                color: root.applyWuWa ? SettingsTheme.colItemBg : (ResonanceTheme.enabled ? ResonanceTheme.alpha(ResonanceTheme.colTealInkDark, 0.70) : Appearance.colors.colSecondaryContainer)
+                colSymbol: root.applyWuWa ? SettingsTheme.colAccent : (ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colOnSecondaryContainer)
                 
                 // Value holder for the entrance animation. This used to be a
                 // real FastBlur just to carry `radius`, which cost every
@@ -292,7 +311,7 @@ Item {
                     pixelSize: Math.round(root.titlePixelSize * root.sizeScale)
                     variableAxes: Appearance.font.variableAxes.title
                 }
-                color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.m3colors.m3outline
+                color: root.applyWuWa ? SettingsTheme.colTextPrimary : (ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.m3colors.m3outline)
                 horizontalAlignment: Text.AlignHCenter
 
                 transform: Translate {
@@ -308,7 +327,7 @@ Item {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
             font.pixelSize: Math.round(root.descriptionPixelSize * root.sizeScale)
-            color: ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.m3colors.m3outline
+            color: root.applyWuWa ? SettingsTheme.colTextSecondary : (ResonanceTheme.enabled ? ResonanceTheme.textSecondary : Appearance.m3colors.m3outline)
             horizontalAlignment: root.descriptionHorizontalAlignment ?? Text.AlignHCenter
             wrapMode: Text.Wrap
 
