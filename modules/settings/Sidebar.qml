@@ -67,12 +67,14 @@ Item {
             id: sidebarContainer
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: Appearance.colors.colLayer0
+            color: SettingsTheme.colSidebarBg
             radius: Appearance.rounding.windowRounding
+            border.width: SettingsTheme.isWuWa ? 1 : 0
+            border.color: SettingsTheme.colSidebarBorder
             // Scrolled buttons are rounded off by painted corners over the
             // opaque background (see CornerCutouts); a mask layer is only
             // needed when the background is translucent.
-            readonly property bool opaqueBackground: Appearance.colors.colLayer0.a >= 1
+            readonly property bool opaqueBackground: SettingsTheme.sidebarOpaque
 
             layer.enabled: !opaqueBackground
             layer.effect: OpacityMask {
@@ -177,8 +179,8 @@ Item {
                                         text: groupDelegate.modelData.name
                                         font.pixelSize: Appearance.font.pixelSize.smaller
                                         font.weight: Font.DemiBold
-                                        color: Appearance.colors.colOnLayer1
-                                        opacity: groupHeaderMouse.containsMouse ? 0.85 : 0.55
+                                        color: SettingsTheme.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer1
+                                        opacity: groupHeaderMouse.containsMouse ? 0.95 : (SettingsTheme.isWuWa ? 0.75 : 0.55)
                                         Layout.fillWidth: true
 
                                         Behavior on opacity {
@@ -191,7 +193,7 @@ Item {
                                     MaterialSymbol {
                                         text: "keyboard_arrow_down"
                                         iconSize: 16
-                                        color: Appearance.colors.colOnLayer1
+                                        color: SettingsTheme.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer1
                                         opacity: groupHeaderMouse.containsMouse ? 0.85 : 0.55
                                         rotation: groupDelegate.expanded ? 0 : -90
 
@@ -279,7 +281,7 @@ Item {
                 anchors.fill: parent
                 visible: sidebarContainer.opaqueBackground
                 radius: sidebarContainer.radius
-                color: Appearance.colors.colLayer0
+                color: SettingsTheme.colSidebarCutout
             }
         }
     }

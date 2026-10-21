@@ -86,7 +86,9 @@ Item {
             - (root.hero ? changeButton.width + 12 : 0))
         height: root.hero ? 40 : 32
         radius: height / 2
-        color: Appearance.colors.colSurfaceContainerHigh
+        color: SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colSurfaceContainerHigh
+        border.width: SettingsTheme.isWuWa ? 1 : 0
+        border.color: SettingsTheme.isWuWa ? SettingsTheme.colCardBorder : "transparent"
 
         RowLayout {
             id: tagRow
@@ -101,14 +103,14 @@ Item {
                 text: root.symbol
                 iconSize: root.hero ? Appearance.font.pixelSize.larger : Appearance.font.pixelSize.normal
                 fill: 1
-                color: Appearance.colors.colPrimary
+                color: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
             }
 
             StyledText {
                 text: root.title
                 font.pixelSize: root.hero ? Appearance.font.pixelSize.small : Appearance.font.pixelSize.smaller
                 font.weight: Font.DemiBold
-                color: Appearance.colors.colOnSurface
+                color: SettingsTheme.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnSurface
             }
 
             StyledText {
@@ -116,7 +118,7 @@ Item {
                 visible: root.hero && picture.fileName.length > 0
                 text: picture.fileName
                 font.pixelSize: Appearance.font.pixelSize.smaller
-                color: Appearance.colors.colSubtext
+                color: SettingsTheme.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
                 elide: Text.ElideMiddle
             }
         }
@@ -136,9 +138,9 @@ Item {
         implicitWidth: root.width < 420 ? implicitHeight : changeRow.implicitWidth + 36
         buttonRadius: height / 2
         buttonRadiusPressed: Appearance.rounding.normal
-        colBackground: Appearance.colors.colPrimary
-        colBackgroundHover: Appearance.colors.colPrimaryHover
-        colRipple: Appearance.colors.colPrimaryActive
+        colBackground: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
+        colBackgroundHover: SettingsTheme.isWuWa ? SettingsTheme.colNavActiveHover : Appearance.colors.colPrimaryHover
+        colRipple: SettingsTheme.isWuWa ? SettingsTheme.colNavActiveHover : Appearance.colors.colPrimaryActive
         onClicked: root.pickRequested()
 
         contentItem: Item {
@@ -150,14 +152,14 @@ Item {
                 MaterialSymbol {
                     text: "imagesmode"
                     iconSize: Appearance.font.pixelSize.larger
-                    color: Appearance.colors.colOnPrimary
+                    color: SettingsTheme.isWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary
                 }
                 StyledText {
                     visible: root.width >= 420
                     text: Translation.tr("Change wallpaper")
                     font.pixelSize: Appearance.font.pixelSize.small
                     font.weight: Font.DemiBold
-                    color: Appearance.colors.colOnPrimary
+                    color: SettingsTheme.isWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary
                 }
             }
         }
@@ -268,9 +270,11 @@ Item {
         anchors.fill: parent
         visible: !root.isSet
         buttonRadius: root.cardRadius
-        colBackground: Appearance.colors.colLayer1
-        colBackgroundHover: Appearance.colors.colLayer1Hover
-        colRipple: Appearance.colors.colLayer1Active
+        colBackground: SettingsTheme.isWuWa ? SettingsTheme.colCardBg : Appearance.colors.colLayer1
+        colBackgroundHover: SettingsTheme.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colLayer1Hover
+        colRipple: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer1Active
+        borderWidth: SettingsTheme.isWuWa ? SettingsTheme.cardBorderWidth : 0
+        borderColor: SettingsTheme.isWuWa ? SettingsTheme.colCardBorder : "transparent"
         onClicked: root.pickRequested()
 
         contentItem: Item {
@@ -288,8 +292,12 @@ Item {
                     padding: root.compact ? 10 : 14
                     fill: 1
                     shape: emptyCard.hovered ? root.emptyShapeHover : root.emptyShape
-                    color: emptyCard.hovered ? Appearance.colors.colPrimaryContainer : Appearance.colors.colSecondaryContainer
-                    colSymbol: emptyCard.hovered ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSecondaryContainer
+                    color: emptyCard.hovered
+                        ? (SettingsTheme.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colPrimaryContainer)
+                        : (SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colSecondaryContainer)
+                    colSymbol: emptyCard.hovered
+                        ? (SettingsTheme.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnPrimaryContainer)
+                        : (SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnSecondaryContainer)
                     Behavior on color {
                         animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
                     }
@@ -306,7 +314,7 @@ Item {
                         font.family: Appearance.font.family.title
                         font.variableAxes: Appearance.font.variableAxes.titleRounded
                         font.pixelSize: Appearance.font.pixelSize.normal
-                        color: Appearance.colors.colOnLayer1
+                        color: SettingsTheme.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
                         elide: Text.ElideRight
                     }
                     StyledText {
@@ -314,7 +322,7 @@ Item {
                         horizontalAlignment: root.compact ? Text.AlignLeft : Text.AlignHCenter
                         text: root.emptyHint
                         font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colSubtext
+                        color: SettingsTheme.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
                         wrapMode: Text.WordWrap
                         maximumLineCount: 2
                         elide: Text.ElideRight

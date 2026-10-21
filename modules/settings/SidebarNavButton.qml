@@ -77,7 +77,11 @@ Item {
         bottomLeftRadius: root._bottomLeftRadius
         bottomRightRadius: root._bottomRightRadius
 
-        color: isActive ? (mouseArea.pressed ? Appearance.colors.colPrimaryActive : mouseArea.containsMouse ? Appearance.colors.colPrimaryHover : Appearance.colors.colPrimary) : (mouseArea.pressed ? Appearance.colors.colLayer2Active : mouseArea.containsMouse ? Appearance.colors.colLayer2Hover : Appearance.colors.colLayer2)
+        color: isActive
+            ? (mouseArea.pressed ? (SettingsTheme.isWuWa ? SettingsTheme.colNavActiveHover : Appearance.colors.colPrimaryActive) : mouseArea.containsMouse ? (SettingsTheme.isWuWa ? SettingsTheme.colNavActiveHover : Appearance.colors.colPrimaryHover) : (SettingsTheme.isWuWa ? SettingsTheme.colNavActive : Appearance.colors.colPrimary))
+            : (mouseArea.pressed ? (SettingsTheme.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colLayer2Active) : mouseArea.containsMouse ? (SettingsTheme.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colLayer2Hover) : (SettingsTheme.isWuWa ? SettingsTheme.colNavInactive : Appearance.colors.colLayer2))
+        border.width: SettingsTheme.isWuWa ? 1 : 0
+        border.color: SettingsTheme.isWuWa ? (isActive ? SettingsTheme.colBorderFocused : (mouseArea.containsMouse ? SettingsTheme.colBorderFocused : SettingsTheme.colNavBorder)) : "transparent"
 
         Behavior on color {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(btnBg)
@@ -113,7 +117,9 @@ Item {
             radius: width / 2
             Layout.alignment: Qt.AlignVCenter
 
-            color: isActive ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(Appearance.colors.colOnLayer2.r, Appearance.colors.colOnLayer2.g, Appearance.colors.colOnLayer2.b, 0.10)
+            color: isActive
+                ? (SettingsTheme.isWuWa ? Qt.rgba(0, 0, 0, 0.12) : Qt.rgba(1, 1, 1, 0.18))
+                : (SettingsTheme.isWuWa ? Qt.rgba(243/255, 219/255, 172/255, 0.08) : Qt.rgba(Appearance.colors.colOnLayer2.r, Appearance.colors.colOnLayer2.g, Appearance.colors.colOnLayer2.b, 0.10))
 
             Behavior on color {
                 animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
@@ -124,7 +130,9 @@ Item {
                 text: root.iconName
                 iconSize: 20
                 fill: isActive ? 1 : 0
-                color: isActive ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer2
+                color: isActive
+                    ? (SettingsTheme.isWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary)
+                    : (SettingsTheme.isWuWa ? (mouseArea.containsMouse ? SettingsTheme.colTextPrimary : SettingsTheme.colTextSecondary) : Appearance.colors.colOnLayer2)
 
                 Behavior on color {
                     animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
@@ -144,7 +152,9 @@ Item {
             elide: Text.ElideRight
             font.pixelSize: Appearance.font.pixelSize.small
             font.weight: isActive ? Font.DemiBold : Font.Normal
-            color: isActive ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer2
+            color: isActive
+                ? (SettingsTheme.isWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary)
+                : (SettingsTheme.isWuWa ? (mouseArea.containsMouse ? SettingsTheme.colTextPrimary : SettingsTheme.colTextSecondary) : Appearance.colors.colOnLayer2)
 
             Behavior on color {
                 animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)

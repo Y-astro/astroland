@@ -23,7 +23,11 @@ Rectangle {
         }
     }
 
-    color: isActive ? (userHeaderMouse.pressed ? Appearance.colors.colPrimaryActive : userHeaderMouse.containsMouse ? Appearance.colors.colPrimaryHover : Appearance.colors.colPrimary) : (userHeaderMouse.pressed ? Appearance.colors.colLayer2Active : userHeaderMouse.containsMouse ? Appearance.colors.colLayer2Hover : Appearance.colors.colLayer2)
+    color: isActive
+        ? (userHeaderMouse.pressed ? (SettingsTheme.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colPrimaryActive) : userHeaderMouse.containsMouse ? (SettingsTheme.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colPrimaryHover) : (SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary))
+        : (userHeaderMouse.pressed ? (SettingsTheme.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colLayer2Active) : userHeaderMouse.containsMouse ? (SettingsTheme.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colLayer2Hover) : (SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colLayer2))
+    border.width: SettingsTheme.isWuWa ? 1 : 0
+    border.color: SettingsTheme.isWuWa ? (userHeaderMouse.containsMouse ? SettingsTheme.colBorderFocused : SettingsTheme.colCardBorder) : "transparent"
 
     Behavior on color {
         animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
@@ -66,8 +70,10 @@ Rectangle {
         StyledText {
             text: userHeaderBtn._customGreeting !== "" ? userHeaderBtn._customGreeting : Translation.tr("Hello,")
             font.pixelSize: Appearance.font.pixelSize.smaller
-            color: userHeaderBtn.isActive ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
-            opacity: userHeaderBtn.isActive ? 0.8 : 0.65
+            color: userHeaderBtn.isActive
+                ? (SettingsTheme.isWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary)
+                : (SettingsTheme.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer1)
+            opacity: userHeaderBtn.isActive ? 0.85 : (SettingsTheme.isWuWa ? 0.90 : 0.65)
             Layout.fillWidth: true
             elide: Text.ElideRight
         }
@@ -75,7 +81,9 @@ Rectangle {
             text: userHeaderBtn._customName !== "" ? userHeaderBtn._customName : SystemInfo.username.toUpperCase()
             font.pixelSize: Appearance.font.pixelSize.small
             font.weight: Font.DemiBold
-            color: userHeaderBtn.isActive ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
+            color: userHeaderBtn.isActive
+                ? (SettingsTheme.isWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary)
+                : (SettingsTheme.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1)
             Layout.fillWidth: true
             elide: Text.ElideRight
         }

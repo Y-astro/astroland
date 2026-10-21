@@ -19,6 +19,7 @@ import "modules/settings"
 
 PanelWindow {
     id: root
+    readonly property bool isSettingsWindow: true
     property string firstRunFilePath: CF.FileUtils.trimFileProtocol(`${Directories.state}/user/first_run.txt`)
     property string firstRunFileContent: "This file is just here to confirm you've been greeted :>"
     property real contentPadding: 8
@@ -512,6 +513,7 @@ PanelWindow {
                 Qt.callLater(() => root.ensurePageReady());
             } else {
                 root.pendingSearchText = "";
+                settingsSearchBar.clear();
                 SearchRegistry.setSettingsActive(false);
                 if (!GlobalStates.settingsSuspendedForScreenshot)
                     root.endNavigationSession();
@@ -676,14 +678,15 @@ PanelWindow {
     // ── Centered Settings Dialog Card ─────────────────────────────────────
     Rectangle {
         id: settingsDialog
+        readonly property bool isSettingsScope: true
         z: 1
         anchors.centerIn: parent
         width: Math.min(parent.width - 64, 1100)
         height: Math.min(parent.height - 64, 750)
-        color: Appearance.colors.colLayer0
+        color: SettingsTheme.colWindowShell
         radius: Appearance.windowRounding
         border.width: 1
-        border.color: Appearance.colors.colLayer0Border
+        border.color: SettingsTheme.colWindowBorder
 
         opacity: GlobalStates.settingsOpen ? 1 : 0
         scale: GlobalStates.settingsOpen ? 1 : 0.96
@@ -819,7 +822,8 @@ PanelWindow {
             // into an offscreen texture and redraws it on every change.
             Item { // Content container
                 id: contentViewport
-                readonly property bool opaqueBackground: Appearance.colors.colLayer0.a >= 1
+                readonly property bool isSettingsScope: true
+                readonly property bool opaqueBackground: SettingsTheme.canvasOpaque
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -831,6 +835,15 @@ PanelWindow {
                         height: contentViewport.height
                         radius: Appearance.windowRounding
                     }
+                }
+
+                Rectangle {
+                    id: canvasBg
+                    anchors.fill: parent
+                    z: -1
+                    visible: SettingsTheme.isWuWa
+                    radius: Appearance.windowRounding
+                    color: SettingsTheme.colCanvasBg
                 }
 
                 Loader {
@@ -1061,7 +1074,7 @@ PanelWindow {
                     z: 2
                     visible: contentViewport.opaqueBackground
                     radius: Appearance.windowRounding
-                    color: Appearance.colors.colLayer0
+                    color: SettingsTheme.colCanvasCutout
                 }
             } // closes Item (Content container)
         } // closes RowLayout (Window content)

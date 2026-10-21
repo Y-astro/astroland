@@ -18,13 +18,32 @@ Rectangle {
     property bool collapsible: false
     property bool expanded: true
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     Layout.fillWidth: true
     implicitHeight: mainLayout.implicitHeight + 16
 
     // Hover color when collapsible — entire header is the button
     color: headerMouseArea.containsMouse && collapsible
-        ? Appearance.colors.colLayer2Hover
-        : Appearance.colors.colLayer2
+        ? (applyWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer2Hover)
+        : (applyWuWa ? SettingsTheme.colRowBg : Appearance.colors.colLayer2)
+    border.width: applyWuWa ? SettingsTheme.rowBorderWidth : 0
+    border.color: applyWuWa ? SettingsTheme.colRowBorder : "transparent"
 
     Behavior on color {
         ColorAnimation { duration: 150 }
@@ -116,7 +135,7 @@ Rectangle {
                 sourceComponent: MaterialSymbol {
                     text: root.icon
                     iconSize: Appearance.font.pixelSize.large
-                    color: Appearance.colors.colOnLayer2
+                    color: applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnLayer2
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -127,7 +146,7 @@ Rectangle {
                 text: root.title
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
-                color: Appearance.colors.colOnLayer2
+                color: applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer2
             }
 
             Loader {

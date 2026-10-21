@@ -38,6 +38,22 @@ RowLayout {
         searchInput.forceActiveFocus();
     }
 
+    function clear() {
+        if (searchInput.text.length > 0) {
+            searchInput.text = "";
+            root.textChanged("");
+        }
+    }
+
+    Connections {
+        target: GlobalStates
+        function onSettingsOpenChanged() {
+            if (!GlobalStates.settingsOpen) {
+                root.clear();
+            }
+        }
+    }
+
     // Shake animation targets search input
     SequentialAnimation {
         id: noMoreResultsAnim
@@ -85,12 +101,18 @@ RowLayout {
 
         color: {
             if (hasText) {
-                return searchIconMouseArea.containsMouse ? Appearance.colors.colPrimaryHover : Appearance.colors.colPrimary;
+                return searchIconMouseArea.containsMouse
+                    ? (SettingsTheme.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colPrimaryHover)
+                    : (SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary);
             } else {
-                return searchIconMouseArea.containsMouse ? Appearance.colors.colLayer2Hover : Appearance.colors.colLayer2;
+                return searchIconMouseArea.containsMouse
+                    ? (SettingsTheme.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colLayer2Hover)
+                    : (SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colLayer2);
             }
         }
-        colSymbol: hasText ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer2
+        colSymbol: hasText
+            ? (SettingsTheme.isWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary)
+            : (SettingsTheme.isWuWa ? (searchIconMouseArea.containsMouse ? SettingsTheme.colTextPrimary : SettingsTheme.colTextSecondary) : Appearance.colors.colOnLayer2)
 
         Behavior on color {
             ColorAnimation {
@@ -167,7 +189,9 @@ RowLayout {
             animateChange: true
             anchors.centerIn: parent
             text: (root.lastSearchIndex % Math.max(root.resultsCount, 1) + 1) + "/" + root.resultsCount
-            color: searchIconShape.hasText ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer2
+            color: searchIconShape.hasText
+                ? (SettingsTheme.isWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary)
+                : (SettingsTheme.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer2)
             font.pixelSize: Appearance.font.pixelSize.smaller
             font.weight: Font.DemiBold
             rotation: 360 - searchIconShape.rotation
@@ -195,7 +219,11 @@ RowLayout {
         Layout.fillWidth: true
         Layout.preferredHeight: 56
         Layout.fillHeight: true
-        colBackground: Appearance.colors.colLayer1
+        colBackground: SettingsTheme.isWuWa
+            ? (activeFocus ? SettingsTheme.colSearchFieldFocused : SettingsTheme.colSearchField)
+            : Appearance.colors.colLayer1
+        color: SettingsTheme.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
+        placeholderTextColor: SettingsTheme.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
         font.pixelSize: Appearance.font.pixelSize.normal
         placeholderText: Translation.tr("Search all settings..")
         rightPadding: (searchActionBtn.hasText || searchActionBtn.width > 0.5) ? (searchActionBtn.width + 16) : 16
@@ -247,7 +275,7 @@ RowLayout {
             width: hasText ? 40 : 0
             height: 40
             radius: Appearance.rounding.full
-            color: Appearance.colors.colPrimary
+            color: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
             opacity: hasText ? 1.0 : 0.0
 
             scale: {
@@ -288,7 +316,7 @@ RowLayout {
                 anchors.centerIn: parent
                 text: "arrow_forward"
                 iconSize: 18
-                color: Appearance.colors.colOnPrimary
+                color: SettingsTheme.isWuWa ? SettingsTheme.colNavOnActive : Appearance.colors.colOnPrimary
             }
 
             MouseArea {
@@ -314,9 +342,9 @@ RowLayout {
         Layout.preferredHeight: 56
         Layout.fillHeight: true
 
-        colBackground: Appearance.colors.colLayer2
-        colBackgroundHover: Appearance.colors.colLayer2Hover
-        colRipple: Appearance.colors.colLayer2Active
+        colBackground: SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colLayer2
+        colBackgroundHover: SettingsTheme.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colLayer2Hover
+        colRipple: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer2Active
 
         scale: closeBtn.down ? 0.92 : (closeBtn.hovered ? 1.06 : 1.0)
         Behavior on scale {
@@ -333,7 +361,9 @@ RowLayout {
             horizontalAlignment: Text.AlignHCenter
             text: "close"
             iconSize: 20
-            color: Appearance.colors.colOnLayer2
+            color: SettingsTheme.isWuWa
+                ? (closeBtn.hovered ? SettingsTheme.colTextPrimary : SettingsTheme.colTextSecondary)
+                : Appearance.colors.colOnLayer2
         }
     }
 }

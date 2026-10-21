@@ -27,6 +27,23 @@ ColumnLayout {
     property bool expanded: true
     readonly property bool performanceMode: Config.options?.appearance?.settingsPerformanceMode ?? false
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     function navigateToPage(subPageOverride) {
         if (!root.pageId || root.pageId === "")
             return;
@@ -124,9 +141,9 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: cardInnerLayout.implicitHeight + 32
         radius: Appearance.rounding.normal
-        color: root.customBackgroundColor !== undefined ? root.customBackgroundColor : Appearance.colors.colLayer0
-        border.width: root.customBackgroundColor !== undefined ? 0 : 1
-        border.color: Appearance.colors.colLayer0Border
+        color: root.customBackgroundColor !== undefined ? root.customBackgroundColor : (root.applyWuWa ? SettingsTheme.colCardBg : Appearance.colors.colLayer0)
+        border.width: root.customBackgroundColor !== undefined ? 0 : (root.applyWuWa ? SettingsTheme.cardBorderWidth : 1)
+        border.color: root.applyWuWa ? SettingsTheme.colCardBorder : Appearance.colors.colLayer0Border
 
         Behavior on color {
             ColorAnimation { duration: 280; easing.type: Easing.InOutQuad }
@@ -170,7 +187,9 @@ ColumnLayout {
                         visible: root.icon && root.icon.length > 0
                         text: root.icon
                         iconSize: Appearance.font.pixelSize.huge
-                        color: headerMouseArea.containsMouse && root.pageId ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1
+                        color: headerMouseArea.containsMouse && root.pageId
+                            ? (root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary)
+                            : (root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnLayer1)
                         opacity: 1 - highlightOverlay.opacity
                         Layout.alignment: Qt.AlignVCenter
                     }
@@ -181,7 +200,9 @@ ColumnLayout {
                         font.pixelSize: Appearance.font.pixelSize.huge
                         font.weight: Font.DemiBold
                         font.variableAxes: Appearance.font.variableAxes.titleRounded
-                        color: headerMouseArea.containsMouse && root.pageId ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1
+                        color: headerMouseArea.containsMouse && root.pageId
+                            ? (root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary)
+                            : (root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1)
                         Layout.fillWidth: true
                         wrapMode: Text.Wrap
 
@@ -194,7 +215,7 @@ ColumnLayout {
                         visible: root.collapsible
                         text: "keyboard_arrow_down"
                         iconSize: Appearance.font.pixelSize.large
-                        color: Appearance.colors.colOnLayer1
+                        color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer1
                         opacity: headerMouseArea.containsMouse ? 1.0 : 0.6
                         Layout.alignment: Qt.AlignVCenter
                         rotation: root.expanded ? 0 : -90

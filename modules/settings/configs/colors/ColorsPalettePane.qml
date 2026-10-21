@@ -68,7 +68,9 @@ Rectangle {
         return root.overrideCount > 0 ? Translation.tr("%1 · customized").arg(label) : label;
     }
 
-    color: Appearance.colors.colLayer1
+    color: SettingsTheme.isWuWa ? SettingsTheme.colCardBg : Appearance.colors.colLayer1
+    border.width: SettingsTheme.isWuWa ? SettingsTheme.cardBorderWidth : 0
+    border.color: SettingsTheme.isWuWa ? SettingsTheme.colCardBorder : "transparent"
     radius: Appearance.rounding.verylarge
     implicitHeight: content.implicitHeight + root.padding * 2
 
@@ -99,8 +101,8 @@ Rectangle {
                     padding: 12
                     fill: 1
                     shape: MaterialShape.Shape.Cookie9Sided
-                    color: Appearance.colors.colPrimaryContainer
-                    colSymbol: Appearance.colors.colOnPrimaryContainer
+                    color: SettingsTheme.isWuWa ? SettingsTheme.colItemBg : Appearance.colors.colPrimaryContainer
+                    colSymbol: SettingsTheme.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnPrimaryContainer
                 }
 
                 ColumnLayout {
@@ -113,7 +115,7 @@ Rectangle {
                         font.family: Appearance.font.family.title
                         font.variableAxes: Appearance.font.variableAxes.titleRounded
                         font.pixelSize: Appearance.font.pixelSize.huge
-                        color: Appearance.colors.colOnLayer1
+                        color: SettingsTheme.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
                         elide: Text.ElideRight
                     }
 
@@ -123,7 +125,7 @@ Rectangle {
                             ? root.currentName
                             : Translation.tr("%1 · %2").arg(root.currentName).arg(root.currentSourceLabel)
                         font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colSubtext
+                        color: SettingsTheme.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
                         elide: Text.ElideRight
                     }
                 }
