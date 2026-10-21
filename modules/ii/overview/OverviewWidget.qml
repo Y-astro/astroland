@@ -78,7 +78,7 @@ Item {
 
     StyledRectangularShadow {
         target: overviewBackground
-        visible: !root.hosted
+        visible: !root.hosted && !ResonanceTheme.enabled
     }
     Rectangle { // Background
         id: overviewBackground
@@ -92,7 +92,7 @@ Item {
         color: root.hosted
             ? "transparent"
             : (ResonanceTheme.enabled
-                ? ResonanceTheme.alpha(ResonanceTheme.colTealInkDark, Math.min(0.88, 0.78 + 0.08 * ResonanceTheme.intensity))
+                ? ResonanceTheme.bgGlassSearchDense
                 : Appearance.colors.colBackgroundSurfaceContainer)
         border.width: (ResonanceTheme.enabled && !root.hosted) ? 1 : 0
         border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
