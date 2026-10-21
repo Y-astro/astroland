@@ -21,6 +21,23 @@ RippleButton {
 
     signal openSubPage
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     Layout.fillWidth: true
     // A settings row is one tap target. Floor it at the Material minimum on a
     // touch-first family rather than fixing the height, so rows that are already
@@ -54,12 +71,14 @@ RippleButton {
         }
     }
 
-    property color normalColor: Appearance.colors.colLayer2
-    property color highlightColor: Appearance.colors.colSecondaryContainer
+    property color normalColor: applyWuWa ? SettingsTheme.colRowBg : Appearance.colors.colLayer2
+    property color highlightColor: applyWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.25) : Appearance.colors.colSecondaryContainer
 
     colBackground: normalColor
-    colBackgroundHover: Appearance.colors.colLayer2Hover
-    colRipple: Appearance.colors.colLayer2Active
+    colBackgroundHover: applyWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer2Hover
+    colRipple: applyWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.20) : Appearance.colors.colLayer2Active
+    borderWidth: applyWuWa ? SettingsTheme.rowBorderWidth : 0
+    borderColor: applyWuWa ? SettingsTheme.colRowBorder : "transparent"
 
     isFirst: root.forceUniformRadius || (root.groupPosition?.isFirst ?? true)
     isLast: root.forceUniformRadius || (root.groupPosition?.isLast ?? true)
@@ -103,8 +122,8 @@ RippleButton {
                     iconSize: 18
                     padding: 6
                     fill: root.checked ? 1 : 0
-                    color: root.checked ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer3
-                    colSymbol: root.checked ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer3
+                    color: root.checked ? (root.applyWuWa ? SettingsTheme.colControlIconActiveBg : Appearance.colors.colPrimaryContainer) : (root.applyWuWa ? SettingsTheme.colControlIconBg : Appearance.colors.colLayer3)
+                    colSymbol: root.checked ? (root.applyWuWa ? SettingsTheme.colControlIconOnActive : Appearance.colors.colOnPrimaryContainer) : (root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer3)
                 }
             }
 
@@ -118,7 +137,7 @@ RippleButton {
                     Layout.fillWidth: true
                     text: root.text
                     font.pixelSize: root.font.pixelSize
-                    color: Appearance.colors.colOnLayer2
+                    color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer2
                     wrapMode: Text.WordWrap
                 }
 
@@ -127,7 +146,7 @@ RippleButton {
                     visible: root.description.length > 0
                     text: root.description
                     font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colSubtext
+                    color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
                     wrapMode: Text.WordWrap
                 }
             }
@@ -147,8 +166,8 @@ RippleButton {
                 Layout.alignment: Qt.AlignVCenter
                 Layout.leftMargin: 2
                 Layout.rightMargin: 2
-                color: Appearance.colors.colOutline
-                opacity: 0.75
+                color: root.applyWuWa ? SettingsTheme.colRowBorder : Appearance.colors.colOutline
+                opacity: root.applyWuWa ? 1.0 : 0.75
             }
 
             Item {

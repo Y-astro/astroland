@@ -7,6 +7,23 @@ import QtQuick.Controls
 RowLayout {
     id: root
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     property string text: ""
     property string description: ""
     property string buttonIcon: ""
@@ -36,7 +53,7 @@ RowLayout {
         StyledText {
             Layout.fillWidth: true
             text: root.text
-            color: Appearance.colors.colOnSecondaryContainer
+            color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnSecondaryContainer
             opacity: root.enabled ? 1 : 0.4
         }
         StyledText {
@@ -44,7 +61,7 @@ RowLayout {
             visible: root.description.length > 0
             text: root.description
             font.pixelSize: Appearance.font.pixelSize.smaller
-            color: Appearance.colors.colSubtext
+            color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
             wrapMode: Text.Wrap
             opacity: root.enabled ? 1 : 0.4
         }

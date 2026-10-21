@@ -28,6 +28,23 @@ RippleButton {
 
     signal openSubPage()
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     Layout.fillWidth: true
     // A settings row is one tap target. Floor it at the Material minimum on a
     // touch-first family rather than fixing the height, so rows that are already
@@ -56,12 +73,14 @@ RippleButton {
         }
     }
 
-    property color normalColor: Appearance.colors.colLayer2
-    property color highlightColor: Appearance.colors.colSecondaryContainer
+    property color normalColor: applyWuWa ? SettingsTheme.colRowBg : Appearance.colors.colLayer2
+    property color highlightColor: applyWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.25) : Appearance.colors.colSecondaryContainer
 
     colBackground: normalColor
-    colBackgroundHover: Appearance.colors.colLayer2Hover
-    colRipple: Appearance.colors.colLayer2Active
+    colBackgroundHover: applyWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer2Hover
+    colRipple: applyWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.20) : Appearance.colors.colLayer2Active
+    borderWidth: applyWuWa ? SettingsTheme.rowBorderWidth : 0
+    borderColor: applyWuWa ? SettingsTheme.colRowBorder : "transparent"
 
     readonly property string effectiveIcon: (root.buttonIcon && root.buttonIcon.length > 0) ? root.buttonIcon : (root.icon?.name ?? "")
 
@@ -99,8 +118,8 @@ RippleButton {
                     iconSize: root.iconSize
                     padding: 6
                     fill: 0
-                    color: Appearance.colors.colLayer3
-                    colSymbol: Appearance.colors.colOnLayer3
+                    color: root.applyWuWa ? SettingsTheme.colControlIconBg : Appearance.colors.colLayer3
+                    colSymbol: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer3
                 }
             }
 
@@ -114,7 +133,7 @@ RippleButton {
                     Layout.fillWidth: true
                     text: root.title.length > 0 ? root.title : root.text
                     font.pixelSize: Appearance.font.pixelSize.normal
-                    color: Appearance.colors.colOnLayer2
+                    color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer2
                     wrapMode: Text.WordWrap
                 }
 
@@ -123,7 +142,7 @@ RippleButton {
                     visible: root.description.length > 0
                     text: root.description
                     font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colSubtext
+                    color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
                     wrapMode: Text.WordWrap
                 }
 
@@ -132,7 +151,7 @@ RippleButton {
                     visible: root.summary.length > 0
                     text: root.summary
                     font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colPrimary
+                    color: root.applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
                     wrapMode: Text.WordWrap
                     opacity: 0.9
                 }
@@ -181,14 +200,14 @@ RippleButton {
                 implicitHeight: 22
                 implicitWidth: badgeLabel.implicitWidth + 14
                 radius: Appearance.rounding.full
-                color: Appearance.colors.colSecondaryContainer
+                color: root.applyWuWa ? SettingsTheme.colControlBg : Appearance.colors.colSecondaryContainer
 
                 StyledText {
                     id: badgeLabel
                     anchors.centerIn: parent
                     text: root.badgeText
                     font.pixelSize: Appearance.font.pixelSize.smallest
-                    color: Appearance.colors.colOnSecondaryContainer
+                    color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnSecondaryContainer
                 }
             }
 
@@ -197,7 +216,7 @@ RippleButton {
                 Layout.alignment: Qt.AlignVCenter
                 text: "arrow_forward"
                 iconSize: Appearance.font.pixelSize.normal
-                color: Appearance.colors.colOnLayer2
+                color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer2
                 opacity: root.enabled ? 0.65 : 0.3
             }
         }

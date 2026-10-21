@@ -38,9 +38,26 @@ Flow {
 
     Layout.preferredWidth: calculatedWidth
 
-    property color colBackground: Appearance.colors.colSecondaryContainer
-    property color colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-    property color colBackgroundActive: Appearance.colors.colSecondaryContainerActive
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
+    property color colBackground: applyWuWa ? SettingsTheme.colControlBg : Appearance.colors.colSecondaryContainer
+    property color colBackgroundHover: applyWuWa ? SettingsTheme.colControlBgHover : Appearance.colors.colSecondaryContainerHover
+    property color colBackgroundActive: applyWuWa ? SettingsTheme.colControlBgActive : Appearance.colors.colSecondaryContainerActive
 
     spacing: 2
     property list<var> options: [

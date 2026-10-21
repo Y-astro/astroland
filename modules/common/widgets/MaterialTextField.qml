@@ -11,6 +11,23 @@ import QtQuick.Controls
 TextField {
     id: root
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     // Set to show the M3 error state (red outline + red caret/selection accent)
     property bool error: false
 
@@ -26,16 +43,17 @@ TextField {
         : 0
 
     Material.theme: Material.System
-    Material.accent: root.error ? Appearance.m3colors.m3error : Appearance.m3colors.m3primary
-    Material.primary: Appearance.m3colors.m3primary
-    Material.background: Appearance.m3colors.m3surface
-    Material.foreground: Appearance.m3colors.m3onSurface
+    Material.accent: root.error ? Appearance.m3colors.m3error : (applyWuWa ? SettingsTheme.colAccent : Appearance.m3colors.m3primary)
+    Material.primary: applyWuWa ? SettingsTheme.colAccent : Appearance.m3colors.m3primary
+    Material.background: applyWuWa ? SettingsTheme.colControlBg : Appearance.m3colors.m3surface
+    Material.foreground: applyWuWa ? SettingsTheme.colTextPrimary : Appearance.m3colors.m3onSurface
     Material.containerStyle: Material.Outlined
     renderType: Text.QtRendering
 
-    selectedTextColor: Appearance.m3colors.m3onSecondaryContainer
-    selectionColor: Appearance.colors.colSecondaryContainer
-    placeholderTextColor: Appearance.m3colors.m3outline
+    color: applyWuWa ? SettingsTheme.colTextPrimary : Appearance.m3colors.m3onSurface
+    selectedTextColor: applyWuWa ? SettingsTheme.colTealInkDark : Appearance.m3colors.m3onSecondaryContainer
+    selectionColor: applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colSecondaryContainer
+    placeholderTextColor: applyWuWa ? SettingsTheme.colTextSecondary : Appearance.m3colors.m3outline
     clip: true
 
     font {
@@ -49,10 +67,9 @@ TextField {
     background: Rectangle {
         implicitHeight: 56
         radius: Appearance.rounding.normal
-        color: Appearance.m3colors.m3surface
+        color: root.applyWuWa ? SettingsTheme.colControlBg : Appearance.m3colors.m3surface
         border.width: root.activeFocus ? 2 : 1
-        border.color: root.error ? Appearance.m3colors.m3error : root.activeFocus ? Appearance.m3colors.m3primary :
-                       root.hovered ? Appearance.m3colors.m3outline : Appearance.m3colors.m3outlineVariant
+        border.color: root.error ? Appearance.m3colors.m3error : (root.applyWuWa ? (root.activeFocus ? SettingsTheme.colAccent : root.hovered ? ColorUtils.applyAlpha(SettingsTheme.colAntiqueGold, 0.35 * SettingsTheme.intensity) : SettingsTheme.colControlBorder) : (root.activeFocus ? Appearance.m3colors.m3primary : root.hovered ? Appearance.m3colors.m3outline : Appearance.m3colors.m3outlineVariant))
 
         Behavior on border.color {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)

@@ -18,7 +18,26 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: mainLayout.implicitHeight + 32
 
-    color: Appearance.colors.colLayer2
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
+    color: applyWuWa ? SettingsTheme.colRowBg : Appearance.colors.colLayer2
+    border.width: applyWuWa ? SettingsTheme.rowBorderWidth : 0
+    border.color: applyWuWa ? SettingsTheme.colRowBorder : "transparent"
 
     property Component rightAction: null
     /// A small pill after the label, for a word about the row. Takes no room while empty.
@@ -123,8 +142,8 @@ Rectangle {
                     shape: textFieldWidget.activeFocus ? MaterialShape.Shape.Cookie6Sided : MaterialShape.Shape.Circle
                     iconSize: 18
                     padding: 6
-                    color: textFieldWidget.activeFocus ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer3
-                    colSymbol: textFieldWidget.activeFocus ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer3
+                    color: textFieldWidget.activeFocus ? (root.applyWuWa ? SettingsTheme.colControlIconActiveBg : Appearance.colors.colPrimaryContainer) : (root.applyWuWa ? SettingsTheme.colControlIconBg : Appearance.colors.colLayer3)
+                    colSymbol: textFieldWidget.activeFocus ? (root.applyWuWa ? SettingsTheme.colControlIconOnActive : Appearance.colors.colOnPrimaryContainer) : (root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer3)
 
                     Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutQuart } }
                     Behavior on colSymbol { ColorAnimation { duration: 250; easing.type: Easing.OutQuart } }
@@ -135,7 +154,7 @@ Rectangle {
                 id: labelWidget
                 Layout.fillWidth: true
                 text: root.text
-                color: Appearance.colors.colOnLayer2
+                color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer2
                 opacity: root.enabled ? 1 : 0.4
             }
 
@@ -145,14 +164,14 @@ Rectangle {
                 implicitHeight: 22
                 implicitWidth: badgeLabel.implicitWidth + 14
                 radius: Appearance.rounding.full
-                color: Appearance.colors.colSecondaryContainer
+                color: root.applyWuWa ? SettingsTheme.colControlBg : Appearance.colors.colSecondaryContainer
 
                 StyledText {
                     id: badgeLabel
                     anchors.centerIn: parent
                     text: root.badgeText
                     font.pixelSize: Appearance.font.pixelSize.smallest
-                    color: Appearance.colors.colOnSecondaryContainer
+                    color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnSecondaryContainer
                 }
             }
             
@@ -162,7 +181,7 @@ Rectangle {
                 text: "info"
                 iconSize: Appearance.font.pixelSize.large
                 
-                color: Appearance.colors.colSubtext
+                color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
                 MouseArea {
                     id: infoMouseArea
                     anchors.fill: parent

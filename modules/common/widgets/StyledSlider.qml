@@ -16,6 +16,23 @@ import Quickshell.Widgets
 Slider {
     id: root
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     property list<real> stopIndicatorValues: [1]
     property list<real> dividerValues: []
     enum Configuration {
@@ -31,11 +48,11 @@ Slider {
 
     property real handleDefaultWidth: 3
     property real handlePressedWidth: 1.5
-    property color highlightColor: Appearance.colors.colPrimary
-    property color trackColor: Appearance.colors.colSecondaryContainer
-    property color handleColor: Appearance.colors.colPrimary
-    property color dotColor: Appearance.m3colors.m3onSecondaryContainer
-    property color dotColorHighlighted: Appearance.m3colors.m3onPrimary
+    property color highlightColor: applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
+    property color trackColor: applyWuWa ? SettingsTheme.colTrackInactive : Appearance.colors.colSecondaryContainer
+    property color handleColor: applyWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
+    property color dotColor: applyWuWa ? SettingsTheme.colSliderDot : Appearance.m3colors.m3onSecondaryContainer
+    property color dotColorHighlighted: applyWuWa ? SettingsTheme.colSliderDotActive : Appearance.m3colors.m3onPrimary
     property real unsharpenRadius: Appearance.rounding.unsharpen
     property real trackWidth: configuration
     property real trackRadius: trackWidth >= StyledSlider.Configuration.XL ? 21

@@ -7,15 +7,33 @@ import QtQuick.Controls
  */
 Switch {
     id: root
+
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     // The M3 default is oversized for a pointer, hence the 0.75. But this control is
     // dragged directly, not only tapped, so a finger needs the spec size back.
     property real sizeScale: PanelFamily.touchFirst ? 1.0 : 0.75
     implicitHeight: 32 * root.sizeScale
     implicitWidth: 52 * root.sizeScale
-    property color activeColor: Appearance?.colors.colPrimary ?? "#685496"
-    property color inactiveColor: Appearance?.colors.colSurfaceContainerHighest ?? "#45464F"
-    property color activeThumbColor: Appearance.m3colors.m3onPrimary
-    property color inactiveThumbColor: Appearance.m3colors.m3outline
+    property color activeColor: applyWuWa ? SettingsTheme.colAccent : (Appearance?.colors.colPrimary ?? "#685496")
+    property color inactiveColor: applyWuWa ? SettingsTheme.colTrackInactive : (Appearance?.colors.colSurfaceContainerHighest ?? "#45464F")
+    property color activeThumbColor: applyWuWa ? SettingsTheme.colThumbActive : Appearance.m3colors.m3onPrimary
+    property color inactiveThumbColor: applyWuWa ? SettingsTheme.colThumbInactive : Appearance.m3colors.m3outline
 
     property bool isPressed: root.pressed || root.down
     scale: (isPressed && enabled) ? 0.95 : 1.0
@@ -33,9 +51,14 @@ Switch {
         width: parent.width
         height: parent.height
         radius: Appearance?.rounding.full ?? 9999
-        color: root.checked ? root.activeColor : root.inactiveColor
+        color: root.checked ? root.activeColor : (root.applyWuWa && root.hovered ? Qt.lighter(root.inactiveColor, 1.25) : root.inactiveColor)
+        border.width: root.applyWuWa ? 1 : 0
+        border.color: root.applyWuWa ? (root.activeFocus ? SettingsTheme.colBorderFocused : (root.checked ? root.activeColor : SettingsTheme.colTrackBorder)) : "transparent"
 
         Behavior on color {
+            animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+        }
+        Behavior on border.color {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
         }
     }

@@ -15,6 +15,23 @@ Rectangle {
     /// A small pill after the label, for a word about the row. Takes no room while empty.
     property string badgeText: ""
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     Layout.fillWidth: true
     // A settings row is one tap target. Floor it at the Material minimum on a
     // touch-first family rather than fixing the height, so rows that are already
@@ -22,7 +39,9 @@ Rectangle {
     implicitHeight: Math.max(rowLayout.implicitHeight + 32,
         PanelFamily.touchFirst ? Appearance.sizes.minimumTouchTarget + 12 : 0)
 
-    color: Appearance.colors.colLayer2
+    color: applyWuWa ? SettingsTheme.colRowBg : Appearance.colors.colLayer2
+    border.width: applyWuWa ? SettingsTheme.rowBorderWidth : 0
+    border.color: applyWuWa ? SettingsTheme.colRowBorder : "transparent"
 
     HoverHandler {
         id: hoverHandler
@@ -122,8 +141,8 @@ Rectangle {
                 shape: isActive ? MaterialShape.Shape.Cookie6Sided : MaterialShape.Shape.Circle
                 iconSize: 18
                 padding: 6
-                color: isActive ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer3
-                colSymbol: isActive ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer3
+                color: isActive ? (root.applyWuWa ? SettingsTheme.colControlIconActiveBg : Appearance.colors.colPrimaryContainer) : (root.applyWuWa ? SettingsTheme.colControlIconBg : Appearance.colors.colLayer3)
+                colSymbol: isActive ? (root.applyWuWa ? SettingsTheme.colControlIconOnActive : Appearance.colors.colOnPrimaryContainer) : (root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer3)
 
                 Behavior on color {
                     ColorAnimation {
@@ -144,7 +163,7 @@ Rectangle {
             id: labelWidget
             Layout.fillWidth: true
             text: root.text
-            color: Appearance.colors.colOnLayer2
+            color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer2
             opacity: root.enabled ? 1 : 0.4
         }
 
@@ -154,14 +173,14 @@ Rectangle {
             implicitHeight: 22
             implicitWidth: badgeLabel.implicitWidth + 14
             radius: Appearance.rounding.full
-            color: Appearance.colors.colSecondaryContainer
+            color: root.applyWuWa ? SettingsTheme.colControlBg : Appearance.colors.colSecondaryContainer
 
             StyledText {
                 id: badgeLabel
                 anchors.centerIn: parent
                 text: root.badgeText
                 font.pixelSize: Appearance.font.pixelSize.smallest
-                color: Appearance.colors.colOnSecondaryContainer
+                color: root.applyWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnSecondaryContainer
             }
         }
 

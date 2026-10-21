@@ -35,7 +35,7 @@ Singleton {
     readonly property color colAntiqueGold: ResonanceTheme.colAntiqueGold // #C9A66E
     readonly property color colWarmIvory: ResonanceTheme.colWarmIvory     // #F3DBAC
     readonly property color colMistySage: ResonanceTheme.colMistySage     // #A5B8AF
-    readonly property color colMistySageDark: ResonanceTheme.colMistySageDark // #6E8279
+    readonly property color colMistySageDark: "#6E8279"                   // #6E8279
     readonly property real intensity: ResonanceTheme.intensity            // ~0.85
 
     // =========================================================================
@@ -176,4 +176,86 @@ Singleton {
     // Accent gold: #C9A66E
     readonly property color colAccent: isWuWa ? colAntiqueGold : Appearance.colors.colPrimary
     readonly property color colBorderFocused: isWuWa ? ColorUtils.applyAlpha(colAntiqueGold, 0.65 * intensity) : "transparent"
+
+    // =========================================================================
+    // REUSABLE CONTROLS & INTERACTION TOKENS (Switches, Sliders, Dropdowns, etc.)
+    // =========================================================================
+    // Switch & Slider Track
+    readonly property color colTrackInactive: isWuWa
+        ? ColorUtils.applyAlpha(colTealInkDark, 0.70)
+        : (Appearance?.colors.colSurfaceContainerHighest ?? "#45464F")
+
+    readonly property color colTrackBorder: isWuWa
+        ? ColorUtils.applyAlpha(colAntiqueGold, 0.20 * intensity)
+        : "transparent"
+
+    // Switch Thumb
+    readonly property color colThumbActive: isWuWa
+        ? colTealInkDark
+        : Appearance.m3colors.m3onPrimary
+
+    readonly property color colThumbInactive: isWuWa
+        ? colMistySageDark
+        : Appearance.m3colors.m3outline
+
+    // Slider Handle & Dots
+    readonly property color colSliderDot: isWuWa
+        ? ColorUtils.applyAlpha(colMistySage, 0.50)
+        : Appearance.m3colors.m3onSecondaryContainer
+
+    readonly property color colSliderDotActive: isWuWa
+        ? colTealInkDark
+        : Appearance.m3colors.m3onPrimary
+
+    // Dropdown & Selection Surfaces (Deep Teal)
+    readonly property color colControlBg: isWuWa
+        ? ColorUtils.applyAlpha(colTealInkDark, 0.60)
+        : Appearance.colors.colSecondaryContainer
+
+    readonly property color colControlBgHover: isWuWa
+        ? ColorUtils.applyAlpha("#203a34", 0.70)
+        : Appearance.colors.colSecondaryContainerHover
+
+    readonly property color colControlBgActive: isWuWa
+        ? ColorUtils.applyAlpha(colAntiqueGold, 0.25 * intensity)
+        : Appearance.colors.colSecondaryContainerActive
+
+    readonly property color colControlBorder: isWuWa
+        ? ColorUtils.applyAlpha(colAntiqueGold, 0.18 * intensity)
+        : "transparent"
+
+    // Selection Group / Option Buttons (Toggled = Gold, Untoggled = Deep Teal)
+    readonly property color colOptionSelected: isWuWa
+        ? colAntiqueGold
+        : Appearance.colors.colPrimary
+
+    readonly property color colOptionSelectedHover: isWuWa
+        ? Qt.lighter(colAntiqueGold, 1.08)
+        : Appearance.colors.colPrimaryHover
+
+    readonly property color colOptionOnSelected: isWuWa
+        ? colTealInkDark
+        : Appearance.colors.colOnPrimary
+
+    // Popup Menu Surface (Dropdown list)
+    readonly property color colPopupBg: isWuWa
+        ? ColorUtils.applyAlpha(colTealInkDark, 0.95)
+        : Appearance.m3colors.m3surfaceContainerHigh
+
+    readonly property color colPopupBorder: isWuWa
+        ? ColorUtils.applyAlpha(colAntiqueGold, 0.28 * intensity)
+        : "transparent"
+
+    // Control Icon Container / Badge
+    readonly property color colControlIconBg: isWuWa
+        ? ColorUtils.applyAlpha(colTealInkDark, 0.60)
+        : Appearance.colors.colLayer3
+
+    readonly property color colControlIconActiveBg: isWuWa
+        ? colAntiqueGold
+        : Appearance.colors.colPrimaryContainer
+
+    readonly property color colControlIconOnActive: isWuWa
+        ? colTealInkDark
+        : Appearance.colors.colOnPrimaryContainer
 }

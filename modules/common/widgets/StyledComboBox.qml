@@ -12,6 +12,23 @@ import qs.modules.common.functions
 ComboBox {
     id: root
 
+    readonly property bool inSettings: {
+        var win = root.QsWindow ? root.QsWindow.window : null;
+        if (win && win.isSettingsWindow)
+            return true;
+        var p = root.parent;
+        var depth = 0;
+        while (p && depth < 20) {
+            if (p.isSettingsScope || p.isSettingsWindow || p.inSettings)
+                return true;
+            p = p.parent;
+            depth++;
+        }
+        return false;
+    }
+    readonly property bool isSettingsScope: inSettings
+    readonly property bool applyWuWa: SettingsTheme.isWuWa && inSettings
+
     hoverEnabled: true
 
     property string buttonIcon: ""
@@ -28,9 +45,9 @@ ComboBox {
     property real bottomLeftRadius: buttonRadius
     property real bottomRightRadius: buttonRadius
 
-    property color colBackground: Appearance.colors.colSecondaryContainer
-    property color colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-    property color colBackgroundActive: Appearance.colors.colSecondaryContainerActive
+    property color colBackground: applyWuWa ? SettingsTheme.colControlBg : Appearance.colors.colSecondaryContainer
+    property color colBackgroundHover: applyWuWa ? SettingsTheme.colControlBgHover : Appearance.colors.colSecondaryContainerHover
+    property color colBackgroundActive: applyWuWa ? SettingsTheme.colControlBgActive : Appearance.colors.colSecondaryContainerActive
 
     opacity: root.enabled ? 1 : 0.4
     implicitHeight: 40
@@ -46,8 +63,13 @@ ComboBox {
         bottomLeftRadius: root.bottomLeftRadius
         bottomRightRadius: root.bottomRightRadius
         color: (root.down && !root.popup.visible) ? root.colBackgroundActive : root.hovered ? root.colBackgroundHover : root.colBackground
+        border.width: root.applyWuWa ? 1 : 0
+        border.color: root.applyWuWa ? (root.activeFocus || root.popup.visible ? SettingsTheme.colBorderFocused : SettingsTheme.colControlBorder) : "transparent"
 
         Behavior on color {
+            animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+        }
+        Behavior on border.color {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
         }
 
@@ -64,7 +86,7 @@ ComboBox {
         y: root.height / 2 - height / 2
         text: "keyboard_arrow_down"
         iconSize: Appearance.font.pixelSize.larger
-        color: Appearance.colors.colOnSecondaryContainer
+        color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnSecondaryContainer
 
         rotation: root.popup.visible ? 180 : 0
         Behavior on rotation {
@@ -100,7 +122,7 @@ ComboBox {
                         return root.buttonIcon;
                     }
                     iconSize: Appearance.font.pixelSize.larger
-                    color: Appearance.colors.colOnSecondaryContainer
+                    color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnSecondaryContainer
                 }
             }
 
@@ -126,7 +148,7 @@ ComboBox {
                 Layout.fillWidth: true
                 visible: !root.iconOnly
                 Layout.alignment: Qt.AlignVCenter
-                color: Appearance.colors.colOnSecondaryContainer
+                color: root.applyWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnSecondaryContainer
                 text: root.displayText
                 elide: Text.ElideRight
                 verticalAlignment: Text.AlignVCenter
@@ -145,17 +167,31 @@ ComboBox {
         required property var model
         required property int index
         property color color: {
-            if (root.currentIndex === itemDelegate.index) {
-                if (itemDelegate.down) return Appearance.colors.colSecondaryContainerActive;
-                if (itemDelegate.hovered) return Appearance.colors.colSecondaryContainerHover;
-                return Appearance.colors.colSecondaryContainer;
+            if (root.applyWuWa) {
+                if (root.currentIndex === itemDelegate.index) {
+                    if (itemDelegate.down) return Qt.darker(SettingsTheme.colOptionSelected, 1.15);
+                    if (itemDelegate.hovered) return Qt.lighter(SettingsTheme.colOptionSelected, 1.08);
+                    return SettingsTheme.colOptionSelected;
+                } else {
+                    if (itemDelegate.down) return ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.20);
+                    if (itemDelegate.hovered) return ColorUtils.applyAlpha(SettingsTheme.colRowHover, 0.70);
+                    return "transparent";
+                }
             } else {
-                if (itemDelegate.down) return Appearance.colors.colLayer3Active;
-                if (itemDelegate.hovered) return Appearance.colors.colLayer3Hover;
-                return ColorUtils.transparentize(Appearance.colors.colLayer3);
+                if (root.currentIndex === itemDelegate.index) {
+                    if (itemDelegate.down) return Appearance.colors.colSecondaryContainerActive;
+                    if (itemDelegate.hovered) return Appearance.colors.colSecondaryContainerHover;
+                    return Appearance.colors.colSecondaryContainer;
+                } else {
+                    if (itemDelegate.down) return Appearance.colors.colLayer3Active;
+                    if (itemDelegate.hovered) return Appearance.colors.colLayer3Hover;
+                    return ColorUtils.transparentize(Appearance.colors.colLayer3);
+                }
             }
         }
-        property color colText: (root.currentIndex === itemDelegate.index) ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer3
+        property color colText: root.applyWuWa
+            ? ((root.currentIndex === itemDelegate.index) ? SettingsTheme.colOptionOnSelected : SettingsTheme.colTextPrimary)
+            : ((root.currentIndex === itemDelegate.index) ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer3)
 
         background: Rectangle {
             anchors.fill: parent
@@ -319,7 +355,9 @@ ComboBox {
                 id: popupBackground
                 anchors.fill: parent
                 radius: Appearance.rounding.normal
-                color: Appearance.m3colors.m3surfaceContainerHigh
+                color: root.applyWuWa ? SettingsTheme.colPopupBg : Appearance.m3colors.m3surfaceContainerHigh
+                border.width: root.applyWuWa ? 1 : 0
+                border.color: root.applyWuWa ? SettingsTheme.colPopupBorder : "transparent"
             }
         }
 
