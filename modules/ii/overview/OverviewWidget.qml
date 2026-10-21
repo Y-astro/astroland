@@ -34,7 +34,7 @@ Item {
     property var windowAddresses: HyprlandData.addresses
     property var monitorData: HyprlandData.monitors.find(m => m.id === root.monitor?.id)
     property real scale: Config.options.overview.scale
-    property color activeBorderColor: Appearance.colors.colSecondary
+    property color activeBorderColor: ResonanceTheme.enabled ? ResonanceTheme.accentGold : Appearance.colors.colSecondary
 
     property real workspaceImplicitWidth: monitor ? ((monitorData?.transform % 2 === 1) ? 
         ((monitor.height - (monitorData?.reserved?.[0] ?? 0) - (monitorData?.reserved?.[2] ?? 0)) * root.scale / (monitor.scale || 1)) :
@@ -78,17 +78,24 @@ Item {
 
     StyledRectangularShadow {
         target: overviewBackground
+        visible: !root.hosted
     }
     Rectangle { // Background
         id: overviewBackground
-        property real padding: 10
+        property real padding: root.hosted ? 0 : 10
         anchors.fill: parent
-        anchors.margins: Appearance.sizes.elevationMargin
+        anchors.margins: root.hosted ? 0 : Appearance.sizes.elevationMargin
 
         implicitWidth: workspaceColumnLayout.implicitWidth + padding * 2
         implicitHeight: workspaceColumnLayout.implicitHeight + padding * 2
-        radius: root.largeWorkspaceRadius + padding
-        color: Appearance.colors.colBackgroundSurfaceContainer
+        radius: root.hosted ? 0 : (root.largeWorkspaceRadius + padding)
+        color: root.hosted
+            ? "transparent"
+            : (ResonanceTheme.enabled
+                ? ResonanceTheme.alpha(ResonanceTheme.colTealInkDark, Math.min(0.88, 0.78 + 0.08 * ResonanceTheme.intensity))
+                : Appearance.colors.colBackgroundSurfaceContainer)
+        border.width: (ResonanceTheme.enabled && !root.hosted) ? 1 : 0
+        border.color: ResonanceTheme.enabled ? ResonanceTheme.borderHairline : "transparent"
 
         Column { // Workspaces
             id: workspaceColumnLayout
@@ -111,6 +118,9 @@ Item {
                             required property int index
                             property int colIndex: index
                             property int workspaceValue: root.workspaceGroup * root.workspacesShown + getWsInCell(row.index, colIndex)
+                            readonly property bool isActiveWorkspace: workspaceValue === root.effectiveActiveWorkspaceId
+                            readonly property bool isHovered: workspaceArea.containsMouse && !hoveredWhileDragging
+
                             property color defaultWorkspaceColor: Appearance.colors.colSurfaceContainerLow
                             property color hoveredWorkspaceColor: ColorUtils.mix(defaultWorkspaceColor, Appearance.colors.colLayer1Hover, 0.1)
                             property color hoveredBorderColor: Appearance.colors.colLayer2Hover
@@ -118,7 +128,16 @@ Item {
 
                             implicitWidth: root.workspaceImplicitWidth
                             implicitHeight: root.workspaceImplicitHeight
-                            color: hoveredWhileDragging ? hoveredWorkspaceColor : defaultWorkspaceColor
+                            color: ResonanceTheme.enabled
+                                ? (hoveredWhileDragging
+                                    ? ResonanceTheme.alpha(ResonanceTheme.colAntiqueGold, 0.18 * ResonanceTheme.intensity)
+                                    : (isHovered
+                                        ? ColorUtils.mix(ResonanceTheme.alpha(ResonanceTheme.colTealInk, 0.40 * ResonanceTheme.intensity), ResonanceTheme.colAntiqueGold, 0.08)
+                                        : (isActiveWorkspace
+                                            ? ResonanceTheme.alpha(ResonanceTheme.colTealInk, 0.52 * ResonanceTheme.intensity)
+                                            : ResonanceTheme.alpha(ResonanceTheme.colTealInk, 0.38 * ResonanceTheme.intensity))))
+                                : (hoveredWhileDragging ? hoveredWorkspaceColor : defaultWorkspaceColor)
+
                             property bool workspaceAtLeft: colIndex === 0
                             property bool workspaceAtRight: colIndex === Config.options.overview.columns - 1
                             property bool workspaceAtTop: row.index === 0
@@ -127,8 +146,26 @@ Item {
                             topRightRadius: (workspaceAtRight && workspaceAtTop) ? root.largeWorkspaceRadius : root.smallWorkspaceRadius
                             bottomLeftRadius: (workspaceAtLeft && workspaceAtBottom) ? root.largeWorkspaceRadius : root.smallWorkspaceRadius
                             bottomRightRadius: (workspaceAtRight && workspaceAtBottom) ? root.largeWorkspaceRadius : root.smallWorkspaceRadius
-                            border.width: 2
-                            border.color: hoveredWhileDragging ? hoveredBorderColor : "transparent"
+
+                            border.width: ResonanceTheme.enabled
+                                ? (hoveredWhileDragging ? 1.5 : 1)
+                                : 2
+                            border.color: ResonanceTheme.enabled
+                                ? (hoveredWhileDragging
+                                    ? ResonanceTheme.accentGold
+                                    : (isHovered
+                                        ? ResonanceTheme.borderHairline
+                                        : (isActiveWorkspace
+                                            ? ResonanceTheme.alpha(ResonanceTheme.colAntiqueGold, 0.35 * ResonanceTheme.intensity)
+                                            : ResonanceTheme.borderSubtle)))
+                                : (hoveredWhileDragging ? hoveredBorderColor : "transparent")
+
+                            Behavior on color {
+                                animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+                            }
+                            Behavior on border.color {
+                                animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+                            }
 
                             StyledText {
                                 anchors.centerIn: parent
@@ -138,7 +175,9 @@ Item {
                                     weight: Font.DemiBold
                                     family: Appearance.font.family.expressive
                                 }
-                                color: ColorUtils.transparentize(Appearance.colors.colOnLayer1, 0.8)
+                                color: ResonanceTheme.enabled
+                                    ? ResonanceTheme.alpha(workspace.isActiveWorkspace ? ResonanceTheme.colWarmIvory : ResonanceTheme.colMistySage, (workspace.isActiveWorkspace ? 0.35 : 0.18) * ResonanceTheme.intensity)
+                                    : ColorUtils.transparentize(Appearance.colors.colOnLayer1, 0.8)
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
                             }
@@ -146,6 +185,7 @@ Item {
                             MouseArea {
                                 id: workspaceArea
                                 anchors.fill: parent
+                                hoverEnabled: true
                                 acceptedButtons: Qt.LeftButton
                                 onPressed: {
                                     if (root.draggingTargetWorkspace === -1) {
@@ -372,7 +412,7 @@ Item {
                 topRightRadius: (workspaceAtRight && workspaceAtTop) ? root.largeWorkspaceRadius : root.smallWorkspaceRadius
                 bottomLeftRadius: (workspaceAtLeft && workspaceAtBottom) ? root.largeWorkspaceRadius : root.smallWorkspaceRadius
                 bottomRightRadius: (workspaceAtRight && workspaceAtBottom) ? root.largeWorkspaceRadius : root.smallWorkspaceRadius
-                border.width: 2
+                border.width: ResonanceTheme.enabled ? 1.5 : 2
                 border.color: root.activeBorderColor
                 Behavior on x {
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
