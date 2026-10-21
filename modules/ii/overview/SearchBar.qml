@@ -239,7 +239,7 @@ RowLayout {
         readonly property bool clearActive: root.searchingText.length > 0
         readonly property bool clearArmed: clearActive && clearMa.containsMouse
 
-        colSymbol: clearArmed ? "transparent" : Appearance.colors.colOnSecondaryContainer
+        colSymbol: clearArmed ? "transparent" : (SearchTheme.isWuWa ? SearchTheme.colIcon : Appearance.colors.colOnSecondaryContainer)
         Behavior on colSymbol {
             enabled: !root.animationsDisabled
             ColorAnimation {
@@ -273,7 +273,7 @@ RowLayout {
             MaterialSymbol {
                 text: "close"
                 iconSize: searchIcon.iconSize
-                color: Appearance.colors.colOnSecondaryContainer
+                color: SearchTheme.isWuWa ? SearchTheme.colIcon : Appearance.colors.colOnSecondaryContainer
                 x: searchIcon.clearArmed ? (parent.width - width) / 2 : parent.width * 0.75
                 y: (parent.height - height) / 2
                 opacity: searchIcon.clearArmed ? 1.0 : 0.0
@@ -382,10 +382,15 @@ RowLayout {
         placeholderText: root.aiModeActive ? Translation.tr("Message the model — Esc to go back")
             : (root.activePanelOwnsInput ? (root.activePanel?.label ?? Translation.tr("Panel")) : Translation.tr("Search, calculate or run"))
 
+        colBackground: activeFocus ? SearchTheme.colSearchFieldFocused : SearchTheme.colSearchField
+        color: SearchTheme.colTextPrimary
+        selectedTextColor: SearchTheme.colSelectionText
+        selectionColor: SearchTheme.colSelection
+
         // Placeholder fades smoothly when text is entered or mode changes
         placeholderTextColor: (root.searchingText === "" && !root.clipboardMode)
-            ? Appearance.colors.colSubtext
-            : ColorUtils.transparentize(Appearance.colors.colSubtext)
+            ? SearchTheme.colTextSecondary
+            : ColorUtils.transparentize(SearchTheme.colTextSecondary)
 
         Behavior on placeholderTextColor {
             enabled: !root.animationsDisabled

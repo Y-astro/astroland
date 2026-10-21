@@ -54,19 +54,25 @@ Item {
                 implicitWidth: Appearance.sizes.elevationMargin * 4
                 implicitHeight: implicitWidth
                 buttonRadius: Appearance.rounding.full
+                colBackground: SearchTheme.isWuWa ? ResonanceTheme.bgGlassPopupCard : "transparent"
+                colBackgroundHover: SearchTheme.isWuWa ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer1Hover
+                colRipple: SearchTheme.isWuWa ? ResonanceTheme.accentGold : Appearance.colors.colLayer1Active
+                borderWidth: SearchTheme.cardBorderWidth
+                borderColor: SearchTheme.colCardBorder
                 onClicked: root.onBack()
 
                 MaterialSymbol {
                     anchors.centerIn: parent
                     text: "arrow_back"
                     iconSize: Appearance.font.pixelSize.large
+                    color: SearchTheme.colTextPrimary
                 }
             }
 
             MaterialSymbol {
                 text: root.icon
                 iconSize: Appearance.font.pixelSize.large
-                color: root.accent ? Appearance.colors.colPrimary : Appearance.colors.colOnSurface
+                color: root.accent ? SearchTheme.colAccent : SearchTheme.colTextPrimary
             }
 
             StyledText {
@@ -74,7 +80,7 @@ Item {
                 text: root.title
                 font.pixelSize: Appearance.font.pixelSize.large
                 font.weight: Font.DemiBold
-                color: Appearance.colors.colOnSurface
+                color: SearchTheme.colTextPrimary
             }
         }
 
@@ -99,7 +105,7 @@ Item {
                 visible: root.showStatus && root.statusText.length > 0
                 text: root.statusText
                 elide: Text.ElideRight
-                color: Appearance.colors.colOnSurfaceVariant
+                color: SearchTheme.colTextSecondary
                 font.pixelSize: Appearance.font.pixelSize.small
             }
 
@@ -120,8 +126,12 @@ Item {
                 visible: root.showKeyHintFooter
                 hints: root.primaryHint.label ? [root.primaryHint].concat(root.hints) : root.hints
                 showKeys: Config.options.search.appearance.showKeyHints
-                surface: root.accent ? Appearance.colors.colPrimaryContainer : Appearance.colors.colSurfaceContainerHigh
-                onSurface: root.accent ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSurface
+                surface: root.accent
+                    ? (SearchTheme.isWuWa ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colPrimaryContainer)
+                    : (SearchTheme.isWuWa ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colSurfaceContainerHigh)
+                onSurface: root.accent
+                    ? (SearchTheme.isWuWa ? ResonanceTheme.accentGold : Appearance.colors.colOnPrimaryContainer)
+                    : (SearchTheme.isWuWa ? ResonanceTheme.textPrimary : Appearance.colors.colOnSurface)
             }
         }
     }

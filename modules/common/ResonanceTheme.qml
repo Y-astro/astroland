@@ -99,6 +99,12 @@ Singleton {
     readonly property color bgGlassPopupCardElevated: ColorUtils.applyAlpha(colTealInk, 0.65 * root.intensity)
     readonly property color bgGlassPopupDivider: ColorUtils.applyAlpha(colMistySage, 0.18 * root.intensity)
 
+    // Search & Overview Surface (Continuous WuWa Frost Surface)
+    readonly property color bgGlassSearch: ColorUtils.applyAlpha(colTealInk, Math.min(0.88, 0.76 + 0.08 * root.intensity))
+    readonly property color bgGlassSearchDense: ColorUtils.applyAlpha(colTealInkDark, Math.min(0.94, 0.86 + 0.06 * root.intensity))
+    readonly property color borderSearchHairline: borderHairline
+    readonly property color borderSearchFocus: borderAccent
+
     // Borders & Hairlines
     readonly property color borderHairline: ColorUtils.applyAlpha(colAntiqueGold, 0.35 * root.intensity)
     readonly property color borderAccent: ColorUtils.applyAlpha(colAntiqueGold, 0.65 * root.intensity)

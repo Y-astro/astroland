@@ -1531,7 +1531,7 @@ Item {
         // `target.radius` read 0: a square shadow sat behind the pill and its
         // dark corners poked out past the rounded ones.
         radius: Math.max(searchWidgetContent.topLeftRadius, searchWidgetContent.bottomLeftRadius)
-        visible: !root.hostOwnsSurface && !Config.options.appearance.transparency.popups && !Config.options.appearance.transparency.enable
+        visible: !root.hostOwnsSurface && SearchTheme.showShadow
         opacity: root.shadowOpacity
         offset: Qt.vector2d(0.0, 0.0)
     }
@@ -1611,9 +1611,22 @@ Item {
         // older registry entries opted out individually, making the control
         // look broken for common prefixes such as Clipboard and Translator.
         color: root.hostOwnsSurface ? "transparent"
-             : Appearance.colors.colBackgroundSurfaceContainer
+             : (root.activePanelUsesHost ? SearchTheme.colContainerDense : SearchTheme.colContainer)
+        border.width: root.hostOwnsSurface ? 0 : SearchTheme.borderWidth
+        border.color: (searchBar.searchInput.activeFocus && SearchTheme.isWuWa)
+            ? SearchTheme.colBorderFocused
+            : SearchTheme.colBorder
 
         Behavior on color {
+            enabled: !root.animationsDisabled
+            ColorAnimation {
+                duration: Appearance.animation.elementMoveFast.duration
+                easing.type: Appearance.animation.elementMoveFast.type
+                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+            }
+        }
+
+        Behavior on border.color {
             enabled: !root.animationsDisabled
             ColorAnimation {
                 duration: Appearance.animation.elementMoveFast.duration
@@ -3084,7 +3097,9 @@ Item {
                             topRightRadius: topLeftRadius
                             bottomLeftRadius: closes ? radius2 : 0
                             bottomRightRadius: bottomLeftRadius
-                            color: Appearance.colors.colSurfaceContainerHigh
+                            color: SearchTheme.colGroupSlab
+                            border.width: SearchTheme.cardBorderWidth
+                            border.color: SearchTheme.colCardBorder
                             antialiasing: true
                         }
 
@@ -3142,7 +3157,7 @@ Item {
                                         text: root.sectionPresentation(resultDelegate.rowData?.sectionId ?? "").icon
                                         iconSize: root.expressiveResults ? Appearance.font.pixelSize.larger : Appearance.font.pixelSize.small
                                         fill: root.expressiveResults ? 1 : 0
-                                        color: root.expressiveResults ? Appearance.colors.colPrimary : Appearance.colors.colOutline
+                                        color: SearchTheme.isWuWa ? SearchTheme.colAccent : (root.expressiveResults ? Appearance.colors.colPrimary : Appearance.colors.colOutline)
                                     }
 
                                     // Expressive: the group name in the rounded
@@ -3152,7 +3167,7 @@ Item {
                                         id: captionLabel
                                         Layout.fillWidth: true
                                         text: root.sectionPresentation(resultDelegate.rowData?.sectionId ?? "").label
-                                        color: root.expressiveResults ? Appearance.m3colors.m3onSurface : Appearance.colors.colOnSurfaceVariant
+                                        color: SearchTheme.isWuWa ? SearchTheme.colTextPrimary : (root.expressiveResults ? Appearance.m3colors.m3onSurface : Appearance.colors.colOnSurfaceVariant)
                                         font.pixelSize: root.expressiveResults ? Appearance.font.pixelSize.larger : Appearance.font.pixelSize.small
                                         font.family: Appearance.font.family.main
                                         font.weight: Font.Medium
@@ -3168,7 +3183,7 @@ Item {
 
                                         StyledText {
                                             text: root.activeResultCategory.label
-                                            color: Appearance.colors.colOutline
+                                            color: SearchTheme.isWuWa ? SearchTheme.colTextSecondary : Appearance.colors.colOutline
                                             font.pixelSize: Appearance.font.pixelSize.small
                                             font.weight: Font.Medium
                                         }
@@ -3177,7 +3192,7 @@ Item {
                                             visible: Config.options.search.appearance.showKeyHints
                                             keys: ["Tab"]
                                             surface: "transparent"
-                                            onSurface: Appearance.colors.colOutline
+                                            onSurface: SearchTheme.isWuWa ? SearchTheme.colTextSecondary : Appearance.colors.colOutline
                                         }
                                     }
                                 }
@@ -3506,15 +3521,15 @@ Item {
                             shape: MaterialShape.Shape.SoftBurst
                             text: "search_off"
                             iconSize: Appearance.font.pixelSize.huge
-                            color: Appearance.colors.colSecondaryContainer
-                            colSymbol: Appearance.colors.colOnSecondaryContainer
+                            color: SearchTheme.isWuWa ? ResonanceTheme.alpha(ResonanceTheme.colTealInkDark, 0.70) : Appearance.colors.colSecondaryContainer
+                            colSymbol: SearchTheme.isWuWa ? SearchTheme.colAccent : Appearance.colors.colOnSecondaryContainer
                         }
 
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
                             Layout.maximumWidth: emptySearchState.width - Appearance.sizes.elevationMargin * 4
                             text: Translation.tr("Nothing found for %1").arg(String(root.searchingText.trim()))
-                            color: Appearance.colors.colOnSurface
+                            color: SearchTheme.isWuWa ? SearchTheme.colTextPrimary : Appearance.colors.colOnSurface
                             font.pixelSize: Appearance.font.pixelSize.large
                             font.weight: Font.DemiBold
                             elide: Text.ElideMiddle
@@ -3523,7 +3538,7 @@ Item {
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
                             text: Translation.tr("Try another category or continue with an action")
-                            color: Appearance.colors.colOnSurfaceVariant
+                            color: SearchTheme.isWuWa ? SearchTheme.colTextSecondary : Appearance.colors.colOnSurfaceVariant
                             font.pixelSize: Appearance.font.pixelSize.small
                         }
 
@@ -3540,9 +3555,11 @@ Item {
                                     implicitWidth: fallbackChipContent.implicitWidth + Appearance.sizes.elevationMargin * 2
                                     implicitHeight: Appearance.sizes.elevationMargin * 4
                                     buttonRadius: Appearance.rounding.full
-                                    colBackground: Appearance.colors.colSurfaceContainerHigh
-                                    colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-                                    colRipple: Appearance.colors.colSecondaryContainerActive
+                                    colBackground: SearchTheme.colChipBackground
+                                    colBackgroundHover: SearchTheme.colChipBackgroundHover
+                                    colRipple: SearchTheme.colChipRipple
+                                    borderWidth: SearchTheme.cardBorderWidth
+                                    borderColor: SearchTheme.colCardBorder
                                     onClicked: root.executeEmptyFallback(modelData.id)
 
                                     contentItem: RowLayout {
@@ -3553,12 +3570,12 @@ Item {
                                         MaterialSymbol {
                                             text: fallbackChip.modelData.icon
                                             iconSize: Appearance.font.pixelSize.normal
-                                            color: Appearance.colors.colOnSurface
+                                            color: SearchTheme.isWuWa ? SearchTheme.colAccent : Appearance.colors.colOnSurface
                                         }
 
                                         StyledText {
                                             text: fallbackChip.modelData.label
-                                            color: Appearance.colors.colOnSurface
+                                            color: SearchTheme.isWuWa ? SearchTheme.colTextPrimary : Appearance.colors.colOnSurface
                                             font.pixelSize: Appearance.font.pixelSize.small
                                             font.weight: Font.Medium
                                         }
@@ -3580,7 +3597,9 @@ Item {
                     anchors.bottomMargin: Appearance.sizes.elevationMargin / 2
                     implicitHeight: feedbackContent.implicitHeight + Appearance.sizes.elevationMargin
                     radius: Appearance.rounding.full
-                    color: Appearance.colors.colSecondaryContainer
+                    color: SearchTheme.colFeedbackBar
+                    border.width: SearchTheme.cardBorderWidth
+                    border.color: SearchTheme.colCardBorder
                     opacity: root.actionFeedbackText.length > 0 ? 1.0 : 0.0
                     visible: opacity > 0.01
 
@@ -3603,11 +3622,11 @@ Item {
                         MaterialSymbol {
                             text: "check_circle"
                             iconSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colOnSecondaryContainer
+                            color: SearchTheme.isWuWa ? SearchTheme.colAccent : Appearance.colors.colOnSecondaryContainer
                         }
                         StyledText {
                             text: root.actionFeedbackText
-                            color: Appearance.colors.colOnSecondaryContainer
+                            color: SearchTheme.isWuWa ? SearchTheme.colTextPrimary : Appearance.colors.colOnSecondaryContainer
                             font.pixelSize: Appearance.font.pixelSize.small
                             font.weight: Font.Medium
                         }
@@ -3642,7 +3661,9 @@ Item {
                             Layout.fillWidth: true
                             implicitHeight: root.expressiveResults ? 60 : 52
                             radius: Appearance.rounding.small
-                            color: Appearance.colors.colSurfaceContainerHigh
+                            color: SearchTheme.colSkeletonRow
+                            border.width: SearchTheme.cardBorderWidth
+                            border.color: SearchTheme.colCardBorder
                             antialiasing: true
 
                             RowLayout {
@@ -3655,7 +3676,7 @@ Item {
                                     implicitWidth: 32
                                     implicitHeight: 32
                                     radius: Appearance.rounding.full
-                                    color: Appearance.colors.colSurfaceContainerHighest
+                                    color: SearchTheme.colSkeletonItem
                                 }
 
                                 ColumnLayout {
@@ -3666,14 +3687,14 @@ Item {
                                         Layout.preferredWidth: 120
                                         implicitHeight: 12
                                         radius: Appearance.rounding.verysmall
-                                        color: Appearance.colors.colSurfaceContainerHighest
+                                        color: SearchTheme.colSkeletonItem
                                     }
 
                                     Rectangle {
                                         Layout.preferredWidth: 80
                                         implicitHeight: 8
                                         radius: Appearance.rounding.verysmall
-                                        color: Appearance.colors.colSurfaceContainerHighest
+                                        color: SearchTheme.colSkeletonItem
                                     }
                                 }
                             }
