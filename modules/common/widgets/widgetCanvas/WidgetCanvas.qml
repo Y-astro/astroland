@@ -75,7 +75,13 @@ MouseArea {
             Qt.callLater(() => {
                 Config.options.background.activeWidgets = Config.options.background.activeWidgets.map(entry => {
                     const update = registryUpdates[entry.id]
-                    return update ? Object.assign({}, entry, { x: update.x, y: update.y, z: update.z }) : entry
+                    return update ? Object.assign({}, entry, {
+                        x: update.x,
+                        y: update.y,
+                        z: update.z,
+                        refWidth: root.width,
+                        refHeight: root.height
+                    }) : entry
                 })
 
             // 4. Preserve legacy behaviors and restore selected widgets by ID next event-loop turn if model replacement recreates them

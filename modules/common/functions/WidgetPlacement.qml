@@ -1,5 +1,6 @@
 pragma Singleton
 import Quickshell
+import qs.modules.common
 
 /**
  * Per-monitor placement of desktop widgets.
@@ -105,7 +106,8 @@ Singleton {
         // coordinates. They are already local, even though hasLocalFork is false.
         // Only legacy or other-monitor coordinates need resolution adaptation.
         const inheritsLocalDesktop = lock && lockFork === null && localDesktop !== null;
-        if (!hasLocalFork && !inheritsLocalDesktop && screenW > 0 && screenH > 0) {
+        const isLocalMonitor = Boolean(entry.monitorName && (entry.monitorName === monitorName || (entry.monitorName.startsWith("eDP") && monitorName.startsWith("eDP"))));
+        if (!hasLocalFork && !inheritsLocalDesktop && !isLocalMonitor && screenW > 0 && screenH > 0) {
             const refW = Number(entry.refWidth || (typeof Config !== "undefined" && Config.options && Config.options.background && Config.options.background.referenceResolution ? Config.options.background.referenceResolution.width : 0) || 1920);
             const refH = Number(entry.refHeight || (typeof Config !== "undefined" && Config.options && Config.options.background && Config.options.background.referenceResolution ? Config.options.background.referenceResolution.height : 0) || 1080);
             if (refW > 0 && refH > 0 && (screenW !== refW || screenH !== refH)) {

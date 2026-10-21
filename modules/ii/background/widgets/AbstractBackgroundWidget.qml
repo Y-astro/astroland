@@ -63,6 +63,17 @@ AbstractWidget {
         root.z = Qt.binding(() => root.targetZ);
     }
 
+    property bool wasDragged: false
+
+    onDraggingChanged: {
+        if (root.dragging) {
+            root.wasDragged = true;
+        } else if (root.wasDragged) {
+            root.wasDragged = false;
+            root.commitPosition();
+        }
+    }
+
     function commitPosition() {
         const newX = Math.max(0, Math.min(root.x, root.scaledScreenWidth - root.width));
         const newY = Math.max(0, Math.min(root.y, root.scaledScreenHeight - root.height));
@@ -74,7 +85,13 @@ AbstractWidget {
             // the release handlers first; the replacement restores its bindings.
             Qt.callLater(() => {
                 Config.options.background.activeWidgets = Config.options.background.activeWidgets.map(entry =>
-                    entry.id === instanceId ? Object.assign({}, entry, { x: newX, y: newY, z: newZ }) : entry);
+                    entry.id === instanceId ? Object.assign({}, entry, {
+                        x: newX,
+                        y: newY,
+                        z: newZ,
+                        refWidth: root.scaledScreenWidth,
+                        refHeight: root.scaledScreenHeight
+                    }) : entry);
             });
             return;
         } else {
@@ -88,7 +105,19 @@ AbstractWidget {
         root.restoreXYBinding();
     }
 
-    onReleased: root.commitPosition()
+    onReleased: {
+        if (root.wasDragged) {
+            root.wasDragged = false;
+            root.commitPosition();
+        }
+    }
+
+    onCanceled: {
+        if (root.wasDragged) {
+            root.wasDragged = false;
+            root.commitPosition();
+        }
+    }
 
     property bool needsColText: false
     property color dominantColor: Appearance.colors.colPrimary
