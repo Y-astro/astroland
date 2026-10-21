@@ -32,23 +32,45 @@ Canvas {
     contextType: "2d"
     transformOrigin: Item.Center
 
+    NumberAnimation {
+        id: smoothDialAnim
+        target: root
+        property: "rotation"
+        duration: 60000
+        loops: Animation.Infinite
+        easing.type: Easing.Linear
+    }
+
     function resync() {
         if (!rotateSeconds) {
+            smoothDialAnim.stop();
             root.rotation = 0;
             return;
         }
         if (!animationActive || !visible) {
+            smoothDialAnim.stop();
             return;
         }
         if (!smoothRotation) {
+            smoothDialAnim.stop();
             root.rotation = 90.0 - (root.currentSecond % 60) * 6.0;
             return;
         }
-        root.rotation = 90.0 - (Date.now() % 60000) * 0.006;
+
+        var nowMs = Date.now() % 60000;
+        var targetAngle = 90.0 - (nowMs * 0.006);
+
+        smoothDialAnim.stop();
+        root.rotation = targetAngle;
+        smoothDialAnim.from = targetAngle;
+        smoothDialAnim.to = targetAngle - 360.0;
+        smoothDialAnim.duration = 60000;
+        smoothDialAnim.restart();
     }
 
     onRotateSecondsChanged: {
         if (!rotateSeconds) {
+            smoothDialAnim.stop();
             root.rotation = 0;
         } else {
             resync();
@@ -58,12 +80,16 @@ Canvas {
     onAnimationActiveChanged: {
         if (animationActive) {
             resync();
+        } else {
+            smoothDialAnim.stop();
         }
     }
 
     onVisibleChanged: {
         if (visible) {
             resync();
+        } else {
+            smoothDialAnim.stop();
         }
     }
 
@@ -76,8 +102,23 @@ Canvas {
     onCurrentSecondChanged: {
         if (root.dialStyle === "minimal_arc" || root.dialStyle === "full_pixel3")
             root.requestPaint();
-        if (!smoothRotation && rotateSeconds && animationActive && visible) {
-            resync();
+        if (!smoothRotation) {
+            if (rotateSeconds && animationActive && visible) {
+                resync();
+            }
+        } else if (rotateSeconds && animationActive && visible) {
+            if (!smoothDialAnim.running) {
+                resync();
+            } else {
+                var nowMs = Date.now() % 60000;
+                var targetAngle = 90.0 - (nowMs * 0.006);
+                var diff = (root.rotation - targetAngle) % 360.0;
+                if (diff > 180.0) diff -= 360.0;
+                if (diff < -180.0) diff += 360.0;
+                if (Math.abs(diff) > 0.5) {
+                    resync();
+                }
+            }
         }
     }
 
@@ -88,14 +129,6 @@ Canvas {
             resync();
         } else if (!rotateSeconds) {
             root.rotation = 0;
-        }
-    }
-
-    FrameAnimation {
-        id: frameAnim
-        running: root.rotateSeconds && root.animationActive && root.visible && root.smoothRotation
-        onTriggered: {
-            root.rotation = 90.0 - (Date.now() % 60000) * 0.006;
         }
     }
 
@@ -148,8 +181,15 @@ Canvas {
             { val: "55", angle: -Math.PI / 2 + (11 * Math.PI / 6) }
         ]
 
-        readonly property real rOrbit: clockGeom.get(root.width).rOrbit
+        readonly property var geom: clockGeom.get(root.width)
+        readonly property real cx: root.width / 2
+        readonly property real cy: root.height / 2
+        readonly property real rOrbit: geom.rOrbit
         readonly property real numFontPx: Math.max(8, Math.round(root.width * 0.040))
+        readonly property real capLeft: geom.capsuleX - geom.maskClearance
+        readonly property real capRight: geom.capsuleX + geom.capsuleWidth + geom.maskClearance
+        readonly property real capTop: (geom.capsuleYCenter - (geom.capsuleHeight / 2.0)) - geom.maskClearance
+        readonly property real capBottom: (geom.capsuleYCenter + (geom.capsuleHeight / 2.0)) + geom.maskClearance
 
         Repeater {
             model: (root.isWuWa && root.dialStyle === "concentric") ? wuwaNumeralsLayer.numerals : []
@@ -159,10 +199,8 @@ Canvas {
                 required property int index
 
                 readonly property real itemAngle: modelData.angle
-                readonly property real cx: root.width / 2
-                readonly property real cy: root.height / 2
-                readonly property real tx: cx + Math.cos(itemAngle) * wuwaNumeralsLayer.rOrbit
-                readonly property real ty: cy + Math.sin(itemAngle) * wuwaNumeralsLayer.rOrbit
+                readonly property real tx: wuwaNumeralsLayer.cx + Math.cos(itemAngle) * wuwaNumeralsLayer.rOrbit
+                readonly property real ty: wuwaNumeralsLayer.cy + Math.sin(itemAngle) * wuwaNumeralsLayer.rOrbit
 
                 x: tx - width / 2
                 y: ty - height / 2
@@ -171,26 +209,30 @@ Canvas {
 
                 rotation: -root.rotation
                 transformOrigin: Item.Center
+                antialiasing: true
 
                 // Whole-glyph soft fade before capsule exclusion intersection
                 opacity: {
                     if (!root.hideMinutePillArea) return 1.0;
-                    var geom = clockGeom.get(root.width);
-                    var clr = geom.maskClearance;
-                    var capLeft = geom.capsuleX - clr;
-                    var capRight = geom.capsuleX + geom.capsuleWidth + clr;
-                    var capTop = (geom.capsuleYCenter - (geom.capsuleHeight / 2.0)) - clr;
-                    var capBottom = (geom.capsuleYCenter + (geom.capsuleHeight / 2.0)) + clr;
 
                     var worldAngle = itemAngle + (root.rotation * Math.PI / 180.0);
-                    var worldCenterX = cx + Math.cos(worldAngle) * wuwaNumeralsLayer.rOrbit;
-                    var worldCenterY = cy + Math.sin(worldAngle) * wuwaNumeralsLayer.rOrbit;
+                    // Fast angular reject: capsule is centered at 3:00 (angle 0 rad).
+                    var aNorm = worldAngle % (2 * Math.PI);
+                    if (aNorm > Math.PI) aNorm -= 2 * Math.PI;
+                    if (aNorm < -Math.PI) aNorm += 2 * Math.PI;
+                    if (aNorm < -0.55 || aNorm > 0.45) return 1.0;
+
+                    var worldCenterX = wuwaNumeralsLayer.cx + Math.cos(worldAngle) * wuwaNumeralsLayer.rOrbit;
+                    var worldCenterY = wuwaNumeralsLayer.cy + Math.sin(worldAngle) * wuwaNumeralsLayer.rOrbit;
                     var glyphLeft = worldCenterX - width / 2.0;
                     var glyphRight = worldCenterX + width / 2.0;
                     var glyphTop = worldCenterY - height / 2.0;
                     var glyphBottom = worldCenterY + height / 2.0;
 
-                    var sep = Math.max(capLeft - glyphRight, glyphLeft - capRight, capTop - glyphBottom, glyphTop - capBottom);
+                    var sep = Math.max(wuwaNumeralsLayer.capLeft - glyphRight,
+                                       glyphLeft - wuwaNumeralsLayer.capRight,
+                                       wuwaNumeralsLayer.capTop - glyphBottom,
+                                       glyphTop - wuwaNumeralsLayer.capBottom);
                     return Math.max(0.0, Math.min(1.0, sep / 4.0));
                 }
 
@@ -199,6 +241,8 @@ Canvas {
                     anchors.centerIn: parent
                     text: glyphItem.modelData.val
                     color: root.isWuWa ? root.textColor : root.accentColor
+                    renderType: Text.QtRendering
+                    antialiasing: true
                     font {
                         family: root.boldFont ? Appearance.font.family.display : Appearance.font.family.numbers
                         pixelSize: wuwaNumeralsLayer.numFontPx
@@ -210,19 +254,16 @@ Canvas {
     }
 
     onPaint: {
+        if (dialStyle === "none") return;
+        // ── WUWA CHRONO RESONATOR: Upright numerals are rendered above via wuwaNumeralsLayer ──
+        if (root.isWuWa && dialStyle === "concentric") return;
+
         var ctx = getContext("2d");
         ctx.reset();
-
-        if (dialStyle === "none") return;
 
         var cx = width / 2;
         var cy = height / 2;
         var fontWeight = boldFont ? "bold " : "bold ";
-
-        // ── WUWA CHRONO RESONATOR: Upright numerals are rendered above via wuwaNumeralsLayer ──
-        if (root.isWuWa && dialStyle === "concentric") {
-            return;
-        }
 
         // ── STYLE 1: CONCENTRIC ──
         if (dialStyle === "concentric") {
@@ -693,3 +734,4 @@ Canvas {
         }
     }
 }
+

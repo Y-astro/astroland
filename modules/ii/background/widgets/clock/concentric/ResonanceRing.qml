@@ -18,6 +18,8 @@ Item {
     property color borderHairline: ResonanceTheme.borderHairline
     property color textIvory: ResonanceTheme.textPrimary
     property color textSecondary: ResonanceTheme.textSecondary
+    property color colTealInk: ResonanceTheme.colTealInk
+    readonly property color warmBronze: ResonanceTheme.isFixedPalette ? "#543414" : Qt.darker(root.accentGold, 2.4)
     property real intensity: ResonanceTheme.intensity
 
     ResonanceClockGeometry { id: clockGeom }
@@ -69,8 +71,9 @@ Item {
             // ── 1. FOUR POINTED CARDINAL DIAMONDS (all visible, clear of capsule) ──
             // North (12:00)
             drawPointedDiamond(ctx, cx, cy - rCardinal, diamondSize, root.accentGold);
-            // South (6:00)
-            drawPointedDiamond(ctx, cx, cy + rCardinal, diamondSize, root.accentGold);
+            // South (6:00) - sits on bright wallpaper highlight; contrast-cushioned and rendered in warm bronze
+            drawPointedDiamond(ctx, cx, cy + rCardinal, diamondSize * 1.35, ColorUtils.applyAlpha(root.colTealInk, 0.40 * root.intensity));
+            drawPointedDiamond(ctx, cx, cy + rCardinal, diamondSize, root.warmBronze);
             // West (9:00)
             drawPointedDiamond(ctx, cx - rCardinal, cy, diamondSize, root.accentGold);
             // East (3:00) - sits at 0.95R, safely outside capsule right edge (0.86R)
@@ -83,44 +86,87 @@ Item {
 
             for (var k = 0; k < 12; k++) {
                 var angle = -Math.PI / 2 + (k * Math.PI / 6);
-                var isNearCapsule = (k === 3) || (angle >= capAngleTop && angle <= capAngleBottom);
+                var cosA = Math.cos(angle);
+                var sinA = Math.sin(angle);
+                var tMajor = Math.max(0.0, Math.min(1.0, sinA));
 
-                // Major tick at hour mark (omit at 3:00 to keep capsule clean)
-                if (!isNearCapsule) {
-                    var cosA = Math.cos(angle);
-                    var sinA = Math.sin(angle);
+                // Major tick at hour mark (shortened at 3:00 to ensure clean clearance from minute capsule)
+                var tickStartR = (k === 3) ? (rOrnament - minorTickLen) : rTickInner;
+                var tickWidth = Math.max(1.0, diameter * 0.005);
+
+                // Subtle local contrast under-pass for lower ticks over bright background
+                if (tMajor > 0.20) {
                     ctx.save();
-                    ctx.strokeStyle = root.accentGold;
-                    ctx.lineWidth = Math.max(1.0, diameter * 0.005);
+                    ctx.strokeStyle = ColorUtils.applyAlpha(root.colTealInk, 0.35 * tMajor * root.intensity);
+                    ctx.lineWidth = tickWidth + 1.2;
                     ctx.beginPath();
-                    ctx.moveTo(cx + cosA * rTickInner, cy + sinA * rTickInner);
+                    ctx.moveTo(cx + cosA * tickStartR, cy + sinA * tickStartR);
                     ctx.lineTo(cx + cosA * rOrnament, cy + sinA * rOrnament);
                     ctx.stroke();
                     ctx.restore();
                 }
 
+                var majorColor = tMajor > 0.05 ? ColorUtils.mix(root.warmBronze, root.accentGold, tMajor) : root.accentGold;
+                ctx.save();
+                ctx.strokeStyle = majorColor;
+                ctx.lineWidth = tickWidth;
+                ctx.beginPath();
+                ctx.moveTo(cx + cosA * tickStartR, cy + sinA * tickStartR);
+                ctx.lineTo(cx + cosA * rOrnament, cy + sinA * rOrnament);
+                ctx.stroke();
+                ctx.restore();
+
                 // Broken outer arc between hour marks
                 var arcStart = angle + arcGapRad;
                 var arcEnd = angle + (Math.PI / 6) - arcGapRad;
-                if (!(arcStart < capAngleBottom && arcEnd > capAngleTop)) {
+                var midAngle = angle + (Math.PI / 12);
+                var sinMid = Math.sin(midAngle);
+                var tArc = Math.max(0.0, Math.min(1.0, sinMid));
+
+                // Subtle local contrast under-pass for lower arc segments
+                if (tArc > 0.20) {
                     ctx.save();
-                    ctx.strokeStyle = ColorUtils.applyAlpha(root.accentGold, 0.75 * root.intensity);
-                    ctx.lineWidth = 1.0;
+                    ctx.strokeStyle = ColorUtils.applyAlpha(root.colTealInk, 0.35 * tArc * root.intensity);
+                    ctx.lineWidth = 2.2;
                     ctx.beginPath();
                     ctx.arc(cx, cy, rOrnament, arcStart, arcEnd, false);
                     ctx.stroke();
                     ctx.restore();
                 }
 
+                var arcColor = tArc > 0.05 ? ColorUtils.mix(root.warmBronze, root.accentGold, tArc) : root.accentGold;
+                var arcAlpha = (0.75 + 0.20 * tArc) * root.intensity;
+                ctx.save();
+                ctx.strokeStyle = ColorUtils.applyAlpha(arcColor, arcAlpha);
+                ctx.lineWidth = 1.0 + 0.15 * tArc;
+                ctx.beginPath();
+                ctx.arc(cx, cy, rOrnament, arcStart, arcEnd, false);
+                ctx.stroke();
+                ctx.restore();
+
                 // 4 Fine ticklets between each pair of major divisions (6 degree intervals)
                 for (var m = 1; m < 5; m++) {
                     var subAngle = angle + (m * Math.PI / 30);
-                    if (subAngle >= capAngleTop && subAngle <= capAngleBottom) continue;
-
                     var cosS = Math.cos(subAngle);
                     var sinS = Math.sin(subAngle);
+                    var tSub = Math.max(0.0, Math.min(1.0, sinS));
+
+                    // Subtle local contrast under-pass for lower fine ticklets
+                    if (tSub > 0.25) {
+                        ctx.save();
+                        ctx.strokeStyle = ColorUtils.applyAlpha(root.colTealInk, 0.28 * tSub * root.intensity);
+                        ctx.lineWidth = 2.0;
+                        ctx.beginPath();
+                        ctx.moveTo(cx + cosS * (rOrnament - minorTickLen), cy + sinS * (rOrnament - minorTickLen));
+                        ctx.lineTo(cx + cosS * rOrnament, cy + sinS * rOrnament);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+
+                    var subColor = tSub > 0.05 ? ColorUtils.mix(root.warmBronze, root.accentGold, tSub) : root.accentGold;
+                    var subAlpha = (0.78 + 0.18 * tSub) * root.intensity;
                     ctx.save();
-                    ctx.strokeStyle = ColorUtils.applyAlpha(root.accentGold, 0.78 * root.intensity);
+                    ctx.strokeStyle = ColorUtils.applyAlpha(subColor, subAlpha);
                     ctx.lineWidth = 1.0;
                     ctx.beginPath();
                     ctx.moveTo(cx + cosS * (rOrnament - minorTickLen), cy + sinS * (rOrnament - minorTickLen));
@@ -253,6 +299,7 @@ Item {
         function onBorderHairlineChanged() { ringCanvas.requestPaint(); }
         function onTextPrimaryChanged() { ringCanvas.requestPaint(); }
         function onTextSecondaryChanged() { ringCanvas.requestPaint(); }
+        function onColTealInkChanged() { ringCanvas.requestPaint(); }
         function onIntensityChanged() { ringCanvas.requestPaint(); }
         function onPaletteModeChanged() { ringCanvas.requestPaint(); }
     }
