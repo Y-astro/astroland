@@ -14,9 +14,7 @@ RippleButton {
     property bool keyboardDown: false
     property real size: 120
 
-    buttonRadius: isWuWa
-        ? Appearance.rounding.large
-        : ((button.focus || button.down) ? size / 2 : Appearance.rounding.verylarge)
+    buttonRadius: (button.focus || button.down) ? size / 2 : Appearance.rounding.verylarge
 
     borderWidth: isWuWa ? (button.focus ? 1.5 : 1) : 0
     borderColor: isWuWa
