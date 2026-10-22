@@ -103,6 +103,9 @@ ColumnLayout {
     }
 
     function tryPendingHighlight() {
+        const win = root.QsWindow ? root.QsWindow.window : null;
+        if (root.searchResult || (win && win.pageIndexById && win.currentPage === win.pageIndexById("search")))
+            return;
         if (!matchesCurrent(SearchRegistry.currentSearch))
             return;
         doScrollAndHighlight();
