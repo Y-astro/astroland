@@ -56,3 +56,68 @@
   - `qmllint modules/common/widgets/StyledScrollBar.qml modules/ii/editMode/WidgetEditorPanel.qml modules/ii/editMode/LegacyBarLayoutConfig.qml` -> Clean (0 warnings).
   - `test_edit_mode_motion_audit.py` -> Passed (2/2).
   - `test_type_to_search_edit_mode_contract.py` -> Passed (2/2).
+
+---
+
+# WuWa Edit Desktop — QA Report: Widgets Tab Segmentation & Hierarchy (Agent 2)
+
+**Date**: 2026-10-27  
+**Scope**: Edit Desktop Interface (`WidgetEditorPanel.qml`, `test_widgets_tab_hierarchy_contract.py`)  
+**Design Direction**: WuWa B+ Material Language (Dense Jinzhou Frost & Structural Parity with Bar tab)  
+- 3-tier depth logic:
+  1. **Tier 1 (Outer Shell)**: Dark frosted teal / blue-green glass (`colWindowShell` `#081312` @ 0.88 alpha) with antique-gold hairline border.
+  2. **Tier 2 (Section Cards)**: Discrete frosted card blocks for each widget category (`colCardBg` with `colCardBorder` hairline, `radius: Appearance.rounding.normal`, 12px breathing room between cards).
+  3. **Tier 3 (Internal Rows)**: Structured widget rows (`colRowBg`, `colRowBorder`, `radius: Appearance.rounding.small`, 6px row spacing) with distinct installed/active state highlights.
+- Visual Parity: `NoticeBox` instruction banner ported to top of Widgets tab, mirroring the Bar tab layout.
+
+---
+
+## 1. Visual Verification & Screenshots
+
+| Target | Screenshot (Cropped) | Full Desktop Capture | Visual Hierarchy & State Verification |
+| :--- | :--- | :--- | :--- |
+| **Widgets tab Top Area** | [`agent2_1_widgets_top.png`](file:///home/astro/.config/quickshell/end4-pC/docs/wuwa-edit-desktop-qa/agent2_1_widgets_top.png) | [`agent2_1_top_full.png`](file:///home/astro/.config/quickshell/end4-pC/docs/wuwa-edit-desktop-qa/agent2_1_top_full.png) | `NoticeBox` banner at top, search input, and first category section card ("Clocks") with antique-gold icon, warm ivory title, count pill ("32"), and chevron. |
+| **Two Category Blocks (Clocks & Date)** | [`agent2_2_two_categories.png`](file:///home/astro/.config/quickshell/end4-pC/docs/wuwa-edit-desktop-qa/agent2_2_two_categories.png) | [`agent2_2_two_categories_full.png`](file:///home/astro/.config/quickshell/end4-pC/docs/wuwa-edit-desktop-qa/agent2_2_two_categories_full.png) | 12px breathing room between "Clocks" card and "Date" card. "Date" card features its own calendar icon, count pill ("14"), and distinct date widgets. |
+| **Mixed Installed / Inactive Rows** | [`agent2_3_mixed_installed.png`](file:///home/astro/.config/quickshell/end4-pC/docs/wuwa-edit-desktop-qa/agent2_3_mixed_installed.png) | [`agent2_1_top_full.png`](file:///home/astro/.config/quickshell/end4-pC/docs/wuwa-edit-desktop-qa/agent2_1_top_full.png) | Installed "Concentric Clock" displays antique-gold hairline border, gold-tinted background, and circular checkmark (`✓`) badge. Inactive rows display dark translucent background and subtle `+` add action. |
+
+---
+
+## 2. Structural & Architectural Changes
+
+1. **Section-Card Architecture**:
+   - Replaced flat `ListView` and bare text headers with discrete `categoryCard` blocks inside `StyledFlickable`.
+   - Each category is an enclosed card (`SettingsTheme.colCardBg`, `SettingsTheme.colCardBorder`, `radius: Appearance.rounding.normal`).
+   - Grouped and ordered categories: `Clocks`, `Date`, `Weather`, `Media`, `System`, `Resources`, `Devices`, `Productivity`, `Photos`, and `Other`.
+   - Date and Clocks are decoupled into separate, distinct categories.
+
+2. **Section Header Affordances**:
+   - Semantic icon in antique gold (`SettingsTheme.colAccent`).
+   - Category title in warm ivory demi-bold (`SettingsTheme.colTextPrimary`).
+   - Frosted count badge pill displaying the count of available widgets in that category.
+   - Interactive expand/collapse chevron animating rotation via `Appearance.animation.elementMoveFast.numberAnimation`.
+
+3. **Widget Row Formatting & Installed States**:
+   - 52px practical row density with structured left icon (22px), title (13px DemiBold/Medium), and subtitle/description (11px).
+   - Inactive widgets display a subtle circular `+` button in misty sage.
+   - Installed/active widgets display an antique-gold tinted background (`colAccent` @ 0.12), an antique-gold hairline border (`colAccent` @ 0.45), and a circular antique-gold checkmark badge (`✓`).
+   - Clicking an active widget selects it on the desktop; clicking an inactive widget adds it to the desktop.
+
+4. **Search & Collapsing**:
+   - Two-way binding for `MaterialTextField` search.
+   - Non-empty search queries automatically expand matching categories and filter out empty categories.
+   - Empty search results present a stylized empty state notice ("No widgets found").
+   - Category expansion/collapse state persists across searches.
+
+---
+
+## 3. Preservations & Compliance
+- **Data models & presets**: 100% untouched.
+- **Bar tab**: 100% untouched.
+- **Wallpaper selector**: 100% untouched.
+- **Widget add/select logic**: `selectOrAdd`, `add`, `duplicate`, `removeSelection` preserved identically.
+- **Motion compliance**: All animations strictly adhere to `Appearance.animation` tiers (`test_edit_mode_motion_audit.py`).
+- **Automated Tests**:
+  - `qmllint modules/ii/editMode/WidgetEditorPanel.qml` -> Clean (0 warnings).
+  - `test_edit_mode_motion_audit.py` -> Passed (2/2).
+  - `test_type_to_search_edit_mode_contract.py` -> Passed (2/2).
+  - `test_widgets_tab_hierarchy_contract.py` -> Passed (7/7).

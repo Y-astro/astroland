@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import qs
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.ii.background.widgets
 import "."
@@ -22,24 +23,62 @@ Rectangle {
 
     readonly property bool isSettingsScope: true
     readonly property bool isWuWa: SettingsTheme.isWuWa
+    readonly property alias catalogFlickable: catalogFlickable
 
     function normalizeCategory(cat) {
         if (!cat) return "Other";
         const c = String(cat).trim();
         const lower = c.toLowerCase();
-        if (lower === "clock" || lower === "date") return "Clock";
+        if (lower === "clock") return "Clock";
+        if (lower === "date") return "Date";
         if (lower === "weather") return "Weather";
         if (lower === "productivity" || lower === "utility") return "Productivity";
         if (lower === "media") return "Media";
-        if (lower === "system" || lower === "resources" || lower === "devices") return "System";
-        if (lower === "images" || lower === "photo" || lower === "photos" || lower === "image") return "Images";
+        if (lower === "system") return "System";
+        if (lower === "resources") return "Resources";
+        if (lower === "devices") return "Devices";
+        if (lower === "images" || lower === "photo" || lower === "photos" || lower === "image") return "Photos";
         return c;
     }
 
     function displayCategory(normCat) {
-        if (normCat === "Clock") return "Clocks";
+        if (normCat === "Clock") return qsTr("Clocks");
+        if (normCat === "Date") return qsTr("Date");
+        if (normCat === "Weather") return qsTr("Weather");
+        if (normCat === "Media") return qsTr("Media");
+        if (normCat === "System") return qsTr("System");
+        if (normCat === "Resources") return qsTr("Resources");
+        if (normCat === "Devices") return qsTr("Devices");
+        if (normCat === "Productivity") return qsTr("Productivity");
+        if (normCat === "Photos") return qsTr("Photos");
         return normCat;
     }
+
+    function categoryIcon(normCat) {
+        if (normCat === "Clock" || normCat === "Clocks") return "schedule";
+        if (normCat === "Date") return "calendar_month";
+        if (normCat === "Weather") return "cloud";
+        if (normCat === "Media") return "music_note";
+        if (normCat === "System") return "settings";
+        if (normCat === "Resources") return "monitor_heart";
+        if (normCat === "Devices") return "devices";
+        if (normCat === "Productivity") return "checklist";
+        if (normCat === "Photos" || normCat === "Images") return "photo";
+        return "widgets";
+    }
+
+    readonly property var categoryOrder: [
+        "Clock",
+        "Date",
+        "Weather",
+        "Media",
+        "System",
+        "Resources",
+        "Devices",
+        "Productivity",
+        "Photos",
+        "Other"
+    ]
 
     function toggleCategory(cat) {
         const copy = Object.assign({}, root.collapsedCategories);
@@ -49,7 +88,6 @@ Rectangle {
     }
 
     readonly property var catalog: {
-        const q = (root.query || "").trim().toLowerCase();
         const legacyItems = LegacyWidgetCatalog.widgets.map(w => {
             const norm = root.normalizeCategory(w.category);
             return Object.assign({}, w, {
@@ -67,18 +105,52 @@ Rectangle {
                 displayCategory: root.displayCategory(norm)
             });
         });
-        return legacyItems.concat(registryItems)
-            .filter(widget => {
-                if (!q) return true;
-                const searchString = (widget.name + " " + (widget.category || "") + " " + widget.normalizedCategory + " " + widget.displayCategory).toLowerCase();
-                return searchString.includes(q);
-            })
-            .sort((a, b) => {
-                if (a.displayCategory !== b.displayCategory) {
-                    return a.displayCategory.localeCompare(b.displayCategory);
+        return legacyItems.concat(registryItems);
+    }
+
+    readonly property var categoriesModel: {
+        const q = (root.query || "").trim().toLowerCase();
+        const all = root.catalog;
+        const groups = {};
+        for (let i = 0; i < all.length; i++) {
+            const w = all[i];
+            const norm = w.normalizedCategory || "Other";
+            if (!groups[norm]) {
+                groups[norm] = {
+                    key: norm,
+                    title: root.displayCategory(norm),
+                    icon: root.categoryIcon(norm),
+                    widgets: []
+                };
+            }
+            if (!q) {
+                groups[norm].widgets.push(w);
+            } else {
+                const searchString = (w.name + " " + (w.description || "") + " " + (w.category || "") + " " + norm + " " + w.displayCategory).toLowerCase();
+                if (searchString.includes(q)) {
+                    groups[norm].widgets.push(w);
                 }
-                return a.name.localeCompare(b.name);
-            });
+            }
+        }
+
+        const result = [];
+        for (let i = 0; i < root.categoryOrder.length; i++) {
+            const key = root.categoryOrder[i];
+            if (groups[key] && groups[key].widgets.length > 0) {
+                groups[key].widgets.sort((a, b) => a.name.localeCompare(b.name));
+                result.push(groups[key]);
+                delete groups[key];
+            }
+        }
+        const remainingKeys = Object.keys(groups).sort();
+        for (let i = 0; i < remainingKeys.length; i++) {
+            const key = remainingKeys[i];
+            if (groups[key].widgets.length > 0) {
+                groups[key].widgets.sort((a, b) => a.name.localeCompare(b.name));
+                result.push(groups[key]);
+            }
+        }
+        return result;
     }
 
     color: isWuWa ? SettingsTheme.colWindowShell : Appearance.colors.colLayer0
@@ -158,8 +230,9 @@ Rectangle {
                     var f = barLoader.item.flickable;
                     f.contentY = Math.max(0, Math.min(f.contentHeight - f.height, f.contentY + dy));
                 }
-            } else if (catalogListView) {
-                catalogListView.contentY = Math.max(0, Math.min(catalogListView.contentHeight - catalogListView.height, catalogListView.contentY + dy));
+            } else if (root.catalogFlickable) {
+                var cf = root.catalogFlickable;
+                cf.contentY = Math.max(0, Math.min(cf.contentHeight - cf.height, cf.contentY + dy));
             }
         }
     }
@@ -285,12 +358,10 @@ Rectangle {
             Layout.fillHeight: true
             visible: GlobalStates.editModePage !== "bar"
             spacing: 8
-            StyledText {
+            NoticeBox {
                 Layout.fillWidth: true
+                materialIcon: "drag_indicator"
                 text: qsTr("Drag widgets to move them. Ctrl-click to select several, or drag a selection box on the desktop.")
-                wrapMode: Text.Wrap
-                font.pixelSize: 12
-                color: root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
             }
             RowLayout {
                 visible: root.entry !== undefined && root.entry !== null
@@ -324,8 +395,8 @@ Rectangle {
                     implicitWidth: 36; implicitHeight: 36
                     buttonRadius: Appearance.rounding.small
                     colBackground: root.isWuWa ? SettingsTheme.colItemBg : "transparent"
-                    colBackgroundHover: root.isWuWa ? (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colThermalOrange, 0.20) : SettingsTheme.colNavHover) : Appearance.colors.colLayer1Hover
-                    colRipple: root.isWuWa ? SettingsTheme.colThermalOrange : Appearance.colors.colLayer1Active
+                    colBackgroundHover: root.isWuWa ? ColorUtils.applyAlpha(ResonanceTheme.colThermalOrange, 0.20) : Appearance.colors.colLayer1Hover
+                    colRipple: root.isWuWa ? ResonanceTheme.colThermalOrange : Appearance.colors.colLayer1Active
                     borderWidth: root.isWuWa ? 1 : 0
                     borderColor: root.isWuWa ? SettingsTheme.colNavBorder : "transparent"
                     onClicked: root.removeSelection()
@@ -406,120 +477,244 @@ Rectangle {
             ColumnLayout {
                 Layout.fillWidth: true; Layout.fillHeight: true
                 visible: !root.showingOptions
+                spacing: 10
+
                 MaterialTextField {
                     Layout.fillWidth: true
                     placeholderText: qsTr("Find a widget…")
+                    text: root.query
                     onTextEdited: root.query = text
                 }
-                ListView {
-                    id: catalogListView
-                    Layout.fillWidth: true; Layout.fillHeight: true
-                    clip: true; spacing: 0
-                    model: root.catalog
 
-                    ScrollBar.vertical: StyledScrollBar {
-                        id: catalogScrollBar
-                    }
+                StyledFlickable {
+                    id: catalogFlickable
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    contentWidth: width
+                    contentHeight: categoriesColumn.implicitHeight + 16
+                    flickableDirection: Flickable.VerticalFlick
 
-                    section.property: "displayCategory"
-                    section.criteria: ViewSection.FullString
-                    section.delegate: Component {
-                        Rectangle {
-                            id: sectionHeader
-                            required property string section
-                            width: ListView.view.width
-                            implicitHeight: 34
-                            color: "transparent"
+                    ColumnLayout {
+                        id: categoriesColumn
+                        width: catalogFlickable.width - 10
+                        spacing: 12
 
-                            property bool isCollapsed: !root.query && !!root.collapsedCategories[section]
-
-                            RippleButton {
-                                anchors.fill: parent
-                                anchors.topMargin: 4
-                                anchors.bottomMargin: 2
-                                anchors.rightMargin: (catalogListView.contentHeight > catalogListView.height) ? 10 : 0
-                                buttonRadius: Appearance.rounding.small
-                                colBackground: "transparent"
-                                colBackgroundHover: root.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer1Hover
-                                colBackgroundActive: root.isWuWa ? SettingsTheme.colControlBgActive : Appearance.colors.colLayer1Active
-                                colRipple: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer1Active
-                                onClicked: root.toggleCategory(sectionHeader.section)
-                                contentItem: RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: 6
-                                    anchors.rightMargin: 8
-                                    MaterialSymbol {
-                                        text: sectionHeader.isCollapsed ? "chevron_right" : "expand_more"
-                                        iconSize: 18
-                                        color: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnLayer1
-                                    }
-                                    StyledText {
-                                        Layout.fillWidth: true
-                                        text: sectionHeader.section
-                                        font.bold: true
-                                        font.pixelSize: 13
-                                        color: root.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
-                                    }
+                        Item {
+                            Layout.fillWidth: true
+                            implicitHeight: 110
+                            visible: root.categoriesModel.length === 0
+                            ColumnLayout {
+                                anchors.centerIn: parent
+                                spacing: 8
+                                MaterialSymbol {
+                                    Layout.alignment: Qt.AlignHCenter
+                                    text: "search_off"
+                                    iconSize: 32
+                                    color: root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
+                                }
+                                StyledText {
+                                    Layout.alignment: Qt.AlignHCenter
+                                    text: qsTr("No widgets found")
+                                    font.pixelSize: 13
+                                    color: root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
                                 }
                             }
                         }
-                    }
 
-                    delegate: Item {
-                        id: catalogItemWrapper
-                        required property var modelData
-                        width: ListView.view.width
-                        property bool isCollapsed: !root.query && !!root.collapsedCategories[modelData.displayCategory]
-                        implicitHeight: isCollapsed ? 0 : 60
-                        height: implicitHeight
-                        visible: !isCollapsed
-                        clip: true
+                        Repeater {
+                            model: root.categoriesModel
+                            delegate: Rectangle {
+                                id: categoryCard
+                                required property var modelData
+                                Layout.fillWidth: true
+                                radius: Appearance.rounding.normal
+                                color: root.isWuWa ? SettingsTheme.colCardBg : Appearance.colors.colLayer0
+                                border.width: root.isWuWa ? SettingsTheme.cardBorderWidth : 1
+                                border.color: root.isWuWa ? SettingsTheme.colCardBorder : Appearance.colors.colLayer0Border
+                                clip: true
 
-                        RippleButton {
-                            id: catalogRow
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.rightMargin: (catalogListView.contentHeight > catalogListView.height) ? 10 : 0
-                            height: 56
-                            buttonRadius: Appearance.rounding.normal
-                            colBackground: root.isWuWa ? SettingsTheme.colRowBg : "transparent"
-                            colBackgroundHover: root.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer1Hover
-                            colBackgroundActive: root.isWuWa ? SettingsTheme.colControlBgActive : Appearance.colors.colLayer1Active
-                            colRipple: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer1Active
-                            borderWidth: root.isWuWa ? SettingsTheme.rowBorderWidth : 0
-                            borderColor: root.isWuWa ? SettingsTheme.colRowBorder : "transparent"
-                            onClicked: root.selectOrAdd(catalogItemWrapper.modelData)
-                            contentItem: RowLayout {
-                                anchors.fill: parent; anchors.margins: 8
-                                MaterialSymbol {
-                                    text: catalogItemWrapper.modelData.icon || "widgets"
-                                    iconSize: 24
-                                    color: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnLayer1
-                                }
+                                readonly property var categoryData: modelData
+                                readonly property bool isCollapsed: !root.query && !!root.collapsedCategories[categoryData.key]
+
+                                implicitHeight: cardInnerLayout.implicitHeight + 20
+
                                 ColumnLayout {
-                                    Layout.fillWidth: true; spacing: 0
-                                    StyledText {
+                                    id: cardInnerLayout
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        top: parent.top
+                                        margins: 10
+                                    }
+                                    spacing: 8
+
+                                    RippleButton {
+                                        id: categoryHeaderBtn
                                         Layout.fillWidth: true
-                                        text: catalogItemWrapper.modelData.name
-                                        elide: Text.ElideRight
-                                        color: root.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
+                                        implicitHeight: 38
+                                        buttonRadius: Appearance.rounding.small
+                                        colBackground: "transparent"
+                                        colBackgroundHover: root.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer1Hover
+                                        colBackgroundActive: root.isWuWa ? SettingsTheme.colControlBgActive : Appearance.colors.colLayer1Active
+                                        colRipple: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer1Active
+                                        onClicked: root.toggleCategory(categoryCard.categoryData.key)
+
+                                        contentItem: RowLayout {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: 6
+                                            anchors.rightMargin: 8
+                                            spacing: 8
+
+                                            MaterialSymbol {
+                                                text: categoryCard.categoryData.icon
+                                                iconSize: 20
+                                                color: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary
+                                            }
+
+                                            StyledText {
+                                                Layout.fillWidth: true
+                                                text: categoryCard.categoryData.title
+                                                font.pixelSize: 14
+                                                font.weight: Font.DemiBold
+                                                color: root.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
+                                            }
+
+                                            Rectangle {
+                                                implicitWidth: countText.implicitWidth + 14
+                                                implicitHeight: 20
+                                                radius: 10
+                                                color: root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.12) : Appearance.colors.colLayer1Hover
+                                                border.width: 1
+                                                border.color: root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.28) : "transparent"
+
+                                                StyledText {
+                                                    id: countText
+                                                    anchors.centerIn: parent
+                                                    text: String(categoryCard.categoryData.widgets.length)
+                                                    font.pixelSize: 11
+                                                    font.weight: Font.Medium
+                                                    color: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colSubtext
+                                                }
+                                            }
+
+                                            MaterialSymbol {
+                                                text: "keyboard_arrow_down"
+                                                iconSize: 20
+                                                color: root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer1
+                                                rotation: categoryCard.isCollapsed ? -90 : 0
+                                                Behavior on rotation {
+                                                    animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                                                }
+                                            }
+                                        }
                                     }
-                                    StyledText {
-                                        text: catalogItemWrapper.modelData.category || ""
-                                        font.pixelSize: 11
-                                        color: root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
+
+                                    ColumnLayout {
+                                        id: rowsColumn
+                                        Layout.fillWidth: true
+                                        visible: !categoryCard.isCollapsed
+                                        spacing: 6
+
+                                        Repeater {
+                                            model: categoryCard.categoryData.widgets
+                                            delegate: Item {
+                                                id: widgetRowWrapper
+                                                required property var modelData
+                                                Layout.fillWidth: true
+                                                implicitHeight: 52
+
+                                                readonly property var widgetItem: modelData
+                                                readonly property bool activeOrAdded: {
+                                                    if (widgetItem.legacy) {
+                                                        return !!(Config.options.background.widgets[widgetItem.id] && Config.options.background.widgets[widgetItem.id].enable);
+                                                    }
+                                                    const activeList = Config.options.background.activeWidgets ?? [];
+                                                    return activeList.some(entry => (entry.widgetId ?? entry.id) === widgetItem.id);
+                                                }
+
+                                                RippleButton {
+                                                    id: widgetRowBtn
+                                                    anchors.fill: parent
+                                                    buttonRadius: Appearance.rounding.small
+                                                    colBackground: widgetRowWrapper.activeOrAdded
+                                                        ? (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.12) : Appearance.colors.colSecondaryContainer)
+                                                        : (root.isWuWa ? SettingsTheme.colRowBg : "transparent")
+                                                    colBackgroundHover: widgetRowWrapper.activeOrAdded
+                                                        ? (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.20) : Appearance.colors.colLayer1Hover)
+                                                        : (root.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer1Hover)
+                                                    colBackgroundActive: root.isWuWa ? SettingsTheme.colControlBgActive : Appearance.colors.colLayer1Active
+                                                    colRipple: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer1Active
+                                                    borderWidth: root.isWuWa ? SettingsTheme.rowBorderWidth : 0
+                                                    borderColor: widgetRowWrapper.activeOrAdded
+                                                        ? (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.45) : Appearance.colors.colPrimary)
+                                                        : (root.isWuWa ? SettingsTheme.colRowBorder : "transparent")
+                                                    onClicked: root.selectOrAdd(widgetRowWrapper.widgetItem)
+
+                                                    contentItem: RowLayout {
+                                                        anchors.fill: parent
+                                                        anchors.leftMargin: 12
+                                                        anchors.rightMargin: 12
+                                                        spacing: 12
+
+                                                        MaterialSymbol {
+                                                            Layout.alignment: Qt.AlignVCenter
+                                                            text: widgetRowWrapper.widgetItem.icon || "widgets"
+                                                            iconSize: 22
+                                                            color: widgetRowWrapper.activeOrAdded
+                                                                ? SettingsTheme.colAccent
+                                                                : (root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnLayer1)
+                                                            opacity: widgetRowWrapper.activeOrAdded ? 1.0 : 0.85
+                                                        }
+
+                                                        ColumnLayout {
+                                                            Layout.fillWidth: true
+                                                            spacing: 1
+
+                                                            StyledText {
+                                                                Layout.fillWidth: true
+                                                                text: widgetRowWrapper.widgetItem.name
+                                                                elide: Text.ElideRight
+                                                                font.pixelSize: 13
+                                                                font.weight: widgetRowWrapper.activeOrAdded ? Font.DemiBold : Font.Medium
+                                                                color: root.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
+                                                            }
+
+                                                            StyledText {
+                                                                Layout.fillWidth: true
+                                                                text: widgetRowWrapper.widgetItem.description || widgetRowWrapper.widgetItem.category || ""
+                                                                elide: Text.ElideRight
+                                                                font.pixelSize: 11
+                                                                color: root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
+                                                            }
+                                                        }
+
+                                                        Rectangle {
+                                                            implicitWidth: 26
+                                                            implicitHeight: 26
+                                                            radius: 13
+                                                            color: widgetRowWrapper.activeOrAdded
+                                                                ? (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.22) : Appearance.colors.colPrimary)
+                                                                : (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colTealInkDark, 0.50) : "transparent")
+                                                            border.width: 1
+                                                            border.color: widgetRowWrapper.activeOrAdded
+                                                                ? (root.isWuWa ? SettingsTheme.colAccent : "transparent")
+                                                                : (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colTextSecondary, 0.35) : "transparent")
+
+                                                            MaterialSymbol {
+                                                                anchors.centerIn: parent
+                                                                text: widgetRowWrapper.activeOrAdded ? "check" : "add"
+                                                                iconSize: 16
+                                                                color: widgetRowWrapper.activeOrAdded
+                                                                    ? (root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnPrimary)
+                                                                    : (root.isWuWa ? (widgetRowBtn.hovered ? SettingsTheme.colTextPrimary : SettingsTheme.colTextSecondary) : Appearance.colors.colOnLayer1)
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
-                                }
-                                MaterialSymbol {
-                                    readonly property bool activeOrAdded: (catalogItemWrapper.modelData.legacy
-                                        ? (Config.options.background.widgets[catalogItemWrapper.modelData.id] && Config.options.background.widgets[catalogItemWrapper.modelData.id].enable)
-                                        : Config.isWidgetActive(catalogItemWrapper.modelData.id))
-                                    text: activeOrAdded ? "check" : "add"
-                                    iconSize: 20
-                                    color: activeOrAdded
-                                        ? (root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary)
-                                        : (root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer1)
                                 }
                             }
                         }
