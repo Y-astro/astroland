@@ -40,7 +40,10 @@ Item {
         Config.options.bar.layouts.hiddenWidgets = hidden;
         Config.options.bar.layouts[key] = entries.map(entry => entry.id);
     }
+    readonly property alias flickable: contentPage.flickable
+
     ContentPage {
+        id: contentPage
         anchors.fill: parent
         forceWidth: false
         NoticeBox {

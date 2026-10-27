@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import qs
 import qs.modules.common
@@ -18,6 +19,9 @@ Rectangle {
     readonly property var metadata: root.instance ? WidgetsRegistry.getWidgetMetadata(root.instance.widgetId) : null
     readonly property var legacy: LegacyWidgetCatalog.widgets.find(entry => entry.id === GlobalStates.editWidgetKey)
     readonly property string selectionName: (root.metadata ? root.metadata.name : "") || (root.legacy ? root.legacy.name : "") || ""
+
+    readonly property bool isSettingsScope: true
+    readonly property bool isWuWa: SettingsTheme.isWuWa
 
     function normalizeCategory(cat) {
         if (!cat) return "Other";
@@ -77,8 +81,10 @@ Rectangle {
             });
     }
 
-    color: Appearance.colors.colLayer0
+    color: isWuWa ? SettingsTheme.colWindowShell : Appearance.colors.colLayer0
     radius: Appearance.rounding.large
+    border.width: isWuWa ? 1 : 0
+    border.color: isWuWa ? SettingsTheme.colWindowBorder : (Appearance.colors.colLayer0Border ?? "transparent")
     clip: true
 
     function setPosition(key, value) {
@@ -146,6 +152,16 @@ Rectangle {
         target: GlobalStates
         function onEditWidgetKeyChanged() { root.showingOptions = false; }
         function onEditWidgetOptionsRequested() { root.showingOptions = true; }
+        function onEditModeScrollRequested(dy) {
+            if (GlobalStates.editModePage === "bar") {
+                if (barLoader.item && barLoader.item.flickable) {
+                    var f = barLoader.item.flickable;
+                    f.contentY = Math.max(0, Math.min(f.contentHeight - f.height, f.contentY + dy));
+                }
+            } else if (catalogListView) {
+                catalogListView.contentY = Math.max(0, Math.min(catalogListView.contentHeight - catalogListView.height, catalogListView.contentY + dy));
+            }
+        }
     }
     MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons; onWheel: wheel => wheel.accepted = true }
     ColumnLayout {
@@ -204,15 +220,21 @@ Rectangle {
                     MaterialSymbol {
                         text: "drag_indicator"
                         iconSize: 20
-                        color: Appearance.colors.colSubtext
+                        color: root.isWuWa
+                            ? (headerDrag.active ? SettingsTheme.colAccent : (headerHover.hovered ? SettingsTheme.colTextPrimary : SettingsTheme.colTextSecondary))
+                            : Appearance.colors.colSubtext
                         opacity: headerDrag.active ? 1.0 : (headerHover.hovered ? 0.8 : 0.4)
-                        Behavior on opacity { NumberAnimation { duration: 120 } }
+                        Behavior on opacity {
+                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                        }
                     }
 
                     StyledText {
                         Layout.fillWidth: true
                         text: qsTr("Edit desktop")
                         font.pixelSize: 22
+                        font.weight: Font.DemiBold
+                        color: root.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer0
                         elide: Text.ElideRight
                     }
                 }
@@ -224,9 +246,24 @@ Rectangle {
             }
 
             RippleButton {
+                id: doneBtn
                 implicitWidth: 70; implicitHeight: 40
+                buttonRadius: Appearance.rounding.small
+                colBackground: root.isWuWa ? SettingsTheme.colItemBg : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 1)
+                colBackgroundHover: root.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colLayer1Hover
+                colBackgroundActive: root.isWuWa ? SettingsTheme.colControlBgActive : Appearance.colors.colLayer1Active
+                colRipple: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer1Active
+                borderWidth: root.isWuWa ? 1 : 0
+                borderColor: root.isWuWa ? SettingsTheme.colNavBorder : "transparent"
                 onClicked: GlobalStates.closeEditMode()
-                StyledText { anchors.centerIn: parent; text: qsTr("Done") }
+                StyledText {
+                    anchors.centerIn: parent
+                    text: qsTr("Done")
+                    font.weight: Font.Medium
+                    color: root.isWuWa
+                        ? (doneBtn.hovered ? SettingsTheme.colTextPrimary : SettingsTheme.colAccent)
+                        : Appearance.colors.colOnLayer1
+                }
             }
         }
         ConfigSelectionArray {
@@ -236,6 +273,7 @@ Rectangle {
             onSelected: value => GlobalStates.editModePage = value
         }
         Loader {
+            id: barLoader
             Layout.fillWidth: true
             Layout.fillHeight: true
             active: GlobalStates.editModePage === "bar"
@@ -247,22 +285,56 @@ Rectangle {
             Layout.fillHeight: true
             visible: GlobalStates.editModePage !== "bar"
             spacing: 8
-            StyledText { Layout.fillWidth: true; text: qsTr("Drag widgets to move them. Ctrl-click to select several, or drag a selection box on the desktop."); wrapMode: Text.Wrap; font.pixelSize: 12 }
+            StyledText {
+                Layout.fillWidth: true
+                text: qsTr("Drag widgets to move them. Ctrl-click to select several, or drag a selection box on the desktop.")
+                wrapMode: Text.Wrap
+                font.pixelSize: 12
+                color: root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
+            }
             RowLayout {
                 visible: root.entry !== undefined && root.entry !== null
                 Layout.fillWidth: true
-                StyledText { Layout.fillWidth: true; text: root.selectionName; font.bold: true; elide: Text.ElideRight }
+                StyledText {
+                    Layout.fillWidth: true
+                    text: root.selectionName
+                    font.bold: true
+                    elide: Text.ElideRight
+                    color: root.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
+                }
                 RippleButton {
                     implicitWidth: 36; implicitHeight: 36
+                    buttonRadius: Appearance.rounding.small
+                    colBackground: root.isWuWa ? SettingsTheme.colItemBg : "transparent"
+                    colBackgroundHover: root.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colLayer1Hover
+                    colRipple: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer1Active
+                    borderWidth: root.isWuWa ? 1 : 0
+                    borderColor: root.isWuWa ? SettingsTheme.colNavBorder : "transparent"
                     visible: root.instance !== undefined
                     onClicked: root.duplicate()
-                    MaterialSymbol { anchors.centerIn: parent; text: "content_copy"; iconSize: 20 }
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        text: "content_copy"
+                        iconSize: 20
+                        color: root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer1
+                    }
                     StyledToolTip { text: qsTr("Duplicate") }
                 }
                 RippleButton {
                     implicitWidth: 36; implicitHeight: 36
+                    buttonRadius: Appearance.rounding.small
+                    colBackground: root.isWuWa ? SettingsTheme.colItemBg : "transparent"
+                    colBackgroundHover: root.isWuWa ? (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colThermalOrange, 0.20) : SettingsTheme.colNavHover) : Appearance.colors.colLayer1Hover
+                    colRipple: root.isWuWa ? SettingsTheme.colThermalOrange : Appearance.colors.colLayer1Active
+                    borderWidth: root.isWuWa ? 1 : 0
+                    borderColor: root.isWuWa ? SettingsTheme.colNavBorder : "transparent"
                     onClicked: root.removeSelection()
-                    MaterialSymbol { anchors.centerIn: parent; text: "delete"; iconSize: 20 }
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        text: "delete"
+                        iconSize: 20
+                        color: root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer1
+                    }
                     StyledToolTip { text: qsTr("Remove") }
                 }
             }
@@ -307,10 +379,21 @@ Rectangle {
                 onCheckedChanged: if (root.instance && checked !== root.instance.pinned) root.setPosition("pinned", checked)
             }
             RippleButton {
+                id: optionsBtn
                 Layout.fillWidth: true; implicitHeight: 36
+                buttonRadius: Appearance.rounding.small
+                colBackground: root.isWuWa ? SettingsTheme.colItemBg : "transparent"
+                colBackgroundHover: root.isWuWa ? SettingsTheme.colNavHover : Appearance.colors.colLayer1Hover
+                colRipple: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer1Active
+                borderWidth: root.isWuWa ? 1 : 0
+                borderColor: root.isWuWa ? SettingsTheme.colNavBorder : "transparent"
                 visible: !!root.entry
                 onClicked: root.showingOptions = !root.showingOptions
-                StyledText { anchors.centerIn: parent; text: root.showingOptions ? qsTr("Back to catalog") : qsTr("Widget options") }
+                StyledText {
+                    anchors.centerIn: parent
+                    text: root.showingOptions ? qsTr("Back to catalog") : qsTr("Widget options")
+                    color: root.isWuWa ? (optionsBtn.hovered ? SettingsTheme.colTextPrimary : SettingsTheme.colAccent) : Appearance.colors.colOnLayer1
+                }
             }
             Loader {
                 Layout.fillWidth: true; Layout.fillHeight: true
@@ -329,9 +412,14 @@ Rectangle {
                     onTextEdited: root.query = text
                 }
                 ListView {
+                    id: catalogListView
                     Layout.fillWidth: true; Layout.fillHeight: true
                     clip: true; spacing: 0
                     model: root.catalog
+
+                    ScrollBar.vertical: StyledScrollBar {
+                        id: catalogScrollBar
+                    }
 
                     section.property: "displayCategory"
                     section.criteria: ViewSection.FullString
@@ -349,6 +437,12 @@ Rectangle {
                                 anchors.fill: parent
                                 anchors.topMargin: 4
                                 anchors.bottomMargin: 2
+                                anchors.rightMargin: (catalogListView.contentHeight > catalogListView.height) ? 10 : 0
+                                buttonRadius: Appearance.rounding.small
+                                colBackground: "transparent"
+                                colBackgroundHover: root.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer1Hover
+                                colBackgroundActive: root.isWuWa ? SettingsTheme.colControlBgActive : Appearance.colors.colLayer1Active
+                                colRipple: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer1Active
                                 onClicked: root.toggleCategory(sectionHeader.section)
                                 contentItem: RowLayout {
                                     anchors.fill: parent
@@ -357,12 +451,14 @@ Rectangle {
                                     MaterialSymbol {
                                         text: sectionHeader.isCollapsed ? "chevron_right" : "expand_more"
                                         iconSize: 18
+                                        color: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnLayer1
                                     }
                                     StyledText {
                                         Layout.fillWidth: true
                                         text: sectionHeader.section
                                         font.bold: true
                                         font.pixelSize: 13
+                                        color: root.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
                                     }
                                 }
                             }
@@ -384,19 +480,46 @@ Rectangle {
                             anchors.top: parent.top
                             anchors.left: parent.left
                             anchors.right: parent.right
+                            anchors.rightMargin: (catalogListView.contentHeight > catalogListView.height) ? 10 : 0
                             height: 56
+                            buttonRadius: Appearance.rounding.normal
+                            colBackground: root.isWuWa ? SettingsTheme.colRowBg : "transparent"
+                            colBackgroundHover: root.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer1Hover
+                            colBackgroundActive: root.isWuWa ? SettingsTheme.colControlBgActive : Appearance.colors.colLayer1Active
+                            colRipple: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer1Active
+                            borderWidth: root.isWuWa ? SettingsTheme.rowBorderWidth : 0
+                            borderColor: root.isWuWa ? SettingsTheme.colRowBorder : "transparent"
                             onClicked: root.selectOrAdd(catalogItemWrapper.modelData)
                             contentItem: RowLayout {
                                 anchors.fill: parent; anchors.margins: 8
-                                MaterialSymbol { text: catalogItemWrapper.modelData.icon || "widgets"; iconSize: 24 }
+                                MaterialSymbol {
+                                    text: catalogItemWrapper.modelData.icon || "widgets"
+                                    iconSize: 24
+                                    color: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnLayer1
+                                }
                                 ColumnLayout {
                                     Layout.fillWidth: true; spacing: 0
-                                    StyledText { Layout.fillWidth: true; text: catalogItemWrapper.modelData.name; elide: Text.ElideRight }
-                                    StyledText { text: catalogItemWrapper.modelData.category || ""; font.pixelSize: 11 }
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: catalogItemWrapper.modelData.name
+                                        elide: Text.ElideRight
+                                        color: root.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
+                                    }
+                                    StyledText {
+                                        text: catalogItemWrapper.modelData.category || ""
+                                        font.pixelSize: 11
+                                        color: root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
+                                    }
                                 }
                                 MaterialSymbol {
-                                    text: (catalogItemWrapper.modelData.legacy ? (Config.options.background.widgets[catalogItemWrapper.modelData.id] && Config.options.background.widgets[catalogItemWrapper.modelData.id].enable) : Config.isWidgetActive(catalogItemWrapper.modelData.id)) ? "check" : "add"
+                                    readonly property bool activeOrAdded: (catalogItemWrapper.modelData.legacy
+                                        ? (Config.options.background.widgets[catalogItemWrapper.modelData.id] && Config.options.background.widgets[catalogItemWrapper.modelData.id].enable)
+                                        : Config.isWidgetActive(catalogItemWrapper.modelData.id))
+                                    text: activeOrAdded ? "check" : "add"
                                     iconSize: 20
+                                    color: activeOrAdded
+                                        ? (root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colPrimary)
+                                        : (root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colOnLayer1)
                                 }
                             }
                         }

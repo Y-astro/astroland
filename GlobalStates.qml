@@ -131,6 +131,7 @@ Singleton {
             root.desktopMenuOpen = false;
         }
     }
+    signal editModeScrollRequested(real dy)
     IpcHandler {
         target: "editMode"
         function open(): void { root.openEditMode("widgets", ""); }
@@ -139,6 +140,7 @@ Singleton {
         function previewLock(enabled: bool): void { root.editLockPreviewExplicit = enabled; }
         function close(): void { root.closeEditMode(); }
         function toggle(): void { if (root.editMode) root.closeEditMode(); else root.openEditMode("widgets", ""); }
+        function scroll(dy: real): void { root.editModeScrollRequested(dy); }
     }
     property bool islandDashboardOpen: false
 
