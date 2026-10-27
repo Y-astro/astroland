@@ -632,44 +632,65 @@ Rectangle {
                                                     const activeList = Config.options.background.activeWidgets ?? [];
                                                     return activeList.some(entry => (entry.widgetId ?? entry.id) === widgetItem.id);
                                                 }
+                                                readonly property bool isSelected: {
+                                                    if (widgetItem.legacy) {
+                                                        return GlobalStates.editWidgetKey === widgetItem.id;
+                                                    }
+                                                    return !!(root.instance && (root.instance.widgetId ?? root.instance.id) === widgetItem.id);
+                                                }
 
                                                 RippleButton {
                                                     id: widgetRowBtn
                                                     anchors.fill: parent
                                                     buttonRadius: Appearance.rounding.small
                                                     colBackground: widgetRowWrapper.activeOrAdded
-                                                        ? (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.12) : Appearance.colors.colSecondaryContainer)
+                                                        ? (root.isWuWa ? (widgetRowWrapper.isSelected ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.16) : ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.10)) : Appearance.colors.colSecondaryContainer)
                                                         : (root.isWuWa ? SettingsTheme.colRowBg : "transparent")
                                                     colBackgroundHover: widgetRowWrapper.activeOrAdded
-                                                        ? (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.20) : Appearance.colors.colLayer1Hover)
+                                                        ? (root.isWuWa ? (widgetRowWrapper.isSelected ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.22) : ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.16)) : Appearance.colors.colLayer1Hover)
                                                         : (root.isWuWa ? SettingsTheme.colRowHover : Appearance.colors.colLayer1Hover)
                                                     colBackgroundActive: root.isWuWa ? SettingsTheme.colControlBgActive : Appearance.colors.colLayer1Active
                                                     colRipple: root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colLayer1Active
                                                     borderWidth: root.isWuWa ? SettingsTheme.rowBorderWidth : 0
                                                     borderColor: widgetRowWrapper.activeOrAdded
-                                                        ? (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.45) : Appearance.colors.colPrimary)
-                                                        : (root.isWuWa ? SettingsTheme.colRowBorder : "transparent")
+                                                        ? (root.isWuWa ? (widgetRowBtn.hovered ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.60) : (widgetRowWrapper.isSelected ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.50) : ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.35))) : Appearance.colors.colPrimary)
+                                                        : (root.isWuWa ? (widgetRowBtn.hovered ? ColorUtils.applyAlpha(SettingsTheme.colAntiqueGold, 0.28 * SettingsTheme.intensity) : SettingsTheme.colRowBorder) : "transparent")
                                                     onClicked: root.selectOrAdd(widgetRowWrapper.widgetItem)
 
                                                     contentItem: RowLayout {
                                                         anchors.fill: parent
-                                                        anchors.leftMargin: 12
-                                                        anchors.rightMargin: 12
-                                                        spacing: 12
+                                                        anchors.leftMargin: 10
+                                                        anchors.rightMargin: 10
+                                                        spacing: 10
 
-                                                        MaterialSymbol {
+                                                        Rectangle {
+                                                            id: iconTile
                                                             Layout.alignment: Qt.AlignVCenter
-                                                            text: widgetRowWrapper.widgetItem.icon || "widgets"
-                                                            iconSize: 22
+                                                            implicitWidth: 32
+                                                            implicitHeight: 32
+                                                            radius: Appearance.rounding.verysmall
                                                             color: widgetRowWrapper.activeOrAdded
-                                                                ? SettingsTheme.colAccent
-                                                                : (root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnLayer1)
-                                                            opacity: widgetRowWrapper.activeOrAdded ? 1.0 : 0.85
+                                                                ? (root.isWuWa ? (widgetRowBtn.hovered ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.24) : ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.16)) : Appearance.colors.colPrimaryContainer)
+                                                                : (root.isWuWa ? (widgetRowBtn.hovered ? ColorUtils.applyAlpha(SettingsTheme.colTealInkDark, 0.70) : ColorUtils.applyAlpha(SettingsTheme.colTealInkDark, 0.45)) : Appearance.colors.colLayer1)
+                                                            border.width: root.isWuWa ? 1 : 0
+                                                            border.color: widgetRowWrapper.activeOrAdded
+                                                                ? (root.isWuWa ? (widgetRowBtn.hovered ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.60) : ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.38)) : "transparent")
+                                                                : (root.isWuWa ? (widgetRowBtn.hovered ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.24) : ColorUtils.applyAlpha(SettingsTheme.colAntiqueGold, 0.10 * SettingsTheme.intensity)) : "transparent")
+
+                                                            MaterialSymbol {
+                                                                anchors.centerIn: parent
+                                                                text: widgetRowWrapper.widgetItem.icon || "widgets"
+                                                                iconSize: 18
+                                                                color: widgetRowWrapper.activeOrAdded
+                                                                    ? (root.isWuWa ? (widgetRowBtn.hovered ? Qt.lighter(SettingsTheme.colAccent, 1.10) : SettingsTheme.colAccent) : Appearance.colors.colOnPrimaryContainer)
+                                                                    : (root.isWuWa ? (widgetRowBtn.hovered ? SettingsTheme.colTextPrimary : SettingsTheme.colTextSecondary) : Appearance.colors.colOnLayer1)
+                                                            }
                                                         }
 
                                                         ColumnLayout {
                                                             Layout.fillWidth: true
-                                                            spacing: 1
+                                                            Layout.alignment: Qt.AlignVCenter
+                                                            spacing: 2
 
                                                             StyledText {
                                                                 Layout.fillWidth: true
@@ -677,36 +698,43 @@ Rectangle {
                                                                 elide: Text.ElideRight
                                                                 font.pixelSize: 13
                                                                 font.weight: widgetRowWrapper.activeOrAdded ? Font.DemiBold : Font.Medium
-                                                                color: root.isWuWa ? SettingsTheme.colTextPrimary : Appearance.colors.colOnLayer1
+                                                                color: root.isWuWa
+                                                                    ? (widgetRowWrapper.activeOrAdded ? SettingsTheme.colTextPrimary : (widgetRowBtn.hovered ? Qt.lighter(SettingsTheme.colTextPrimary, 1.05) : SettingsTheme.colTextPrimary))
+                                                                    : Appearance.colors.colOnLayer1
                                                             }
 
                                                             StyledText {
                                                                 Layout.fillWidth: true
-                                                                text: widgetRowWrapper.widgetItem.description || widgetRowWrapper.widgetItem.category || ""
+                                                                text: widgetRowWrapper.widgetItem.description || widgetRowWrapper.widgetItem.displayCategory || widgetRowWrapper.widgetItem.category || ""
                                                                 elide: Text.ElideRight
                                                                 font.pixelSize: 11
-                                                                color: root.isWuWa ? SettingsTheme.colTextSecondary : Appearance.colors.colSubtext
+                                                                color: root.isWuWa
+                                                                    ? (widgetRowBtn.hovered ? Qt.lighter(SettingsTheme.colTextSecondary, 1.10) : SettingsTheme.colTextSecondary)
+                                                                    : Appearance.colors.colSubtext
+                                                                opacity: widgetRowWrapper.activeOrAdded ? 0.90 : 0.75
                                                             }
                                                         }
 
                                                         Rectangle {
+                                                            id: actionBadge
+                                                            Layout.alignment: Qt.AlignVCenter
                                                             implicitWidth: 26
                                                             implicitHeight: 26
                                                             radius: 13
                                                             color: widgetRowWrapper.activeOrAdded
-                                                                ? (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.22) : Appearance.colors.colPrimary)
-                                                                : (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colTealInkDark, 0.50) : "transparent")
+                                                                ? (root.isWuWa ? (widgetRowBtn.hovered ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.28) : ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.20)) : Appearance.colors.colPrimary)
+                                                                : (root.isWuWa ? (widgetRowBtn.hovered ? ColorUtils.applyAlpha(SettingsTheme.colTealInkDark, 0.70) : ColorUtils.applyAlpha(SettingsTheme.colTealInkDark, 0.45)) : "transparent")
                                                             border.width: 1
                                                             border.color: widgetRowWrapper.activeOrAdded
-                                                                ? (root.isWuWa ? SettingsTheme.colAccent : "transparent")
-                                                                : (root.isWuWa ? ColorUtils.applyAlpha(SettingsTheme.colTextSecondary, 0.35) : "transparent")
+                                                                ? (root.isWuWa ? (widgetRowBtn.hovered ? Qt.lighter(SettingsTheme.colAccent, 1.15) : SettingsTheme.colAccent) : "transparent")
+                                                                : (root.isWuWa ? (widgetRowBtn.hovered ? ColorUtils.applyAlpha(SettingsTheme.colAccent, 0.40) : ColorUtils.applyAlpha(SettingsTheme.colTextSecondary, 0.22)) : "transparent")
 
                                                             MaterialSymbol {
                                                                 anchors.centerIn: parent
                                                                 text: widgetRowWrapper.activeOrAdded ? "check" : "add"
-                                                                iconSize: 16
+                                                                iconSize: 15
                                                                 color: widgetRowWrapper.activeOrAdded
-                                                                    ? (root.isWuWa ? SettingsTheme.colAccent : Appearance.colors.colOnPrimary)
+                                                                    ? (root.isWuWa ? (widgetRowBtn.hovered ? Qt.lighter(SettingsTheme.colAccent, 1.15) : SettingsTheme.colAccent) : Appearance.colors.colOnPrimary)
                                                                     : (root.isWuWa ? (widgetRowBtn.hovered ? SettingsTheme.colTextPrimary : SettingsTheme.colTextSecondary) : Appearance.colors.colOnLayer1)
                                                             }
                                                         }

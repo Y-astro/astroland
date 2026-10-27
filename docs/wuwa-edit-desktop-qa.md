@@ -121,3 +121,75 @@
   - `test_edit_mode_motion_audit.py` -> Passed (2/2).
   - `test_type_to_search_edit_mode_contract.py` -> Passed (2/2).
   - `test_widgets_tab_hierarchy_contract.py` -> Passed (7/7).
+
+---
+
+# WuWa Edit Desktop — QA Report: Widget Row Polish & Interaction Clarity (Agent 3)
+
+**Date**: 2026-10-27  
+**Scope**: Edit Desktop Interface (`WidgetEditorPanel.qml`, `test_widgets_row_polish_contract.py`)  
+**Design Direction**: WuWa B+ Material Language (Dense Jinzhou Frost Row-Level Polish)  
+- **Dark Inky Teal Row Surfaces**: `SettingsTheme.colRowBg` (`#182E29` @ 0.38 alpha) transitioning to `SettingsTheme.colRowHover` (`#203a34` @ 0.48 alpha) on hover.
+- **Hairline Antique Gold Borders**: `SettingsTheme.colRowBorder` (antique gold @ 0.12 * intensity) brightening smoothly to 0.28 * intensity on hover.
+- **Dedicated 32x32 Squircle Icon Containers**: Anchors every leading glyph in a centered tile (`radius: Appearance.rounding.verysmall`), eliminating optical jitter across variable-width glyphs.
+- **Warm Ivory & Misty Sage Typography Hierarchy**: 13px warm ivory title (`Font.DemiBold` for active, `Font.Medium` for inactive) paired with 11px misty sage secondary description (`opacity: 0.90` active vs `0.75` resting).
+- **Tactile 26x26 Trailing Action Badges**: Circular badge with distinct interactive states — subtle dark teal glass with misty sage `+` for uninstalled widgets, antique gold glass badge with solid antique gold border and `✓` checkmark for installed/active widgets.
+
+---
+
+## 1. Visual Verification & Screenshots
+
+| Target | Screenshot Closeup | Visual Detail & Interaction State |
+| :--- | :--- | :--- |
+| **Normal Row (Resting Inactive)** | [`agent3_1_normal_row.png`](file:///home/astro/.config/quickshell/end4-pC/docs/wuwa-edit-desktop-qa/agent3_1_normal_row.png) | Dark frosted inner surface (`colRowBg`), 32x32 squircle icon tile with misty sage glyph, warm ivory 13px title, 11px misty sage description, circular `+` pill. |
+| **Hovered Row (Hovered Inactive)** | [`agent3_2_hovered_row.png`](file:///home/astro/.config/quickshell/end4-pC/docs/wuwa-edit-desktop-qa/agent3_2_hovered_row.png) | Hover surface (`colRowHover`), illuminated antique gold border, darkened icon tile with warm ivory glyph, hand pointer cursor, and glowing antique gold `+` badge. |
+| **Active/Installed Row with Check (Resting)** | [`agent3_3_active_installed_row.png`](file:///home/astro/.config/quickshell/end4-pC/docs/wuwa-edit-desktop-qa/agent3_3_active_installed_row.png) | Antique gold tinted glass background, antique gold hairline border, 32x32 gold icon tile with glowing antique gold icon, 13px DemiBold title, and circular gold checkmark (`✓`) badge. |
+| **Inactive Row with Plus Detail** | [`agent3_4_inactive_row_plus.png`](file:///home/astro/.config/quickshell/end4-pC/docs/wuwa-edit-desktop-qa/agent3_4_inactive_row_plus.png) | High-contrast detail of resting inactive row showing the 26x26 circular `+` button in misty sage, clean padding (10px horizontal), and 52px density. |
+| **Active/Installed Row (Hovered)** | [`agent3_5_active_hovered_row.png`](file:///home/astro/.config/quickshell/end4-pC/docs/wuwa-edit-desktop-qa/agent3_5_active_hovered_row.png) | Active row reacting to hover: reinforced antique gold border glow (`colAccent` @ 0.60), brightened checkmark badge, and pointer cursor. |
+| **Full Panel Overview** | [`agent3_overview_panel.png`](file:///home/astro/.config/quickshell/end4-pC/docs/wuwa-edit-desktop-qa/agent3_overview_panel.png) | Full 440px wide Edit Desktop panel showing multiple section cards and aligned widget rows. |
+
+---
+
+## 2. Row Polish & Structural Improvements
+
+1. **Fixed-Dimension Squircle Icon Tiles**:
+   - Replaced raw `MaterialSymbol` alignment with an enclosing 32x32 `iconTile` (`radius: Appearance.rounding.verysmall`).
+   - Centered 18px icon inside the container.
+   - Guaranteed identical horizontal baseline and left-margin alignment across all categories and varying glyph geometries (e.g. narrow `schedule` vs wide `calendar_month`).
+   - Inactive state: `colTealInkDark` @ 0.45 fill, misty sage icon.
+   - Active state: `colAccent` @ 0.16 fill, antique gold icon and hairline border.
+
+2. **Typography Hierarchy**:
+   - Title: `font.pixelSize: 13`, color warm ivory (`SettingsTheme.colTextPrimary`), weighted `Font.DemiBold` for installed/active rows and `Font.Medium` for inactive rows.
+   - Description / Subtitle: `font.pixelSize: 11`, color misty sage (`SettingsTheme.colTextSecondary`), with `opacity: 0.90` on active rows and `0.75` on inactive rows for clean vertical rhythm.
+   - Text elision: `Text.ElideRight` applied to prevent badge overlap or layout clipping.
+
+3. **Trailing Action Badge**:
+   - 26x26 circular badge (`radius: 13`) with 15px centered symbol.
+   - Uninstalled/inactive: Dark inky teal translucent pill (`colTealInkDark` @ 0.45 resting, 0.70 hover) with misty sage `+` icon that warms to warm ivory on row hover.
+   - Installed/active: Semi-translucent antique gold pill (`colAccent` @ 0.20 resting, 0.28 hover) with solid antique gold hairline border and antique gold `✓` checkmark.
+
+4. **Interactive States & Hover Feedback**:
+   - Inactive hover: Transitions to `SettingsTheme.colRowHover` (`#203a34` @ 0.48), hairline border illuminates to antique gold (`colAntiqueGold` @ 0.28 * intensity), icon tile darkens and icon warms to ivory.
+   - Active hover: Tint deepens (`colAccent` @ 0.18), border illuminates to `colAccent` @ 0.60, check badge highlights.
+   - Avoids loud neon fills or over-bright hovers; strictly adheres to dense WuWa Jinzhou Frost aesthetics.
+
+5. **Selection & Logic Integrity**:
+   - Preserved `root.selectOrAdd(widget)` on click: clicking an uninstalled widget adds it to the desktop canvas; clicking an already installed widget selects it for on-screen editing.
+   - `isSelected` focus support: currently selected widget on desktop canvas receives additional accent glow.
+
+---
+
+## 3. Preservations & Compliance
+- **Click & Add/Remove Logic**: 100% preserved.
+- **Bar Tab**: 100% untouched.
+- **Wallpaper Selector**: 100% untouched.
+- **Performance & Blur**: Zero custom blur shaders introduced; uses native compositor glass and standard QML property bindings.
+- **Motion Compliance**: No raw durations, no bare animations, no `Easing.` in `modules/ii/editMode/` (`test_edit_mode_motion_audit.py`).
+- **Automated Tests**:
+  - `qmllint modules/ii/editMode/WidgetEditorPanel.qml` -> Clean (0 warnings).
+  - `test_edit_mode_motion_audit.py` -> Passed (2/2).
+  - `test_type_to_search_edit_mode_contract.py` -> Passed (2/2).
+  - `test_widgets_tab_hierarchy_contract.py` -> Passed (7/7).
+  - `test_widgets_row_polish_contract.py` -> Passed (5/5).
+  - Total: 16/16 tests passing.
