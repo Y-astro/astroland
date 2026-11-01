@@ -103,15 +103,33 @@ StyledImage {
                 return ["true"];
 
             const maxSize = Images.thumbnailSizes[root.thumbnailSizeName];
-            const sourcePath = StringUtils.shellSingleQuoteEscape(FileUtils.trimFileProtocol(root.sourcePath));
-            const thumbnailPath = StringUtils.shellSingleQuoteEscape(FileUtils.trimFileProtocol(root.thumbnailPath));
-            const thumbnailDirectory = StringUtils.shellSingleQuoteEscape(FileUtils.parentDirectory(FileUtils.trimFileProtocol(root.thumbnailPath)));
+            const thumbPath = FileUtils.trimFileProtocol(root.thumbnailPath);
+            const srcPath = FileUtils.trimFileProtocol(root.sourcePath);
 
             if (root.sourceIsVideo) {
-                return ["bash", "-c", `mkdir -p '${thumbnailDirectory}' && [ -f '${thumbnailPath}' ] && exit 0 || { command -v ffmpeg >/dev/null 2>&1 && ffmpeg -v error -y -i '${sourcePath}' -frames:v 1 -vf 'scale=${maxSize}:${maxSize}:force_original_aspect_ratio=decrease' '${thumbnailPath}' && exit 1; exit 2; }`];
+                return ["bash", "-c", `
+                    thumb="$1"; src="$2"; max="$3"
+                    mkdir -p "\${thumb%/*}"
+                    [ -f "$thumb" ] && exit 0
+                    command -v ffmpeg >/dev/null 2>&1 || exit 2
+                    tmp="$thumb.$$.tmp.png"
+                    trap 'kill "$pid" 2>/dev/null; rm -f "$tmp"' EXIT
+                    ffmpeg -v error -y -i "$src" -frames:v 1 -vf "scale=$max:$max:force_original_aspect_ratio=decrease" -f image2 -c:v png "$tmp" & pid=$!
+                    wait "$pid" && mv "$tmp" "$thumb" && exit 1
+                    exit 2
+                `, "_", thumbPath, srcPath, `${maxSize}`];
             }
 
-            return ["bash", "-c", `mkdir -p '${thumbnailDirectory}' && [ -f '${thumbnailPath}' ] && exit 0 || { magick '${sourcePath}' -resize ${maxSize}x${maxSize} '${thumbnailPath}' && exit 1; }`];
+            return ["bash", "-c", `
+                thumb="$1"; src="$2"; max="$3"
+                mkdir -p "\${thumb%/*}"
+                [ -f "$thumb" ] && exit 0
+                tmp="$thumb.$$.tmp.png"
+                trap 'kill "$pid" 2>/dev/null; rm -f "$tmp"' EXIT
+                magick "$src" -resize "$max"x"$max" "$tmp" & pid=$!
+                wait "$pid" && mv "$tmp" "$thumb" && exit 1
+                exit 2
+            `, "_", thumbPath, srcPath, `${maxSize}`];
         }
         onExited: (exitCode, exitStatus) => {
             if (exitCode === 1) { // Force reload if thumbnail had to be generated
