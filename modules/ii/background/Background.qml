@@ -81,6 +81,15 @@ Variants {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
         }
 
+        // Decode wallpapers bounded to physical display pixels.
+        // Uploading a 5K+ image and its mipmaps to the GPU stalls the render thread, and the GUI thread with it.
+        readonly property size wallpaperSourceSize: {
+            const w = modelData ? (modelData.width ?? bgRoot.width) : bgRoot.width;
+            const h = modelData ? (modelData.height ?? bgRoot.height) : bgRoot.height;
+            const dpr = modelData ? (modelData.devicePixelRatio ?? 1.0) : 1.0;
+            return Qt.size(Math.ceil(w * dpr), Math.ceil(h * dpr));
+        }
+
         property real transitionProgress: 1.0
         property bool transitionPending: false
         property int wallpaperUpdateSerial: 0
@@ -229,6 +238,7 @@ Variants {
                     id: previousWallpaper
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
+                    sourceSize: bgRoot.wallpaperSourceSize
                     cache: true
                     mipmap: true
                     smooth: true
@@ -241,6 +251,7 @@ Variants {
                     id: wallpaper
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
+                    sourceSize: bgRoot.wallpaperSourceSize
                     cache: true
                     smooth: true
                     mipmap: true

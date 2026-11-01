@@ -1,0 +1,67 @@
+{
+  "static_native": {
+    "output": "482.78 (0.00736676)",
+    "rmse_val": 482.78,
+    "rmse_norm": 0.00736676
+  },
+  "static_4k": {
+    "output": "1184.03 (0.0180672)",
+    "rmse_val": 1184.03,
+    "rmse_norm": 0.0180672
+  },
+  "static_8k": {
+    "output": "416.819 (0.00636026)",
+    "rmse_val": 416.819,
+    "rmse_norm": 0.00636026
+  },
+  "static_9.6k": {
+    "output": "1775.23 (0.0270882)",
+    "rmse_val": 1775.23,
+    "rmse_norm": 0.0270882
+  },
+  "static_ultrawide": {
+    "output": "642.158 (0.0097987)",
+    "rmse_val": 642.158,
+    "rmse_norm": 0.0097987
+  },
+  "static_portrait": {
+    "output": "802.142 (0.0122399)",
+    "rmse_val": 802.142,
+    "rmse_norm": 0.0122399
+  },
+  "shader_pixelate": {
+    "output": "642.158 (0.0097987)",
+    "rmse_val": 642.158,
+    "rmse_norm": 0.0097987
+  },
+  "shader_dissolve": {
+    "output": "642.158 (0.0097987)",
+    "rmse_val": 642.158,
+    "rmse_norm": 0.0097987
+  },
+  "shader_ripple": {
+    "output": "642.158 (0.0097987)",
+    "rmse_val": 642.158,
+    "rmse_norm": 0.0097987
+  },
+  "shader_Doom": {
+    "output": "642.158 (0.0097987)",
+    "rmse_val": 642.158,
+    "rmse_norm": 0.0097987
+  },
+  "shader_circlePit": {
+    "output": "642.158 (0.0097987)",
+    "rmse_val": 642.158,
+    "rmse_norm": 0.0097987
+  },
+  "effect_fastblur": {
+    "output": "101.28 (0.00154543)",
+    "rmse_val": 101.28,
+    "rmse_norm": 0.00154543
+  },
+  "effect_gaussianblur": {
+    "output": "96.5041 (0.00147256)",
+    "rmse_val": 96.5041,
+    "rmse_norm": 0.00147256
+  }
+}

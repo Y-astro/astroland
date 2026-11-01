@@ -1,0 +1,330 @@
+{
+  "unbounded": {
+    "mode": "unbounded",
+    "results": [
+      {
+        "file": "/home/astro/Pictures/Wallpapers/wallhaven-k8d7j7.jpg",
+        "mode": "unbounded",
+        "phase": "cold",
+        "decodeTimeMs": 66,
+        "totalTimeMs": 566,
+        "maxFrameDeltaMs": 11,
+        "droppedFrames": 0,
+        "paintedSize": "1725.607476635514x1154",
+        "implicitSize": "1920x1284"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/1378781.png",
+        "mode": "unbounded",
+        "phase": "cold",
+        "decodeTimeMs": 173,
+        "totalTimeMs": 673,
+        "maxFrameDeltaMs": 27,
+        "droppedFrames": 3,
+        "paintedSize": "2051.555555555555x1154",
+        "implicitSize": "3840x2160"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/wallhaven-lydkg2.jpg",
+        "mode": "unbounded",
+        "phase": "cold",
+        "decodeTimeMs": 159,
+        "totalTimeMs": 659,
+        "maxFrameDeltaMs": 27,
+        "droppedFrames": 3,
+        "paintedSize": "2579.3473401877513x1154",
+        "implicitSize": "5000x2237"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/wallpaperflare.com_wallpaper_upscayl_3x_digital-art-4x.png",
+        "mode": "unbounded",
+        "phase": "cold",
+        "decodeTimeMs": 373,
+        "totalTimeMs": 873,
+        "maxFrameDeltaMs": 91,
+        "droppedFrames": 14,
+        "paintedSize": "2051.555555555555x1154",
+        "implicitSize": "7680x4320"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/naive-HM1siQ2bAAAJLVb_upscayl_2x_digital-art-4x.png",
+        "mode": "unbounded",
+        "phase": "cold",
+        "decodeTimeMs": 629,
+        "totalTimeMs": 1129,
+        "maxFrameDeltaMs": 102,
+        "droppedFrames": 15,
+        "paintedSize": "2051.5555555555557x1154",
+        "implicitSize": "8192x4608"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/test_upscayl_4x_digital-art-4x.png",
+        "mode": "unbounded",
+        "phase": "cold",
+        "decodeTimeMs": 881,
+        "totalTimeMs": 1381,
+        "maxFrameDeltaMs": 92,
+        "droppedFrames": 14,
+        "paintedSize": "2308x1154",
+        "implicitSize": "9600x4800"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/test_portrait_2160x3840.png",
+        "mode": "unbounded",
+        "phase": "cold",
+        "decodeTimeMs": 183,
+        "totalTimeMs": 683,
+        "maxFrameDeltaMs": 13,
+        "droppedFrames": 2,
+        "paintedSize": "951x1690.6666666666665",
+        "implicitSize": "2160x3840"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/wallhaven-k8d7j7.jpg",
+        "mode": "unbounded",
+        "phase": "warm",
+        "decodeTimeMs": 33,
+        "totalTimeMs": 533,
+        "maxFrameDeltaMs": 12,
+        "droppedFrames": 0,
+        "paintedSize": "1725.607476635514x1154",
+        "implicitSize": "1920x1284"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/1378781.png",
+        "mode": "unbounded",
+        "phase": "warm",
+        "decodeTimeMs": 90,
+        "totalTimeMs": 590,
+        "maxFrameDeltaMs": 9,
+        "droppedFrames": 0,
+        "paintedSize": "2051.555555555555x1154",
+        "implicitSize": "3840x2160"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/wallhaven-lydkg2.jpg",
+        "mode": "unbounded",
+        "phase": "warm",
+        "decodeTimeMs": 147,
+        "totalTimeMs": 647,
+        "maxFrameDeltaMs": 24,
+        "droppedFrames": 2,
+        "paintedSize": "2579.3473401877513x1154",
+        "implicitSize": "5000x2237"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/wallpaperflare.com_wallpaper_upscayl_3x_digital-art-4x.png",
+        "mode": "unbounded",
+        "phase": "warm",
+        "decodeTimeMs": 277,
+        "totalTimeMs": 777,
+        "maxFrameDeltaMs": 43,
+        "droppedFrames": 6,
+        "paintedSize": "2051.555555555555x1154",
+        "implicitSize": "7680x4320"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/naive-HM1siQ2bAAAJLVb_upscayl_2x_digital-art-4x.png",
+        "mode": "unbounded",
+        "phase": "warm",
+        "decodeTimeMs": 531,
+        "totalTimeMs": 1031,
+        "maxFrameDeltaMs": 83,
+        "droppedFrames": 12,
+        "paintedSize": "2051.5555555555557x1154",
+        "implicitSize": "8192x4608"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/test_upscayl_4x_digital-art-4x.png",
+        "mode": "unbounded",
+        "phase": "warm",
+        "decodeTimeMs": 859,
+        "totalTimeMs": 1359,
+        "maxFrameDeltaMs": 120,
+        "droppedFrames": 18,
+        "paintedSize": "2308x1154",
+        "implicitSize": "9600x4800"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/test_portrait_2160x3840.png",
+        "mode": "unbounded",
+        "phase": "warm",
+        "decodeTimeMs": 112,
+        "totalTimeMs": 612,
+        "maxFrameDeltaMs": 13,
+        "droppedFrames": 1,
+        "paintedSize": "951x1690.6666666666665",
+        "implicitSize": "2160x3840"
+      }
+    ],
+    "peak_rss_mb": 780.83984375,
+    "vram_start_mb": 1425.0,
+    "vram_peak_mb": 2190.0,
+    "vram_delta_mb": 765.0,
+    "stderr": ""
+  },
+  "bounded": {
+    "mode": "bounded",
+    "results": [
+      {
+        "file": "/home/astro/Pictures/Wallpapers/wallhaven-k8d7j7.jpg",
+        "mode": "bounded",
+        "phase": "cold",
+        "decodeTimeMs": 152,
+        "totalTimeMs": 652,
+        "maxFrameDeltaMs": 13,
+        "droppedFrames": 1,
+        "paintedSize": "1726x1154",
+        "implicitSize": "1726x1154"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/1378781.png",
+        "mode": "bounded",
+        "phase": "cold",
+        "decodeTimeMs": 89,
+        "totalTimeMs": 589,
+        "maxFrameDeltaMs": 7,
+        "droppedFrames": 0,
+        "paintedSize": "2052x1154",
+        "implicitSize": "2052x1154"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/wallhaven-lydkg2.jpg",
+        "mode": "bounded",
+        "phase": "cold",
+        "decodeTimeMs": 124,
+        "totalTimeMs": 624,
+        "maxFrameDeltaMs": 9,
+        "droppedFrames": 0,
+        "paintedSize": "2579x1154",
+        "implicitSize": "2579x1154"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/wallpaperflare.com_wallpaper_upscayl_3x_digital-art-4x.png",
+        "mode": "bounded",
+        "phase": "cold",
+        "decodeTimeMs": 260,
+        "totalTimeMs": 760,
+        "maxFrameDeltaMs": 7,
+        "droppedFrames": 0,
+        "paintedSize": "2052x1154",
+        "implicitSize": "2052x1154"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/naive-HM1siQ2bAAAJLVb_upscayl_2x_digital-art-4x.png",
+        "mode": "bounded",
+        "phase": "cold",
+        "decodeTimeMs": 490,
+        "totalTimeMs": 990,
+        "maxFrameDeltaMs": 8,
+        "droppedFrames": 0,
+        "paintedSize": "2052x1154",
+        "implicitSize": "2052x1154"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/test_upscayl_4x_digital-art-4x.png",
+        "mode": "bounded",
+        "phase": "cold",
+        "decodeTimeMs": 689,
+        "totalTimeMs": 1189,
+        "maxFrameDeltaMs": 8,
+        "droppedFrames": 0,
+        "paintedSize": "2308x1154",
+        "implicitSize": "2308x1154"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/test_portrait_2160x3840.png",
+        "mode": "bounded",
+        "phase": "cold",
+        "decodeTimeMs": 184,
+        "totalTimeMs": 684,
+        "maxFrameDeltaMs": 13,
+        "droppedFrames": 1,
+        "paintedSize": "951x1691",
+        "implicitSize": "951x1691"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/wallhaven-k8d7j7.jpg",
+        "mode": "bounded",
+        "phase": "warm",
+        "decodeTimeMs": 38,
+        "totalTimeMs": 538,
+        "maxFrameDeltaMs": 12,
+        "droppedFrames": 0,
+        "paintedSize": "1726x1154",
+        "implicitSize": "1726x1154"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/1378781.png",
+        "mode": "bounded",
+        "phase": "warm",
+        "decodeTimeMs": 103,
+        "totalTimeMs": 603,
+        "maxFrameDeltaMs": 8,
+        "droppedFrames": 0,
+        "paintedSize": "2052x1154",
+        "implicitSize": "2052x1154"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/wallhaven-lydkg2.jpg",
+        "mode": "bounded",
+        "phase": "warm",
+        "decodeTimeMs": 80,
+        "totalTimeMs": 580,
+        "maxFrameDeltaMs": 9,
+        "droppedFrames": 0,
+        "paintedSize": "2579x1154",
+        "implicitSize": "2579x1154"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/wallpaperflare.com_wallpaper_upscayl_3x_digital-art-4x.png",
+        "mode": "bounded",
+        "phase": "warm",
+        "decodeTimeMs": 253,
+        "totalTimeMs": 753,
+        "maxFrameDeltaMs": 13,
+        "droppedFrames": 1,
+        "paintedSize": "2052x1154",
+        "implicitSize": "2052x1154"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/naive-HM1siQ2bAAAJLVb_upscayl_2x_digital-art-4x.png",
+        "mode": "bounded",
+        "phase": "warm",
+        "decodeTimeMs": 500,
+        "totalTimeMs": 1000,
+        "maxFrameDeltaMs": 12,
+        "droppedFrames": 0,
+        "paintedSize": "2052x1154",
+        "implicitSize": "2052x1154"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/test_upscayl_4x_digital-art-4x.png",
+        "mode": "bounded",
+        "phase": "warm",
+        "decodeTimeMs": 658,
+        "totalTimeMs": 1158,
+        "maxFrameDeltaMs": 13,
+        "droppedFrames": 1,
+        "paintedSize": "2308x1154",
+        "implicitSize": "2308x1154"
+      },
+      {
+        "file": "/home/astro/Pictures/Wallpapers/test_portrait_2160x3840.png",
+        "mode": "bounded",
+        "phase": "warm",
+        "decodeTimeMs": 103,
+        "totalTimeMs": 603,
+        "maxFrameDeltaMs": 8,
+        "droppedFrames": 0,
+        "paintedSize": "951x1691",
+        "implicitSize": "951x1691"
+      }
+    ],
+    "peak_rss_mb": 494.47265625,
+    "vram_start_mb": 1425.0,
+    "vram_peak_mb": 1541.0,
+    "vram_delta_mb": 116.0,
+    "stderr": ""
+  }
+}
