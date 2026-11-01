@@ -85,7 +85,7 @@ Scope {
             id: window
             screen: GlobalStates.desktopMenuScreen ?? Quickshell.screens[0]
             color: "transparent"; exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.namespace: "quickshell:desktopMenu"
+            WlrLayershell.namespace: "quickshell:popup"
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
             anchors { top: true; bottom: true; left: true; right: true }
@@ -103,7 +103,7 @@ Scope {
                     implicitHeight: contents.implicitHeight + 16
                     height: Math.min(implicitHeight, (window.height - 16) / ContextMenus.scale)
                     scale: ContextMenus.scale; transformOrigin: Item.TopLeft
-                    radius: Appearance.rounding.large; color: Appearance.colors.colLayer0; clip: true
+                    radius: ContextMenuTheme.radiusMenu; color: ContextMenuTheme.colBackground; border.width: ContextMenuTheme.borderWidth; border.color: ContextMenuTheme.colBorder; clip: true
                     focus: true
                     Keys.onEscapePressed: GlobalStates.desktopMenuOpen = false
                     MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons; onWheel: wheel => wheel.accepted = true }
@@ -117,7 +117,7 @@ Scope {
                             Rectangle {
                                 Layout.fillWidth: true; implicitHeight: 140
                                 visible: root.menuId === "desktop" && ContextMenus.isShown("desktop", "recents") && !window.submenuOpen
-                                radius: Appearance.rounding.large; color: Appearance.colors.colLayer1; clip: true
+                                radius: ContextMenuTheme.radiusCard; color: ContextMenuTheme.colCardBackground; border.width: ContextMenuTheme.cardBorderWidth; border.color: ContextMenuTheme.colCardBorder; clip: true
                                 Carousel {
                                     anchors.fill: parent; anchors.margins: 8
                                     model: root.carouselModel
@@ -132,8 +132,15 @@ Scope {
                                     delegate: RippleButton {
                                         required property var modelData
                                         Layout.fillWidth: true; implicitHeight: 36
+                                        buttonRadius: ContextMenuTheme.radiusRow
+                                        colBackground: ContextMenuTheme.colRowBackground
+                                        colBackgroundHover: ContextMenuTheme.colRowBackgroundHover
+                                        colBackgroundActive: ContextMenuTheme.colRowBackgroundActive
+                                        colRipple: ContextMenuTheme.colRipple
+                                        borderWidth: ContextMenuTheme.rowBorderWidth
+                                        borderColor: hovered ? ContextMenuTheme.colRowBorderHover : ContextMenuTheme.colRowBorder
                                         onClicked: root.activate(modelData)
-                                        MaterialSymbol { anchors.centerIn: parent; text: modelData.symbol || "terminal"; iconSize: 20 }
+                                        MaterialSymbol { anchors.centerIn: parent; text: modelData.symbol || "terminal"; iconSize: 20; color: ContextMenuTheme.colIconAccent }
                                         StyledToolTip { text: modelData.title }
                                     }
                                 }
@@ -145,17 +152,27 @@ Scope {
                                     required property var modelData
                                     Layout.fillWidth: true
                                     sourceComponent: modelData.separator ? separator : menuRow
-                                    Component { id: separator; Rectangle { implicitHeight: 1; color: Appearance.colors.colOutlineVariant; opacity: 0.5 } }
+                                    Component { id: separator; Rectangle { implicitHeight: 1; color: ContextMenuTheme.colDivider; opacity: ContextMenuTheme.dividerOpacity } }
                                     Component {
                                         id: menuRow
                                         RippleButton {
                                             implicitHeight: ContextMenus.compact ? 34 : 46
+                                            buttonRadius: ContextMenuTheme.radiusRow
+                                            colBackground: ContextMenuTheme.colRowBackground
+                                            colBackgroundHover: ContextMenuTheme.colRowBackgroundHover
+                                            colBackgroundActive: ContextMenuTheme.colRowBackgroundActive
+                                            colRipple: ContextMenuTheme.colRipple
+                                            borderWidth: ContextMenuTheme.rowBorderWidth
+                                            borderColor: hovered ? ContextMenuTheme.colRowBorderHover : ContextMenuTheme.colRowBorder
+                                            enabled: row.modelData.enabled !== false
+                                            opacity: enabled ? 1.0 : ContextMenuTheme.disabledOpacity
                                             onClicked: root.activate(row.modelData)
                                             contentItem: RowLayout {
                                                 anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 10
-                                                MaterialSymbol { text: row.modelData.symbol || "terminal"; iconSize: 20 }
-                                                StyledText { Layout.fillWidth: true; text: row.modelData.title; elide: Text.ElideRight }
-                                                MaterialSymbol { visible: !!row.modelData.submenu; text: "chevron_right"; iconSize: 18 }
+                                                MaterialSymbol { text: row.modelData.symbol || "terminal"; iconSize: 20; color: ContextMenuTheme.colIcon }
+                                                StyledText { Layout.fillWidth: true; text: row.modelData.title; elide: Text.ElideRight; color: ContextMenuTheme.colTextPrimary }
+                                                MaterialSymbol { visible: !!row.modelData.checked; text: "check"; iconSize: 18; color: ContextMenuTheme.colIconAccent }
+                                                MaterialSymbol { visible: !!row.modelData.submenu; text: "chevron_right"; iconSize: 18; color: ContextMenuTheme.colChevron }
                                             }
                                         }
                                     }
@@ -164,8 +181,20 @@ Scope {
                             RippleButton {
                                 Layout.fillWidth: true; implicitHeight: 36
                                 visible: window.submenuOpen && !ContextMenus.cascade
+                                buttonRadius: ContextMenuTheme.radiusRow
+                                colBackground: ContextMenuTheme.colRowBackground
+                                colBackgroundHover: ContextMenuTheme.colRowBackgroundHover
+                                colBackgroundActive: ContextMenuTheme.colRowBackgroundActive
+                                colRipple: ContextMenuTheme.colRipple
+                                borderWidth: ContextMenuTheme.rowBorderWidth
+                                borderColor: hovered ? ContextMenuTheme.colRowBorderHover : ContextMenuTheme.colRowBorder
                                 onClicked: window.submenuOpen = false
-                                StyledText { anchors.centerIn: parent; text: qsTr("Back") }
+                                contentItem: RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 6
+                                    MaterialSymbol { text: "chevron_left"; iconSize: 18; color: ContextMenuTheme.colChevron }
+                                    StyledText { text: qsTr("Back"); color: ContextMenuTheme.colTextPrimary }
+                                }
                             }
                             Loader {
                                 Layout.fillWidth: true
@@ -186,7 +215,7 @@ Scope {
                 x: cardSlot.x + cardSlot.width + width * ContextMenus.scale + 8 < window.width
                     ? cardSlot.x + cardSlot.width + 8 : Math.max(8, cardSlot.x - width * ContextMenus.scale - 8)
                 y: Math.min(cardSlot.y, window.height - height * ContextMenus.scale - 8)
-                radius: Appearance.rounding.large; color: Appearance.colors.colLayer0; clip: true
+                radius: ContextMenuTheme.radiusMenu; color: ContextMenuTheme.colBackground; border.width: ContextMenuTheme.borderWidth; border.color: ContextMenuTheme.colBorder; clip: true
                 MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
                 Flickable {
                     anchors.fill: parent; contentHeight: cascadeContents.implicitHeight; clip: true

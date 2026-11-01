@@ -26,8 +26,10 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: schemeGrid.implicitHeight + 20
-            radius: Appearance.rounding.verylarge
-            color: Appearance.colors.colLayer0
+            radius: ContextMenuTheme.radiusCard
+            color: ContextMenuTheme.colCardBackground
+            border.width: ContextMenuTheme.cardBorderWidth
+            border.color: ContextMenuTheme.colCardBorder
 
             GridLayout {
                 id: schemeGrid
@@ -79,9 +81,12 @@ Item {
                         bottomLeftRadius: isBottomLeft ? Appearance.rounding.verylarge : ownRadius
                         bottomRightRadius: isBottomRight ? Appearance.rounding.verylarge : ownRadius
 
-                        color: isSelected ? Appearance.colors.colPrimary
-                            : hovered ? Appearance.colors.colSecondaryContainerHover
-                            : Appearance.colors.colSecondaryContainer
+                        color: isSelected ? (ContextMenuTheme.isWuWa ? ResonanceTheme.accentGold : Appearance.colors.colPrimary)
+                            : hovered ? (ContextMenuTheme.isWuWa ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colSecondaryContainerHover)
+                            : (ContextMenuTheme.isWuWa ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colSecondaryContainer)
+
+                        border.width: ContextMenuTheme.isWuWa ? 1 : 0
+                        border.color: ContextMenuTheme.isWuWa ? (isSelected ? ResonanceTheme.accentGold : (hovered ? ResonanceTheme.borderHairline : ResonanceTheme.borderSubtle)) : "transparent"
 
                         Behavior on ownRadius {
                             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
@@ -94,7 +99,9 @@ Item {
                             anchors.centerIn: parent
                             text: schemeTile.modelData.icon
                             iconSize: Appearance.font.pixelSize.larger
-                            color: schemeTile.isSelected ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+                            color: schemeTile.isSelected
+                                ? (ContextMenuTheme.isWuWa ? ResonanceTheme.colTealInk : Appearance.colors.colOnPrimary)
+                                : (ContextMenuTheme.isWuWa ? (schemeTile.hovered ? ResonanceTheme.textPrimary : ResonanceTheme.textSecondary) : Appearance.colors.colOnSecondaryContainer)
                         }
 
                         MouseArea {
@@ -120,8 +127,10 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: centeredCol.implicitHeight + 16
-            radius: Appearance.rounding.verylarge
-            color: Appearance.colors.colLayer0
+            radius: ContextMenuTheme.radiusCard
+            color: ContextMenuTheme.colCardBackground
+            border.width: ContextMenuTheme.cardBorderWidth
+            border.color: ContextMenuTheme.colCardBorder
 
             ColumnLayout {
                 id: centeredCol
@@ -133,6 +142,12 @@ Item {
                     buttonIcon: "check"
                     text: Translation.tr("Centered wallpaper")
                     checked: Config.options.background.centeredWallpaper
+                    normalColor: ContextMenuTheme.isWuWa ? ResonanceTheme.alpha(ResonanceTheme.colTealInk, 0.40 * ResonanceTheme.intensity) : Appearance.colors.colLayer2
+                    highlightColor: ContextMenuTheme.isWuWa ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colSecondaryContainer
+                    colBackgroundHover: ContextMenuTheme.isWuWa ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer2Hover
+                    colRipple: ContextMenuTheme.isWuWa ? ResonanceTheme.accentGold : Appearance.colors.colLayer2Active
+                    borderWidth: ContextMenuTheme.isWuWa ? 1 : 0
+                    borderColor: ContextMenuTheme.isWuWa ? ResonanceTheme.borderSubtle : "transparent"
                     onCheckedChanged: Config.options.background.centeredWallpaper = checked
                 }
 
@@ -142,6 +157,12 @@ Item {
                     text: Translation.tr("Only when locked")
                     checked: Config.options.background.centeredWallpaperOnlyWhenLocked
                     enabled: Config.options.background.centeredWallpaper
+                    normalColor: ContextMenuTheme.isWuWa ? ResonanceTheme.alpha(ResonanceTheme.colTealInk, 0.40 * ResonanceTheme.intensity) : Appearance.colors.colLayer2
+                    highlightColor: ContextMenuTheme.isWuWa ? ResonanceTheme.bgGlassPopupCardActive : Appearance.colors.colSecondaryContainer
+                    colBackgroundHover: ContextMenuTheme.isWuWa ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer2Hover
+                    colRipple: ContextMenuTheme.isWuWa ? ResonanceTheme.accentGold : Appearance.colors.colLayer2Active
+                    borderWidth: ContextMenuTheme.isWuWa ? 1 : 0
+                    borderColor: ContextMenuTheme.isWuWa ? ResonanceTheme.borderSubtle : "transparent"
                     onCheckedChanged: Config.options.background.centeredWallpaperOnlyWhenLocked = checked
                 }
 
@@ -150,8 +171,8 @@ Item {
                     Layout.topMargin: 2
                     visible: Config.options.background.centeredWallpaper
                     currentValue: Config.options.background.centeredWallpaperShape
-                    shapeColor: Appearance.colors.colPrimary
-                    backgroundColor: Appearance.colors.colPrimaryContainer
+                    shapeColor: ContextMenuTheme.isWuWa ? ResonanceTheme.accentGold : Appearance.colors.colPrimary
+                    backgroundColor: ContextMenuTheme.isWuWa ? ResonanceTheme.bgGlassPopupCard : Appearance.colors.colPrimaryContainer
                     options: root.shapeOptions
                     onSelected: newValue => Config.options.background.centeredWallpaperShape = newValue
                 }
@@ -178,6 +199,9 @@ Item {
                     from: 400
                     to: 800
                     stopIndicatorValues: [400]
+                    color: ContextMenuTheme.isWuWa ? ResonanceTheme.alpha(ResonanceTheme.colTealInk, 0.40 * ResonanceTheme.intensity) : Appearance.colors.colLayer2
+                    border.width: ContextMenuTheme.isWuWa ? 1 : 0
+                    border.color: ContextMenuTheme.isWuWa ? ResonanceTheme.borderSubtle : "transparent"
                     onValueChanged: Config.options.background.centeredWallpaperSize = value
                 }
             }
@@ -187,8 +211,10 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: transCol.implicitHeight + 16
-            radius: Appearance.rounding.verylarge
-            color: Appearance.colors.colLayer0
+            radius: ContextMenuTheme.radiusCard
+            color: ContextMenuTheme.colCardBackground
+            border.width: ContextMenuTheme.cardBorderWidth
+            border.color: ContextMenuTheme.colCardBorder
 
             ColumnLayout {
                 id: transCol
@@ -208,11 +234,13 @@ Item {
                         implicitHeight: 40
                         toggled: Config.options.background.wallpaperAnimation === transRow.modelData.value
                         colBackground: "transparent"
-                        buttonRadius: Appearance.rounding.verylarge
-                        colBackgroundHover: Appearance.colors.colLayer2
-                        colBackgroundToggled: Appearance.colors.colSecondaryContainer
-                        colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
-                        colRippleToggled: Appearance.colors.colSecondaryContainerActive
+                        buttonRadius: ContextMenuTheme.radiusRow
+                        colBackgroundHover: ContextMenuTheme.isWuWa ? ResonanceTheme.bgGlassPopupCardHover : Appearance.colors.colLayer2
+                        colBackgroundToggled: ContextMenuTheme.isWuWa ? ContextMenuTheme.colRowBackgroundActive : Appearance.colors.colSecondaryContainer
+                        colBackgroundToggledHover: ContextMenuTheme.isWuWa ? ContextMenuTheme.colRowBackgroundActive : Appearance.colors.colSecondaryContainerHover
+                        colRippleToggled: ContextMenuTheme.isWuWa ? ResonanceTheme.accentGold : Appearance.colors.colSecondaryContainerActive
+                        borderWidth: ContextMenuTheme.isWuWa ? 1 : 0
+                        borderColor: ContextMenuTheme.isWuWa ? (transRow.toggled ? ResonanceTheme.borderHairline : (transRow.hovered ? ResonanceTheme.borderSubtle : ResonanceTheme.alpha(ResonanceTheme.colMistySage, 0.10))) : "transparent"
                         onClicked: Config.options.background.wallpaperAnimation = transRow.modelData.value
                         contentItem: RowLayout {
                             anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
@@ -220,20 +248,20 @@ Item {
                             MaterialSymbol {
                                 text: transRow.modelData.icon
                                 iconSize: Appearance.font.pixelSize.larger
-                                color: transRow.toggled ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer1
+                                color: transRow.toggled ? (ContextMenuTheme.isWuWa ? ResonanceTheme.accentGold : Appearance.colors.colOnSecondaryContainer) : (ContextMenuTheme.isWuWa ? ResonanceTheme.colWarmIvory : Appearance.colors.colOnLayer1)
                                 fill: transRow.toggled ? 1 : 0
                             }
                             StyledText {
                                 Layout.fillWidth: true
                                 text: transRow.modelData.displayName
                                 font.pixelSize: Appearance.font.pixelSize.normal
-                                color: transRow.toggled ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer1
+                                color: transRow.toggled ? (ContextMenuTheme.isWuWa ? ResonanceTheme.colWarmIvory : Appearance.colors.colOnSecondaryContainer) : (ContextMenuTheme.isWuWa ? ResonanceTheme.colWarmIvory : Appearance.colors.colOnLayer1)
                             }
                             MaterialSymbol {
                                 visible: transRow.toggled
                                 text: "check"
                                 iconSize: Appearance.font.pixelSize.normal
-                                color: Appearance.colors.colOnSecondaryContainer
+                                color: ContextMenuTheme.isWuWa ? ResonanceTheme.accentGold : Appearance.colors.colOnSecondaryContainer
                             }
                         }
                     }

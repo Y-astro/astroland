@@ -610,14 +610,9 @@ class ScrcpySessionManager:
             title = f"ii-phone-{type_str}-{session_id.replace(':', '_')}"
             cmd = ["scrcpy"] + resolved_target + ["--window-title=" + title] + args
 
-            sub_env = os.environ.copy()
-            preload = str(Path.home() / ".local" / "lib" / "libscrcpy_smooth_scroll.so")
-            if os.path.exists(preload):
-                existing = sub_env.get("LD_PRELOAD", "")
-                sub_env["LD_PRELOAD"] = f"{preload}:{existing}" if existing else preload
-
+            # Preserve scrcpy's native wheel input. Touch-flick conversion in
+            # readers loses rapid wheel events and introduces fling inertia.
             proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
-                                    env=sub_env,
                                     preexec_fn=_default_sigint)
             with self.lock:
                 self.processes[session_id] = proc

@@ -32,6 +32,9 @@ Canvas {
     contextType: "2d"
     transformOrigin: Item.Center
 
+    layer.enabled: true
+    layer.smooth: true
+
     NumberAnimation {
         id: smoothDialAnim
         target: root

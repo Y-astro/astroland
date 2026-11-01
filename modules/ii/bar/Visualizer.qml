@@ -54,8 +54,12 @@ Item {
     property real ambientPhase: 0.0
     property real phaseTime: 0.0
     property real smoothEnergy: 0.0
+    property bool settled: true
+    property int settleTicks: 0
 
     function advanceMotion(dt) {
+        root.settled = false;
+        root.settleTicks = 0;
         root.phaseTime += dt;
         const twoPi = 2.0 * Math.PI;
         const pBob = root.phaseTime * (twoPi / 3.6);
@@ -79,6 +83,35 @@ Item {
         animatedShader.time += dt * (1.0 + energy * 1.5);
     }
 
+    function settleResting(dt) {
+        root.settleTicks++;
+        // Smooth easing toward neutral resting stance over ~0.5-1s
+        const ease = Math.min(1.0, dt * 4.5);
+
+        container.anchors.verticalCenterOffset += (0.0 - container.anchors.verticalCenterOffset) * ease;
+        breathScale.xScale += (1.0 - breathScale.xScale) * ease;
+        breathScale.yScale += (1.0 - breathScale.yScale) * ease;
+        auraBlur.opacity += (0.28 - auraBlur.opacity) * ease;
+        root.smoothEnergy += (0.0 - root.smoothEnergy) * ease;
+        animatedShader.time += dt * (1.0 + root.smoothEnergy * 1.5);
+
+        const dOffset = Math.abs(container.anchors.verticalCenterOffset);
+        const dScaleX = Math.abs(breathScale.xScale - 1.0);
+        const dScaleY = Math.abs(breathScale.yScale - 1.0);
+        const dAura = Math.abs(auraBlur.opacity - 0.28);
+        const dEnergy = Math.abs(root.smoothEnergy);
+
+        if (root.settleTicks >= 30 || (dOffset < 0.01 && dScaleX < 0.001 && dScaleY < 0.001 && dAura < 0.005 && dEnergy < 0.005)) {
+            container.anchors.verticalCenterOffset = 0;
+            breathScale.xScale = 1.0;
+            breathScale.yScale = 1.0;
+            auraBlur.opacity = 0.28;
+            root.smoothEnergy = 0.0;
+            root.settled = true;
+            root.settleTicks = 0;
+        }
+    }
+
     function resetStatic() {
         if (!normalRunning && !ambientRunning) {
             container.anchors.verticalCenterOffset = 0;
@@ -86,14 +119,31 @@ Item {
             breathScale.yScale = 1.0;
             auraBlur.opacity = 0.28;
             root.smoothEnergy = 0.0;
+            root.settled = true;
+            root.settleTicks = 0;
         } else if (ambientRunning) {
             container.anchors.verticalCenterOffset = 0;
             root.smoothEnergy = 0.0;
+            root.settled = true;
+            root.settleTicks = 0;
         }
     }
 
     onNormalRunningChanged: resetStatic()
     onAmbientRunningChanged: resetStatic()
+    onHasAudioChanged: {
+        if (hasAudio) {
+            settled = false;
+            settleTicks = 0;
+        } else {
+            if (normalRunning) {
+                settled = false;
+                settleTicks = 0;
+            } else {
+                resetStatic();
+            }
+        }
+    }
     Component.onCompleted: resetStatic()
 
     // Full-rate audio reactive driver during music playback
@@ -103,13 +153,13 @@ Item {
         onTriggered: root.advanceMotion(Math.min(frameTime, 0.05))
     }
 
-    // Paced gentle breathing driver during idle silence (~30 fps)
+    // Smooth resting settling driver when audio stops (~30 fps, dormant once settled)
     Timer {
         id: idleTimer
         interval: 33
         repeat: true
-        running: root.normalRunning && !root.hasAudio
-        onTriggered: root.advanceMotion(interval / 1000.0)
+        running: root.normalRunning && !root.hasAudio && !root.settled
+        onTriggered: root.settleResting(interval / 1000.0)
     }
 
     // Ambient mode low-rate gentle idle breath (~8 fps, explicitly low-rate including active playback)

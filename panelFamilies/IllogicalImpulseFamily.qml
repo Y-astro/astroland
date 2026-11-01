@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 
 import qs
+import qs.services
 import qs.modules.common
 import qs.modules.ii.background
 import qs.modules.ii.bar
@@ -69,8 +70,18 @@ Scope {
     PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/usage/UsageApp.qml") }
     PanelUrlLoader { extraCondition: Config.options.notes.enable; panelUrl: Qt.resolvedUrl("../modules/ii/notes/NotesApp.qml") }
     PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/cheatsheet/Cheatsheet.qml") }
-    PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/alarmRingingPopup/AlarmRingingPopup.qml") }
-    PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/reminderAlertPopup/ReminderAlertPopup.qml") }
+    PanelUrlLoader {
+        lazy: true
+        lazyOpen: AlarmService.ringingAlarmIndex !== -1 && Config.options.time.alarms.useFullscreenPopup && !GlobalStates.islandOwnsAlarm
+        retainAfterOpen: false
+        panelUrl: Qt.resolvedUrl("../modules/ii/alarmRingingPopup/AlarmRingingPopup.qml")
+    }
+    PanelUrlLoader {
+        lazy: true
+        lazyOpen: RemindersService.ringing != null
+        retainAfterOpen: false
+        panelUrl: Qt.resolvedUrl("../modules/ii/reminderAlertPopup/ReminderAlertPopup.qml")
+    }
     // Legacy 2-column layer-shell settings disabled in favor of SettingsWindow.qml in shell.qml
     // PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii//Settings.qml") }
     PanelUrlLoader {
@@ -85,6 +96,12 @@ Scope {
         retainAfterOpen: true
         panelUrl: Qt.resolvedUrl("../modules/ii/dropover/DropShelfPanel.qml")
     }
-    PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/background/NiriBackdrop.qml") }
-    PanelUrlLoader { panelUrl: Qt.resolvedUrl("../modules/ii/frame/ScreenFrame.qml") }
+    PanelUrlLoader {
+        extraCondition: WM.compositor === "niri"
+        panelUrl: Qt.resolvedUrl("../modules/ii/background/NiriBackdrop.qml")
+    }
+    PanelUrlLoader {
+        extraCondition: Config.options.bar.showFrame
+        panelUrl: Qt.resolvedUrl("../modules/ii/frame/ScreenFrame.qml")
+    }
 }
