@@ -199,19 +199,43 @@ Singleton {
     }
 
     function discardNotification(id) {
-        console.log("[Notifications] Discarding notification with ID: " + id);
-        const index = root.list.findIndex((notif) => notif.notificationId === id);
-        if (index !== -1) {
-            const notifObject = root.list[index];
-            const externalNotif = notifObject.notification;
-            root.list.splice(index, 1);
-            notifFileView.setText(stringifyList(root.list));
-            triggerListChange();
-            if (externalNotif?.tracked) {
-                externalNotif.dismiss();
+        root.discardNotifications([id]);
+    }
+
+    function discardNotifications(ids) {
+        if (!ids || ids.length === 0) return;
+        const idSet = new Set(ids);
+        if (idSet.size === 0) return;
+        console.log("[Notifications] Discarding notifications with IDs: " + Array.from(idSet).join(", "));
+        const toDismiss = [];
+        const remaining = [];
+        for (let i = 0; i < root.list.length; i++) {
+            const notif = root.list[i];
+            if (idSet.has(notif.notificationId)) {
+                toDismiss.push(notif);
+            } else {
+                remaining.push(notif);
             }
         }
-        root.discard(id); // Emit signal
+        if (toDismiss.length > 0) {
+            root.list = remaining;
+            notifFileView.setText(stringifyList(root.list));
+            toDismiss.forEach((notif) => {
+                if (notif.timer) {
+                    notif.timer.stop();
+                    notif.timer.destroy();
+                }
+                const externalNotif = notif.notification;
+                if (externalNotif?.tracked) {
+                    externalNotif.dismiss();
+                }
+            });
+        }
+        idSet.forEach((id) => root.discard(id)); // Emit signal
+    }
+
+    function discardNotificationBatch(ids) {
+        root.discardNotifications(ids);
     }
 
     function discardAllNotifications() {
