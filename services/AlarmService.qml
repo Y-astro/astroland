@@ -43,6 +43,32 @@ Singleton {
     /// When the wake timer is set to fire, or null.
     property var wakeScheduledFor: null
 
+    /// Evaluates true only when an active, ringing, snoozed, or queued alarm exists.
+    readonly property bool hasRelevantAlarms: Persistent.ready && (
+        root.ringingAlarmIndex !== -1
+        || root.ringQueue.length > 0
+        || root.snoozedAlarm !== null
+        || (root.alarms && Array.from(root.alarms).some(alarm => Boolean(alarm && alarm.enabled)))
+    )
+
+    onHasRelevantAlarmsChanged: {
+        if (root.hasRelevantAlarms) {
+            if (root.lastCheckMs <= 0 && Persistent.ready) {
+                root.lastCheckMs = Persistent.states.alarmState.lastCheck > 0
+                    ? Persistent.states.alarmState.lastCheck
+                    : Date.now() - 1000;
+            } else if (root.lastCheckMs > 0) {
+                root.lastCheckMs = Date.now() - 1000;
+            }
+            root.checkAlarms();
+        } else {
+            if (Persistent.ready) {
+                root.lastCheckMs = Date.now();
+                root.persistLastCheck(root.lastCheckMs);
+            }
+        }
+    }
+
     signal alarmRang(var alarm)
     signal alarmDismissed(var alarm)
     signal alarmSnoozed(var alarm)
@@ -60,6 +86,16 @@ Singleton {
                 root.alarms = Persistent.states.alarms;
                 root.refreshUpcoming();
                 wakeDebounce.restart();
+                if (root.hasRelevantAlarms) {
+                    if (root.lastCheckMs <= 0) {
+                        root.lastCheckMs = Persistent.states.alarmState.lastCheck > 0
+                            ? Persistent.states.alarmState.lastCheck
+                            : Date.now() - 1000;
+                    }
+                    root.checkAlarms();
+                } else {
+                    root.lastCheckMs = Date.now();
+                }
             }
         }
     }
@@ -648,7 +684,9 @@ Singleton {
         id: alarmCheckTimer
         interval: 1000
         repeat: true
-        running: true
+        // Only tick while an active/ringing/snoozed alarm needs evaluation.
+        // Halts 1-second timer wakeups and disk persistence churn when no relevant alarms exist.
+        running: root.hasRelevantAlarms
         onTriggered: checkAlarms()
     }
 
@@ -767,6 +805,16 @@ Singleton {
             root.alarms = Persistent.states.alarms;
             root.refreshUpcoming();
             wakeDebounce.restart();
+            if (root.hasRelevantAlarms) {
+                if (root.lastCheckMs <= 0) {
+                    root.lastCheckMs = Persistent.states.alarmState.lastCheck > 0
+                        ? Persistent.states.alarmState.lastCheck
+                        : Date.now() - 1000;
+                }
+                root.checkAlarms();
+            } else {
+                root.lastCheckMs = Date.now();
+            }
         }
     }
 }
