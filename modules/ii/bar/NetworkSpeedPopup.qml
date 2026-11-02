@@ -7,6 +7,11 @@ import qs.services
 StyledPopup {
     id: root
 
+    onActiveChanged: {
+        if (active)
+            Network.update()
+    }
+
     property real downloadSpeed: 0
     property real uploadSpeed: 0
     property real downloadedBytes: 0
@@ -205,26 +210,23 @@ StyledPopup {
 
             StyledPopupValueRow {
                 Layout.fillWidth: true
-                visible: Network.ipAddress !== ""
                 icon: "lan"
                 label: Translation.tr("Local IP")
-                value: Network.ipAddress
+                value: Network.ipAddress || Translation.tr("Unavailable")
             }
 
             StyledPopupValueRow {
                 Layout.fillWidth: true
-                visible: Network.publicIpAddress !== ""
                 icon: "public"
                 label: Translation.tr("Public IP")
-                value: Network.publicIpAddress
+                value: Network.publicIpAddress || Translation.tr("Unavailable")
             }
 
             StyledPopupValueRow {
                 Layout.fillWidth: true
-                visible: Network.gateway !== ""
                 icon: "router"
                 label: Translation.tr("Gateway")
-                value: Network.gateway
+                value: Network.gateway || Translation.tr("Unavailable")
             }
 
             StyledPopupValueRow {

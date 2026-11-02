@@ -488,6 +488,7 @@ Singleton {
             onRead: {
                 root.refreshSaved();
                 root.refreshDetails();
+                root.refreshAddresses();
                 NetworkFallback.refresh();
             }
         }
