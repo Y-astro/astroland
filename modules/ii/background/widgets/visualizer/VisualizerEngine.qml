@@ -15,7 +15,7 @@ Item {
     property real maxValue: 1000
 
     readonly property int maxBands: 52
-    readonly property list<real> raw: GlobalStates.visualizerPoints
+    readonly property list<real> raw: root.active ? GlobalStates.visualizerPoints : []
     property int bandCount: 0
     property real time: 0
     property real bass: 0
@@ -36,8 +36,11 @@ Item {
     property real govSince: 0
     property int frameSkipCounter: 0
 
-    onRawChanged: {
-        if (!root.active) return;
+    function updateActivity() {
+        if (!root.active) {
+            ticker.running = false;
+            return;
+        }
         if (root.raw.length > 0) root.bandCount = Math.min(root.raw.length, root.maxBands);
         for (let i = 0; i < root.raw.length; i++) {
             if (root.raw[i] > 0) {
@@ -48,20 +51,13 @@ Item {
                 return;
             }
         }
+        if (root.fade > 0 || root.levels.some(level => level > 0))
+            ticker.running = true;
     }
 
-    Component.onCompleted: {
-        if (root.raw.length > 0) {
-            root.bandCount = Math.min(root.raw.length, root.maxBands);
-            for (let i = 0; i < root.raw.length; i++) {
-                if (root.raw[i] > 0) {
-                    root.lastSignal = Date.now();
-                    ticker.running = true;
-                    return;
-                }
-            }
-        }
-    }
+    onRawChanged: root.updateActivity()
+    onActiveChanged: root.updateActivity()
+    Component.onCompleted: root.updateActivity()
 
     function step(dt) {
         const now = Date.now();

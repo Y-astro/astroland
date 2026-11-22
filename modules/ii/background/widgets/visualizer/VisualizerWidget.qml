@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
@@ -104,7 +105,9 @@ AbstractBackgroundWidget {
 
     VisualizerEngine {
         id: levelEngine
-        active: root.shaderStyle
+        active: root.shaderStyle && root.live
+            && (root.Window.window?.visible ?? true)
+            && !(root.Window.window?.hiddenForFullscreen ?? false)
         sensitivity: root.configEntry.sensitivity ?? 1
     }
 

@@ -77,9 +77,12 @@ Scope {
         return filtered;
     }
 
+    readonly property bool hasAudiblePlayer: (MprisController.isPlaying ?? false)
+        || Mpris.players.values.some(player => player?.isPlaying === true)
+
     Process {
         id: cavaProc
-        running: (GlobalStates.mediaControlsOpen ||
+        running: root.hasAudiblePlayer && (GlobalStates.mediaControlsOpen ||
             GlobalStates.sidebarRightOpen ||
             (GlobalStates.sidebarLeftOpen && !GlobalStates.mediaLyricsVisible) ||
             GlobalStates.equalizerOpen ||
@@ -91,7 +94,6 @@ Scope {
             Config.options.bar.layouts.rightLayout.includes("visualizer") ||
             Config.options.background.widgets.visualizer.enable ||
             Config.options.background.widgets.visualizer2.enable)
-            && (MprisController.activePlayer !== null || Config.options.background.widgets.visualizer.enable || Config.options.background.widgets.visualizer2.enable)
         onRunningChanged: {
             if (!cavaProc.running) {
                 GlobalStates.visualizerPoints = [];

@@ -81,7 +81,7 @@ Rectangle {
         const filePath = `${root.imageDecodePath}/${fileName}`;
         root.source = "";
         root.failed = false;
-        if (entryNumber <= 0 || fileName.length === 0)
+        if (entryNumber <= 0 || fileName.length === 0 || !Cliphist.entryIsImage(root.entry))
             return;
         if (root.decoded[filePath] === true) {
             root.source = "file://" + filePath;

@@ -41,6 +41,7 @@ ShaderEffect {
 
     Connections {
         target: root.engine
+        enabled: root.fade > 0
         function onFrame() {
             const l = root.engine.levels;
             const p = root.engine.peaks;

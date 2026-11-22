@@ -76,13 +76,18 @@ Singleton {
         return `${m}:${sec.toString().padStart(2, "0")}`;
     }
 
-    // One quiet, short ding for both timer completion paths. Keep playback
-    // independent of the legacy alarm toggle so completion is audible by default.
+    // Gentle, clear ding when a timer finishes. Respects custom sound if configured,
+    // and scales volume to be audible and pleasant without being harsh.
     function notifyTimerFinished(message) {
         Quickshell.execDetached(["notify-send", "Timer", message, "-a", "Shell",
             "--urgency=normal", "--hint=boolean:suppress-sound:true"]);
-        Quickshell.execDetached(["pw-play", "--volume=0.35",
-            Qt.resolvedUrl("../assets/sounds/timer-ding.wav").toString().replace("file://", "")]);
+        if ((Config.options.sounds?.enable ?? true) && (Config.options.sounds?.timer ?? true)) {
+            const rawPath = (Config.options.sounds?.custom?.timer) || Quickshell.shellPath("assets/sounds/timer-ding.wav");
+            const soundFile = rawPath.startsWith("file://") ? rawPath.slice(7) : rawPath;
+            const baseVol = (Config.options.sounds?.volume ?? 100) / 100;
+            const vol = Math.max(0.2, Math.min(1.0, baseVol * 0.85));
+            Quickshell.execDetached(["pw-play", `--volume=${vol.toFixed(2)}`, soundFile]);
+        }
     }
 
     // One-shot timer. Keep the API names compatible with existing shell widgets.

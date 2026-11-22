@@ -242,8 +242,9 @@ Variants {
                     cache: true
                     mipmap: true
                     smooth: true
-                    layer.enabled: true
-                    visible: !bgRoot.videoRevealed
+                    layer.enabled: transitionEffect.visible
+                    visible: !bgRoot.videoRevealed && (wallpaperSurface.isTransitioning
+                        || wallpaper.status !== Image.Ready || wallpaper.opacity < 1)
                     opacity: bgRoot.videoRevealed ? 0 : 1
                 }
 
@@ -256,7 +257,8 @@ Variants {
                     smooth: true
                     mipmap: true
                     asynchronous: true
-                    layer.enabled: bgRoot.wallpaperIsVideo ? false : true
+                    layer.enabled: !bgRoot.wallpaperIsVideo
+                        && (transitionEffect.visible || blurLoader.active || fastBlurLoader.active)
                     visible: !blurLoader.active && !bgRoot.videoRevealed
                         && (bgRoot.wallpaperAnimation === "" || bgRoot.transitionProgress >= 1.0)
                         && !centeredWallpaper.centeredHidesFullWallpaper

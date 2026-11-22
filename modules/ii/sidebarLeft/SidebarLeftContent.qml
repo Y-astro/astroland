@@ -4,6 +4,7 @@ import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
 import QtQuick
+import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
@@ -29,6 +30,35 @@ Item {
         ...((root.animeEnabled && !root.animeCloset) ? [{"icon": "bookmark_heart", "name": Translation.tr("Anime")}] : [])
     ]
     property int tabCount: swipeView.count
+    readonly property bool tabsReady: Config.ready && Persistent.ready
+    readonly property bool keepLoaded: Config.options.sidebar.keepLeftSidebarLoaded
+    readonly property bool shownInWindow: root.visible && (root.Window.window?.visible ?? false)
+
+    Timer {
+        id: releaseCollect
+        interval: 500
+        onTriggered: if (!GlobalStates.sidebarLeftOpen) gc()
+    }
+
+    Component {
+        id: tabLoader
+        Loader {
+            property bool visited: false
+            // Retain staged files and drafts, and phone subpages while switching tabs.
+            readonly property bool hasPendingState: Boolean(item && (
+                item.hasStagedFiles || String(item.activeSubPage ?? "").length > 0
+                || String(item.inputField?.text ?? "").length > 0))
+            active: root.tabsReady && (root.shownInWindow
+                && (SwipeView.isCurrentItem || SwipeView.isNextItem || SwipeView.isPreviousItem)
+                || root.keepLoaded && visited || hasPendingState)
+            onLoaded: {
+                visited = true;
+                if (SwipeView.isCurrentItem && root.shownInWindow) item.forceActiveFocus();
+            }
+            onFocusChanged: if (focus && item) item.forceActiveFocus()
+            onActiveChanged: if (!active) releaseCollect.restart()
+        }
+    }
 
     function applyTabRequest(): void {
         const wanted = GlobalStates.policiesRequestTabIcon;
@@ -48,7 +78,7 @@ Item {
     }
 
     function focusActiveItem() {
-        swipeView.currentItem.forceActiveFocus()
+        swipeView.currentItem?.item?.forceActiveFocus()
     }
 
     Keys.onPressed: (event) => {
@@ -122,12 +152,12 @@ Item {
                 }
 
                 contentChildren: [
-                    ...(root.phoneEnabled ? [phoneTab.createObject()] : []),
-                    ...(root.aiChatEnabled ? [aiChat.createObject()] : []),
-                    ...(root.translatorEnabled ? [translator.createObject()] : []),
-                    ...(root.mediaEnabled ? [media.createObject()] : []),
-                    ...((root.tabButtonList.length === 0 || (!root.phoneEnabled && !root.aiChatEnabled && !root.translatorEnabled && root.animeCloset)) ? [placeholder.createObject()] : []),
-                    ...(root.animeEnabled ? [anime.createObject()] : []),
+                    ...(root.phoneEnabled ? [tabLoader.createObject(swipeView, { sourceComponent: phoneTab })] : []),
+                    ...(root.aiChatEnabled ? [tabLoader.createObject(swipeView, { sourceComponent: aiChat })] : []),
+                    ...(root.translatorEnabled ? [tabLoader.createObject(swipeView, { sourceComponent: translator })] : []),
+                    ...(root.mediaEnabled ? [tabLoader.createObject(swipeView, { sourceComponent: media })] : []),
+                    ...((root.tabButtonList.length === 0 || (!root.phoneEnabled && !root.aiChatEnabled && !root.translatorEnabled && root.animeCloset)) ? [tabLoader.createObject(swipeView, { sourceComponent: placeholder })] : []),
+                    ...(root.animeEnabled ? [tabLoader.createObject(swipeView, { sourceComponent: anime })] : []),
                 ]
             }
         }

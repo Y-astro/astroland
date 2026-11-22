@@ -6,6 +6,7 @@ import qs.services
 import qs.modules.common.functions
 import Qt5Compat.GraphicalEffects
 import QtQuick
+import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Effects
 import QtQuick.Layouts
@@ -34,6 +35,7 @@ Item {
     property int visualizerSmoothing: 2
     property real radius
     property int currentPlayerIndex: 0
+    readonly property bool shownInWindow: root.visible && (root.Window.window?.visible ?? false)
     property bool blurredBackground: Config.options.sidebar.media.blurredBackground ?? false
     property bool shapeArt: Config.options.sidebar.media.shapeArt ?? false
     readonly property var artShapeOptions: ["Circle", "Square", "Pill", "Bun", "Cookie12Sided", "Clover4Leaf", "Heart", "Slanted", "Arch", "Arrow", "SemiCircle", "Oval", "Triangle", "Diamond", "ClamShell", "Pentagon", "Gem", "Sunny", "VerySunny", "Cookie4Sided", "Cookie6Sided", "Cookie7Sided", "Cookie9Sided", "Ghostish", "Clover8Leaf", "Burst", "SoftBurst", "Boom", "SoftBoom", "Flower", "Puffy", "PuffyDiamond"]
@@ -41,7 +43,7 @@ Item {
     property string displayedArtFilePath: root.downloaded ? Qt.resolvedUrl(artFilePath) : ""
 
     Timer {
-        running: root.player?.playbackState == MprisPlaybackState.Playing
+        running: root.shownInWindow && root.player?.playbackState == MprisPlaybackState.Playing
         interval: Config.options.resources.updateInterval
         repeat: true
         onTriggered: root.player?.positionChanged()  
@@ -91,7 +93,9 @@ Item {
         Image {
             id: blurArtSource
             anchors.fill: parent
-            source: root.displayedArtFilePath
+            source: root.blurredBackground ? root.displayedArtFilePath : ""
+            sourceSize: Qt.size(Math.ceil(width * (root.Window.window?.screen?.devicePixelRatio ?? 1)),
+                Math.ceil(height * (root.Window.window?.screen?.devicePixelRatio ?? 1)))
             fillMode: Image.PreserveAspectCrop
             cache: false
             asynchronous: true
