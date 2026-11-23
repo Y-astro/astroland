@@ -39,8 +39,10 @@ Item {
 
     // Audio energy derived from unified GlobalStates telemetry
     readonly property real audioEnergy: GlobalStates.audioEnergy
-    readonly property bool hasAudio: GlobalStates.hasAudioEnergy
-    readonly property real visualEnergy: root.motionOff ? 0 : root.audioEnergy
+    readonly property bool hasAudio: GlobalStates.hasAudioEnergy || (MprisController.isPlaying ?? false)
+    readonly property real visualEnergy: root.motionOff ? 0 : (GlobalStates.hasAudioEnergy
+        ? root.audioEnergy
+        : (root.hasAudio ? (0.65 + 0.25 * Math.sin(root.time * 2.5)) : 0))
     readonly property bool visualHasAudio: root.visualEnergy > 0.05
 
     // The user opacity is applied once. The premultiplied shader already owns

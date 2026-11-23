@@ -103,12 +103,16 @@ Scope {
         stdout: SplitParser {
             property bool wasAllZero: false
             onRead: data => {
-                let points = data.split(";").map(p => parseFloat(p.trim())).filter(p => !isNaN(p));
+                let parts = data.split(";");
+                let points = [];
                 let isZero = true;
-                for (let i = 0; i < points.length; i++) {
-                    if (points[i] > 0) {
-                        isZero = false;
-                        break;
+                for (let i = 0; i < parts.length; i++) {
+                    let str = parts[i].trim();
+                    if (str.length === 0) continue;
+                    let p = parseFloat(str);
+                    if (!isNaN(p)) {
+                        points.push(p);
+                        if (p > 0) isZero = false;
                     }
                 }
                 if (isZero) {

@@ -72,7 +72,9 @@ Item {
         const idleScaleX = 1.0 - 0.02 * Math.sin(pX);
         const idleGlow = 0.28 + 0.14 * Math.sin(pGlow);
 
-        const targetEnergy = root.hasAudio ? root.audioEnergy : 0.0;
+        const targetEnergy = root.hasAudio
+            ? (GlobalStates.hasAudioEnergy ? root.audioEnergy : (0.65 + 0.20 * Math.sin(root.phaseTime * 2.5)))
+            : 0.0;
         root.smoothEnergy += (targetEnergy - root.smoothEnergy) * Math.min(1.0, dt * 10.0);
         const energy = root.smoothEnergy;
 
@@ -146,11 +148,13 @@ Item {
     }
     Component.onCompleted: resetStatic()
 
-    // Full-rate audio reactive driver during music playback
-    FrameAnimation {
+    // Capped 60 Hz audio reactive driver during music playback (avoids 165 Hz CPU churn)
+    Timer {
         id: audioTicker
+        interval: 16 // 60 fps
+        repeat: true
         running: root.normalRunning && root.hasAudio
-        onTriggered: root.advanceMotion(Math.min(frameTime, 0.05))
+        onTriggered: root.advanceMotion(0.016)
     }
 
     // Smooth resting settling driver when audio stops (~30 fps, dormant once settled)
