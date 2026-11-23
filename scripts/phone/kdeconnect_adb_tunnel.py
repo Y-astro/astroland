@@ -168,9 +168,12 @@ class TcpProxyServer:
                 break
 
     def _handle_client(self, client_sock, addr):
+        remote_sock = None
         try:
             remote_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            remote_sock.settimeout(5.0)
             remote_sock.connect(("127.0.0.1", self.forward_port))
+            remote_sock.settimeout(None)
             
             def pipe(src, dst):
                 try:
@@ -182,20 +185,33 @@ class TcpProxyServer:
                 except Exception:
                     pass
                 finally:
-                    try: src.close()
-                    except: pass
-                    try: dst.close()
-                    except: pass
+                    try:
+                        dst.shutdown(socket.SHUT_RDWR)
+                    except Exception:
+                        pass
+                    try:
+                        src.shutdown(socket.SHUT_RDWR)
+                    except Exception:
+                        pass
 
             t1 = threading.Thread(target=pipe, args=(client_sock, remote_sock), daemon=True)
             t2 = threading.Thread(target=pipe, args=(remote_sock, client_sock), daemon=True)
             t1.start()
             t2.start()
-            t1.join()
-            t2.join()
-        except Exception as e:
-            try: client_sock.close()
-            except: pass
+            t1.join(timeout=2.0)
+            t2.join(timeout=2.0)
+        except Exception:
+            pass
+        finally:
+            try:
+                client_sock.close()
+            except Exception:
+                pass
+            if remote_sock:
+                try:
+                    remote_sock.close()
+                except Exception:
+                    pass
 
 def setup_adb_rules(serial):
     """Sets up ADB forward and reverse rules."""
