@@ -1,4 +1,5 @@
 import QtQuick
+import qs.modules.common
 
 MouseArea { // Right side | scroll to change volume
     id: root
@@ -12,6 +13,9 @@ MouseArea { // Right side | scroll to change volume
     property real lastScrollY: 0
     property bool trackingScroll: false
     property real moveThreshold: 20
+    property real touchpadDeltaThreshold: 240
+    property real _touchpadDelta: 0
+    property bool invertMouse: false
 
     acceptedButtons: Qt.LeftButton
     hoverEnabled: true
@@ -23,18 +27,55 @@ MouseArea { // Right side | scroll to change volume
     onExited: {
         root.hovered = false;
         root.trackingScroll = false;
+        root._touchpadDelta = 0;
     }
 
-    onWheel: event => {
-        if (event.angleDelta.y < 0)
-            root.scrollDown(event.angleDelta.y);
-        else if (event.angleDelta.y > 0)
-            root.scrollUp(event.angleDelta.y);
+    function handleWheel(event) {
+        if (event.phase === Qt.ScrollBegin || event.phase === Qt.ScrollEnd)
+            root._touchpadDelta = 0;
+
+        const rawDelta = event.angleDelta.y;
+        if (rawDelta !== 0) {
+            // QtWayland sends primaryPointingDevice (TouchPad on gesture seats) for all wheel events; use scroll phase.
+            const hasScrollPhase = event.phase !== undefined && event.phase !== Qt.NoScrollPhase;
+            const isTouchpad = hasScrollPhase
+                || (event.device === undefined && Math.abs(rawDelta) < (Config.options?.interactions?.scrolling?.mouseScrollDeltaThreshold ?? 120));
+
+            if (!isTouchpad) {
+                root._touchpadDelta = 0;
+                const delta = root.invertMouse ? -rawDelta : rawDelta;
+                if (delta < 0)
+                    root.scrollDown(delta);
+                else
+                    root.scrollUp(delta);
+            } else {
+                // Natural scroll negates touchpad axis delta on the compositor; restore finger-up == up.
+                const invertTouchpad = event.inverted || (Config.options?.hyprland?.input?.touchpad?.naturalScroll ?? false);
+                const delta = invertTouchpad ? -rawDelta : rawDelta;
+                if ((root._touchpadDelta > 0 && delta < 0) || (root._touchpadDelta < 0 && delta > 0))
+                    root._touchpadDelta = 0;
+                root._touchpadDelta += delta;
+
+                const threshold = root.touchpadDeltaThreshold;
+                while (Math.abs(root._touchpadDelta) >= threshold) {
+                    if (root._touchpadDelta > 0) {
+                        root._touchpadDelta -= threshold;
+                        root.scrollUp(threshold);
+                    } else {
+                        root._touchpadDelta += threshold;
+                        root.scrollDown(-threshold);
+                    }
+                }
+            }
+        }
+
         // Store the mouse position and start tracking
         root.lastScrollX = event.x;
         root.lastScrollY = event.y;
         root.trackingScroll = true;
     }
+
+    onWheel: event => root.handleWheel(event)
 
     onPositionChanged: mouse => {
         if (root.trackingScroll) {

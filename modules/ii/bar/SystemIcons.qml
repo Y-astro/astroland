@@ -95,19 +95,13 @@ Item {
                     }
                 }
 
-                MouseArea {
+                FocusedScrollMouseArea {
                     anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton
-                    hoverEnabled: true
+                    invertMouse: Config.options.bar.invertVolumeMouseScroll ?? false
                     onEntered: volumeItem.hovered = true
                     onExited: volumeItem.hovered = false
-                    onWheel: wheel => {
-                        if (wheel.angleDelta.y > 0) {
-                            Audio.incrementVolume();
-                        } else if (wheel.angleDelta.y < 0) {
-                            Audio.decrementVolume();
-                        }
-                    }
+                    onScrollUp: Audio.incrementVolume()
+                    onScrollDown: Audio.decrementVolume()
                     onPressed: mouse => {
                         GlobalStates.sidebarRightOpen = !GlobalStates.sidebarRightOpen;
                     }

@@ -249,6 +249,7 @@ Item {
     FocusedScrollMouseArea {
         id: barRightSideMouseArea
         z: -1
+        invertMouse: Config.options.bar.invertVolumeMouseScroll ?? false
         anchors { top: parent.top; bottom: parent.bottom; left: middleSection.right; right: parent.right }
         implicitHeight: Appearance.sizes.baseBarHeight
         onScrollDown: if (Config.options.bar.enableVolumeScroll) Audio.decrementVolume()

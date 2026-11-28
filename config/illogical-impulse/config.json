@@ -1897,6 +1897,7 @@
         "dynamicIslandSpacingVertical": 2,
         "enableBrightnessScroll": true,
         "enableVolumeScroll": true,
+        "invertVolumeMouseScroll": false,
         "expressiveColorTheme": "monochrome",
         "expressiveColors": false,
         "expressiveGroupColor": false,

@@ -1,5 +1,6 @@
 pragma Singleton
 import Quickshell
+import QtQuick
 
 /**
  * How far one wheel event moves a scroll surface, in pixels. The one rule
@@ -12,12 +13,24 @@ Singleton {
     // content exactly as far as Qt's own Flickable would: its pixelDelta.
     // `settings` carries fasterTouchpadScroll, mouseScrollDeltaThreshold,
     // mouseScrollFactor and touchpadScrollFactor, named as in the config.
-    function step(angle, pixel, settings) {
+    function isNotch(angle, settings, phase = Qt.NoScrollPhase) {
+        return phase === Qt.NoScrollPhase && Math.abs(angle) >= (settings?.mouseScrollDeltaThreshold ?? 120);
+    }
+
+    function notchStep(angle, settings) {
         const threshold = settings?.mouseScrollDeltaThreshold ?? 120;
-        if (Math.abs(angle) >= threshold)
-            return angle / threshold * (settings?.mouseScrollFactor ?? 120);
-        if (settings?.fasterTouchpadScroll ?? false)
+        return angle / threshold * (settings?.mouseScrollFactor ?? 120);
+    }
+
+    function touchpadStep(angle, pixel, settings) {
+        if (settings?.fasterTouchpadScroll ?? false) {
+            const threshold = settings?.mouseScrollDeltaThreshold ?? 120;
             return angle / threshold * (settings?.touchpadScrollFactor ?? 450);
+        }
         return pixel !== 0 ? pixel : angle / 8;
+    }
+
+    function step(angle, pixel, settings) {
+        return isNotch(angle, settings) ? notchStep(angle, settings) : touchpadStep(angle, pixel, settings);
     }
 }

@@ -575,6 +575,7 @@ Item {
         FocusedScrollMouseArea {
             id: barRightSideMouseArea
             z: -1
+            invertMouse: Config.options.bar.invertVolumeMouseScroll ?? false
             anchors {
                 top: parent.top
                 bottom: parent.bottom

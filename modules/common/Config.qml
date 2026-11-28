@@ -3929,6 +3929,7 @@ Singleton {
                 property bool expressiveGroupColor: false
                 property bool enableVolumeScroll: true
                 property bool enableBrightnessScroll: true
+                property bool invertVolumeMouseScroll: false
                 property bool sidebarClickOpen: true
                 property bool onlyShowOnSingleMonitor: false
                 property string singleMonitorName: ""

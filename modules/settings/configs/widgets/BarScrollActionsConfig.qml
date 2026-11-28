@@ -71,6 +71,18 @@ Item {
                     Config.options.bar.enableBrightnessScroll = checked;
                 }
             }
+            ConfigSwitch {
+                buttonIcon: "swap_vert"
+                text: Translation.tr("Invert mouse scroll for volume")
+                checked: Config.options.bar.invertVolumeMouseScroll
+                property bool readyForToggle: false
+                Component.onCompleted: readyForToggle = true
+                onCheckedChanged: {
+                    if (!readyForToggle || !Config.ready)
+                        return;
+                    Config.options.bar.invertVolumeMouseScroll = checked;
+                }
+            }
         }
     }
 }
