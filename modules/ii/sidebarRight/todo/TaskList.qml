@@ -15,6 +15,7 @@ Item {
     property int todoListItemSpacing: 5
     property int todoListItemPadding: 8
     property int listBottomPadding: 80
+    signal editRequested(var task)
 
     StyledListView {
         id: listView
@@ -73,6 +74,20 @@ Item {
                         Layout.bottomMargin: todoListItemPadding
                         Item {
                             Layout.fillWidth: true
+                        }
+                        TodoItemActionButton {
+                            Layout.fillWidth: false
+                            visible: Todo.canEditTask(todoItem.modelData)
+                            tooltipText: Translation.tr("Edit task")
+                            Accessible.name: tooltipText
+                            onClicked: root.editRequested(todoItem.modelData)
+                            contentItem: MaterialSymbol {
+                                anchors.centerIn: parent
+                                horizontalAlignment: Text.AlignHCenter
+                                text: "edit"
+                                iconSize: Appearance.font.pixelSize.larger
+                                color: Appearance.colors.colOnLayer1
+                            }
                         }
                         TodoItemActionButton {
                             Layout.fillWidth: false

@@ -9,12 +9,47 @@ Item {
     id: root
     property var tabButtonList: [{"icon": "checklist", "name": Translation.tr("Unfinished")}, {"name": Translation.tr("Done"), "icon": "check_circle"}]
     property bool showAddDialog: false
+    property var editingTask: null
+    readonly property bool isEditing: root.editingTask !== null
     property int dialogMargins: 20
     property int fabSize: 48
     property int fabMargins: 14
 
+    function openAddDialog() {
+        root.editingTask = null
+        todoInput.text = ""
+        root.showAddDialog = true
+        if (dialogOverlay.visible)
+            todoInput.forceActiveFocus()
+    }
+
+    function openEditDialog(task) {
+        if (!task || !Todo.canEditTask(task))
+            return
+        root.editingTask = task
+        todoInput.text = String(task.content ?? "")
+        root.showAddDialog = true
+        if (dialogOverlay.visible) {
+            todoInput.forceActiveFocus()
+            todoInput.cursorPosition = todoInput.text.length
+        }
+    }
+
+    function closeDialog() {
+        root.showAddDialog = false
+        if (todoInput.activeFocus)
+            fabButton.forceActiveFocus()
+    }
+
     Keys.onPressed: (event) => {
-        if ((event.key === Qt.Key_PageDown || event.key === Qt.Key_PageUp) && event.modifiers === Qt.NoModifier) {
+        if (event.key === Qt.Key_Escape && root.showAddDialog) {
+            root.closeDialog()
+            event.accepted = true;
+        }
+        else if (root.showAddDialog) {
+            return;
+        }
+        else if ((event.key === Qt.Key_PageDown || event.key === Qt.Key_PageUp) && event.modifiers === Qt.NoModifier) {
             if (event.key === Qt.Key_PageDown) {
                 tabBar.incrementCurrentIndex();
             } else if (event.key === Qt.Key_PageUp) {
@@ -24,12 +59,7 @@ Item {
         }
         // Open add dialog on "N" (any modifiers)
         else if (event.key === Qt.Key_N) {
-            root.showAddDialog = true
-            event.accepted = true;
-        }
-        // Close dialog on Esc if open
-        else if (event.key === Qt.Key_Escape && root.showAddDialog) {
-            root.showAddDialog = false
+            root.openAddDialog()
             event.accepted = true;
         }
     }
@@ -68,6 +98,7 @@ Item {
                 taskList: Todo.list
                     .map(function(item, i) { return Object.assign({}, item, {originalIndex: i}); })
                     .filter(function(item) { return !item.done; })
+                onEditRequested: task => root.openEditDialog(task)
             }
             TaskList {
                 listBottomPadding: root.fabSize + root.fabMargins * 2
@@ -76,6 +107,7 @@ Item {
                 taskList: Todo.list
                     .map(function(item, i) { return Object.assign({}, item, {originalIndex: i}); })
                     .filter(function(item) { return item.done; })
+                onEditRequested: task => root.openEditDialog(task)
             }
 
         }
@@ -94,11 +126,12 @@ Item {
         anchors.rightMargin: root.fabMargins
         anchors.bottomMargin: root.fabMargins
 
-        onClicked: root.showAddDialog = true
+        onClicked: root.openAddDialog()
         iconText: "add"
     }
 
     Item {
+        id: dialogOverlay
         anchors.fill: parent
         z: 9999
 
@@ -113,8 +146,14 @@ Item {
         }
 
         onVisibleChanged: {
-            if (!visible) {
+            if (visible) {
+                if (root.showAddDialog) {
+                    todoInput.forceActiveFocus()
+                    todoInput.cursorPosition = todoInput.text.length
+                }
+            } else {
                 todoInput.text = ""
+                root.editingTask = null
                 fabButton.focus = true
             }
         }
@@ -142,13 +181,18 @@ Item {
             color: Appearance.m3colors.m3surfaceContainerHigh
             radius: Appearance.rounding.normal
 
-            function addTask() {
-                if (todoInput.text.length > 0) {
-                    Todo.addTask(todoInput.text)
-                    todoInput.text = ""
-                    root.showAddDialog = false
+            function submitTask() {
+                const trimmed = todoInput.text.trim()
+                if (trimmed.length === 0)
+                    return
+                if (root.isEditing) {
+                    if (!Todo.updateItem(root.editingTask, { "content": trimmed }))
+                        return
+                } else {
+                    Todo.addTask(trimmed)
                     tabBar.setCurrentIndex(0) // Show unfinished tasks
                 }
+                root.closeDialog()
             }
 
             ColumnLayout {
@@ -163,7 +207,7 @@ Item {
                     Layout.alignment: Qt.AlignLeft
                     color: Appearance.m3colors.m3onSurface
                     font.pixelSize: Appearance.font.pixelSize.larger
-                    text: Translation.tr("Add task")
+                    text: root.isEditing ? Translation.tr("Edit task") : Translation.tr("Add task")
                 }
 
                 TextField {
@@ -178,8 +222,7 @@ Item {
                     selectionColor: Appearance.colors.colSecondaryContainer
                     placeholderText: Translation.tr("Task description")
                     placeholderTextColor: Appearance.m3colors.m3outline
-                    focus: root.showAddDialog
-                    onAccepted: dialog.addTask()
+                    onAccepted: dialog.submitTask()
 
                     background: Rectangle {
                         anchors.fill: parent
@@ -205,12 +248,12 @@ Item {
 
                     DialogButton {
                         buttonText: Translation.tr("Cancel")
-                        onClicked: root.showAddDialog = false
+                        onClicked: root.closeDialog()
                     }
                     DialogButton {
-                        buttonText: Translation.tr("Add")
-                        enabled: todoInput.text.length > 0
-                        onClicked: dialog.addTask()
+                        buttonText: root.isEditing ? Translation.tr("Save") : Translation.tr("Add")
+                        enabled: todoInput.text.trim().length > 0 && (!root.isEditing || Todo.canEditTask(root.editingTask))
+                        onClicked: dialog.submitTask()
                     }
                 }
             }
